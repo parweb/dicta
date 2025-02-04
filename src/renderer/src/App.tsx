@@ -1,14 +1,10 @@
-import Versions from './components/Versions'
-import Home from './pages/Home'
+import Versions from './components/Versions';
+import Home from './pages/Home';
 
 function App(): JSX.Element {
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping');
 
-  return (
-    <>
-      <Home />
-    </>
-  )
+  return <Home />;
 }
 
-export default App
+export default App;

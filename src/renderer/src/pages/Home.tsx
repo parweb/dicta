@@ -1,120 +1,126 @@
-import { Mic, MicOff } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
+import { Loader2, Mic, MicOff } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 const apiKey =
-  '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'
+  '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';
 
 const HomePage = () => {
-  const [isRecording, setIsRecording] = useState(false)
-  const [audioBlob, setAudioBlob] = useState(null)
-  const [transcript, setTranscript] = useState('')
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const [transcript, setTranscript] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const mediaRecorder = useRef(null)
-  const audioChunks = useRef([])
-  const transcriptRef = useRef(null)
+  const mediaRecorder = useRef(null);
+  const audioChunks = useRef([]);
+  const transcriptRef = useRef(null);
 
   useEffect(() => {
     navigator.mediaDevices
       .getUserMedia({ audio: true })
-      .catch((err) => console.error('Microphone access denied:', err))
-  }, [])
+      .catch(err => console.error('Microphone access denied:', err));
+  }, []);
 
   useEffect(() => {
-    const controller = new AbortController()
-    let xKeyIsDown = false
+    const controller = new AbortController();
+    let xKeyIsDown = false;
 
     document.addEventListener(
       'keydown',
-      (e) => {
+      e => {
         if (e.key === 'x' && !xKeyIsDown) {
-          xKeyIsDown = true
-          console.log('keydown once', e.key)
-          startRecording()
+          xKeyIsDown = true;
+          console.log('keydown once', e.key);
+          startRecording();
         }
       },
       { signal: controller.signal }
-    )
+    );
 
     document.addEventListener(
       'keyup',
-      (e) => {
+      e => {
         if (e.key === 'x') {
-          xKeyIsDown = false
-          console.log('keyup', e.key)
-          stopRecording()
+          xKeyIsDown = false;
+          console.log('keyup', e.key);
+          stopRecording();
         }
       },
       { signal: controller.signal }
-    )
+    );
 
     return () => {
-      controller.abort()
-    }
-  }, [])
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (transcript && transcriptRef.current) {
-      const range = document.createRange()
-      const selection = window.getSelection()
-      range.selectNodeContents(transcriptRef.current)
-      selection.removeAllRanges()
-      selection.addRange(range)
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.selectNodeContents(transcriptRef.current);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
-  }, [transcript])
+  }, [transcript]);
 
   const startRecording = async () => {
-    console.log('startRecording')
+    console.log('startRecording');
 
-    setIsRecording(true)
-    audioChunks.current = []
+    setIsRecording(true);
+    audioChunks.current = [];
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    mediaRecorder.current = new MediaRecorder(stream)
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder.current = new MediaRecorder(stream);
 
-    mediaRecorder.current.ondataavailable = (e) => {
-      audioChunks.current.push(e.data)
-    }
+    mediaRecorder.current.ondataavailable = e => {
+      audioChunks.current.push(e.data);
+    };
 
     mediaRecorder.current.onstop = async () => {
-      const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' })
-      setAudioBlob(audioBlob)
-      await transcribeAudio(audioBlob)
-    }
+      setIsLoading(true);
+      const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+      setAudioBlob(audioBlob);
+      await transcribeAudio(audioBlob);
+      setIsLoading(false);
+    };
 
-    mediaRecorder.current.start()
-  }
+    mediaRecorder.current.start();
+  };
 
   const stopRecording = () => {
-    console.log('stopRecording')
+    console.log('stopRecording');
     if (mediaRecorder.current) {
-      mediaRecorder.current.stop()
-      setIsRecording(false)
+      mediaRecorder.current.stop();
+      setIsRecording(false);
     }
-  }
+  };
 
-  const transcribeAudio = async (blob) => {
-    console.log('transcribeAudio')
+  const transcribeAudio = async blob => {
+    console.log('transcribeAudio');
 
-    const formData = new FormData()
-    formData.append('file', blob, 'recording.webm')
-    formData.append('model', 'whisper-1')
+    const formData = new FormData();
+    formData.append('file', blob, 'recording.webm');
+    formData.append('model', 'whisper-1');
 
     try {
-      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`
-        },
-        body: formData
-      })
+      const response = await fetch(
+        'https://api.openai.com/v1/audio/transcriptions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`
+          },
+          body: formData
+        }
+      );
 
-      const data = await response.json()
-      setTranscript(data.text)
-      navigator.clipboard.writeText(data.text)
+      const data = await response.json();
+      setTranscript(data.text);
+      navigator.clipboard.writeText(data.text);
     } catch (error) {
-      console.error('Transcription error:', error)
+      console.error('Transcription error:', error);
     }
-  }
+  };
 
   return (
     <div
@@ -142,7 +148,13 @@ const HomePage = () => {
           transition: 'background-color 0.3s'
         }}
       >
-        {isRecording ? <Mic /> : <MicOff />}
+        {isRecording ? (
+          <Mic />
+        ) : isLoading ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          <MicOff />
+        )}
       </button>
 
       <div
@@ -178,7 +190,7 @@ const HomePage = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default HomePage
+export default HomePage;
