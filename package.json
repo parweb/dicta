@@ -75,7 +75,7 @@
     "@electron-toolkit/eslint-config-ts": "2.0.0",
     "@electron-toolkit/tsconfig": "1.0.1",
     "@tailwindcss/postcss": "4.0.3",
-    "@types/node": "22.13.1",
+    "@types/node": "^22.13.4",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "@vitejs/plugin-react": "4.3.4",

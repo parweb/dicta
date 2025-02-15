@@ -21,6 +21,18 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
+    const handleCustomEvent = (event, data) => {
+      console.log('Received custom event:', data);
+      startRecording();
+    };
+
+    window.api.onShowMiniAppHotKey(handleCustomEvent);
+    return () => {
+      window.api.removeShowMiniAppHotKey(handleCustomEvent);
+    };
+  }, []);
+
+  useEffect(() => {
     const controller = new AbortController();
     let xKeyIsDown = false;
 
