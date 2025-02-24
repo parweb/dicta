@@ -1,9 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain, globalShortcut } from 'electron';
+import { electronApp, is, optimizer } from '@electron-toolkit/utils';
+import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
+import { exec } from 'node:child_process';
 import { join } from 'node:path';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+
 import icon from '../../resources/icon.png?asset';
 
-// Declare the mainWindow variable in a scope accessible to the shortcut callback.
+// Déclaration de mainWindow dans un scope accessible
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
@@ -30,7 +32,7 @@ function createWindow(): void {
     return { action: 'deny' };
   });
 
-  // Load the URL for development or the local HTML file for production.
+  // Charge l'URL de développement ou le fichier HTML en production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
@@ -39,7 +41,7 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  // Set app user model id for Windows.
+  // Définir l'App User Model ID pour Windows.
   electronApp.setAppUserModelId('com.electron');
 
   app.on('browser-window-created', (_, window) => {
@@ -48,39 +50,48 @@ app.whenReady().then(() => {
 
   ipcMain.on('ping', () => console.log('pong'));
 
+  // Écoute de l'événement "stop-recording" envoyé par le renderer.
+  ipcMain.on('stop-recording', () => {
+    console.log(
+      'Stop recording déclenché, simulation du collage depuis le presse-papier'
+    );
+
+    pasteClipboard();
+  });
+
   createWindow();
 
-  // Register the global shortcut to bring the app to the front.
+  // Enregistrement du raccourci global pour amener l'app au premier plan.
   const shortcutRegistered = globalShortcut.register(
     'CommandOrControl+Shift+X',
     () => {
       console.log('Global shortcut triggered!');
       if (mainWindow) {
-        // Restore if minimized
+        // Restaure la fenêtre si elle est minimisée.
         if (mainWindow.isMinimized()) {
           mainWindow.restore();
         }
 
-        // Workaround to force the window onto the current desktop:
+        // Forcer la fenêtre sur le bureau courant :
         if (process.platform === 'darwin') {
-          // On macOS, temporarily show the window on all workspaces.
+          // Sur macOS, affichage temporaire sur tous les espaces.
           mainWindow.setVisibleOnAllWorkspaces(true, {
             visibleOnFullScreen: true
           });
-
           app.dock.show();
         } else {
-          // On Windows/Linux, set the window as always on top.
+          // Sur Windows/Linux, mise en "always on top".
           mainWindow.setAlwaysOnTop(true);
         }
 
-        // Bring window to foreground and focus it.
+        // Met la fenêtre au premier plan et lui donne le focus.
         mainWindow.show();
         mainWindow.focus();
 
+        // Notifie le renderer pour afficher l'interface miniature.
         mainWindow.webContents.send('show-mini-app-hot-key');
 
-        // Revert the temporary settings after a short delay.
+        // Rétablit les réglages temporaires après un court délai.
         setTimeout(() => {
           if (process.platform === 'darwin') {
             mainWindow.setVisibleOnAllWorkspaces(false);
@@ -97,22 +108,34 @@ app.whenReady().then(() => {
   }
 
   app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the dock icon is clicked
-    // and there are no other windows open.
+    // Sur macOS, recrée la fenêtre si aucune n'est ouverte.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-// Quit when all windows are closed, except on macOS.
+// Quitte l'application quand toutes les fenêtres sont fermées (sauf sur macOS).
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-// Unregister all shortcuts when the app is about to quit.
+// Désenregistre tous les raccourcis quand l'application quitte.
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
+
+// Fonction qui simule le collage du contenu du presse-papier.
+function pasteClipboard() {
+  if (process.platform !== 'darwin') return; // On n'applique qu'en macOS
+
+  exec(`osascript -e 'tell application "System Events" to keystroke "v" using command down'`, (error) => {
+    if (error) {
+      console.error('Erreur lors du collage :', error);
+      return;
+    }
+    console.log('Collage effectué avec succès');
+  });
+}

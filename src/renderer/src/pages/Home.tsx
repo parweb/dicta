@@ -21,14 +21,14 @@ const HomePage = () => {
   }, []);
 
   useEffect(() => {
-    const handleCustomEvent = (event, data) => {
+    const handler = data => {
       console.log('Received custom event:', data);
       startRecording();
     };
 
-    window.api.onShowMiniAppHotKey(handleCustomEvent);
+    window.api.on('show-mini-app-hot-key', handler);
     return () => {
-      window.api.removeShowMiniAppHotKey(handleCustomEvent);
+      window.api.removeListener('show-mini-app-hot-key', handler);
     };
   }, []);
 
@@ -51,11 +51,13 @@ const HomePage = () => {
     document.addEventListener(
       'keyup',
       e => {
-        if (e.key === 'x') {
-          xKeyIsDown = false;
-          console.log('keyup', e.key);
-          stopRecording();
-        }
+        console.log({ keyup: 'keyup', key: e.key });
+
+        // if (e.key === 'x') {
+        xKeyIsDown = false;
+        console.log('keyup', e.key);
+        stopRecording();
+        // }
       },
       { signal: controller.signal }
     );
@@ -104,6 +106,8 @@ const HomePage = () => {
     if (mediaRecorder.current) {
       mediaRecorder.current.stop();
       setIsRecording(false);
+
+      window.api.send('stop-recording');
     }
   };
 

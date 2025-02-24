@@ -3,10 +3,15 @@ import { electronAPI } from '@electron-toolkit/preload';
 
 // Custom APIs for renderer
 const api = {
-  onShowMiniAppHotKey: callback =>
-    ipcRenderer.on('show-mini-app-hot-key', callback),
-  removeShowMiniAppHotKey: callback =>
-    ipcRenderer.removeListener('show-mini-app-hot-key', callback)
+  send: (channel, data) => {
+    ipcRenderer.send(channel, data);
+  },
+  on: (channel, callback) => {
+    ipcRenderer.on(channel, callback);
+  },
+  removeListener: (channel, callback) => {
+    ipcRenderer.removeListener(channel, callback);
+  }
 };
 
 if (process.contextIsolated) {
