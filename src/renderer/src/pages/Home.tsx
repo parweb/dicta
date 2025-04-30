@@ -41,7 +41,6 @@ const HomePage = () => {
       e => {
         if (e.key === 'x' && !xKeyIsDown) {
           xKeyIsDown = true;
-          console.log('keydown once', e.key);
           startRecording();
         }
       },
@@ -50,14 +49,11 @@ const HomePage = () => {
 
     document.addEventListener(
       'keyup',
-      e => {
-        console.log({ keyup: 'keyup', key: e.key });
-
-        // if (e.key === 'x') {
-        xKeyIsDown = false;
-        console.log('keyup', e.key);
-        stopRecording();
-        // }
+      () => {
+        if (isRecording === true) {
+          xKeyIsDown = false;
+          stopRecording();
+        }
       },
       { signal: controller.signal }
     );
@@ -65,7 +61,7 @@ const HomePage = () => {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [isRecording]);
 
   useEffect(() => {
     if (transcript && transcriptRef.current) {
@@ -194,6 +190,9 @@ const HomePage = () => {
 
         <p
           ref={transcriptRef}
+          onClick={() => {
+            navigator.clipboard.writeText(transcript);
+          }}
           style={{
             flex: 1,
             alignSelf: 'stretch',

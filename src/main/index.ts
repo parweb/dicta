@@ -56,7 +56,17 @@ app.whenReady().then(() => {
       'Stop recording déclenché, simulation du collage depuis le presse-papier'
     );
 
-    pasteClipboard();
+    // Hide our app window to restore focus to previous application before pasting
+    if (mainWindow) {
+      // mainWindow.minimize();
+
+      // Wait a short moment for focus to be given back to the previous application
+      setTimeout(() => {
+        pasteClipboard();
+      }, 200);
+    } else {
+      pasteClipboard();
+    }
   });
 
   createWindow();
@@ -129,13 +139,33 @@ app.on('will-quit', () => {
 
 // Fonction qui simule le collage du contenu du presse-papier.
 function pasteClipboard() {
-  if (process.platform !== 'darwin') return; // On n'applique qu'en macOS
-
-  exec(`osascript -e 'tell application "System Events" to keystroke "v" using command down'`, (error) => {
-    if (error) {
-      console.error('Erreur lors du collage :', error);
-      return;
-    }
-    console.log('Collage effectué avec succès');
-  });
+  if (process.platform === 'darwin') {
+    // macOS - using AppleScript
+    exec(`osascript -e 'tell application "System Events" to keystroke "v" using command down'`, (error) => {
+      if (error) {
+        console.error('Erreur lors du collage (macOS):', error);
+        return;
+      }
+      console.log('Collage effectué avec succès (macOS)');
+    });
+  } else if (process.platform === 'win32') {
+    // Windows - using PowerShell SendKeys
+    exec('powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^v\')"', (error) => {
+      if (error) {
+        console.error('Erreur lors du collage (Windows):', error);
+        return;
+      }
+      console.log('Collage effectué avec succès (Windows)');
+    });
+  } else if (process.platform === 'linux') {
+    // Linux - using xdotool (xclip must be installed)
+    exec('xdotool key ctrl+v', (error) => {
+      if (error) {
+        console.error('Erreur lors du collage (Linux):', error);
+        console.log('Vérifiez que xdotool est installé: sudo apt-get install xdotool');
+        return;
+      }
+      console.log('Collage effectué avec succès (Linux)');
+    });
+  }
 }
