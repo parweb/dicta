@@ -6,7 +6,6 @@ const apiKey =
 
 const HomePage = () => {
   const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState(null);
   const [transcript, setTranscript] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -87,9 +86,9 @@ const HomePage = () => {
     };
 
     mediaRecorder.current.onstop = async () => {
+      console.log('ici');
       setIsLoading(true);
       const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-      setAudioBlob(audioBlob);
       await transcribeAudio(audioBlob);
       setIsLoading(false);
     };
@@ -115,8 +114,9 @@ const HomePage = () => {
     formData.append('model', 'whisper-1');
 
     try {
+      console.log('yala');
       const response = await fetch(
-        'https://api.openai.com/v1/audio/transcriptions',
+        'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions',
         {
           method: 'POST',
           headers: {
@@ -129,6 +129,7 @@ const HomePage = () => {
       const data = await response.json();
       setTranscript(data.text);
       navigator.clipboard.writeText(data.text);
+      console.log('all good');
     } catch (error) {
       console.error('Transcription error:', error);
     }
