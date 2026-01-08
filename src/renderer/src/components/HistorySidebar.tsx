@@ -1,6 +1,12 @@
-import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import {
+  borderRadius,
+  colors,
+  components,
+  spacing,
+  typography
+} from '../lib/design-system';
 import {
   formatRelativeTime,
   getDayLabel,
@@ -81,7 +87,7 @@ const HistorySidebar = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: colors.background.overlay,
           zIndex: 999,
           WebkitAppRegion: 'no-drag'
         }}
@@ -90,18 +96,16 @@ const HistorySidebar = ({
       {/* Sidebar */}
       <div
         style={{
+          ...components.sidebar.base,
           position: 'fixed',
           top: 0,
           left: 0,
           bottom: 0,
           width: '320px',
-          backgroundColor: '#1e293b',
-          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.5)',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
-          WebkitAppRegion: 'no-drag',
-          borderRight: '1px solid #334155'
+          WebkitAppRegion: 'no-drag'
         }}
       >
         {/* Content */}
@@ -109,15 +113,15 @@ const HistorySidebar = ({
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '16px'
+            padding: spacing.lg
           }}
         >
           {isLoading ? (
             <div
               style={{
                 textAlign: 'center',
-                padding: '20px',
-                color: '#94a3b8'
+                padding: spacing.xl,
+                color: colors.text.tertiary
               }}
             >
               Chargement...
@@ -126,21 +130,21 @@ const HistorySidebar = ({
             <div
               style={{
                 textAlign: 'center',
-                padding: '20px',
-                color: '#94a3b8'
+                padding: spacing.xl,
+                color: colors.text.tertiary
               }}
             >
               Aucune transcription
             </div>
           ) : (
             groupedTranscriptions.map(group => (
-              <div key={group.dayLabel} style={{ marginBottom: '24px' }}>
+              <div key={group.dayLabel} style={{ marginBottom: spacing['2xl'] }}>
                 <h3
                   style={{
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: '#94a3b8',
-                    marginBottom: '8px',
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.text.tertiary,
+                    marginBottom: spacing.sm,
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
                   }}
@@ -151,7 +155,7 @@ const HistorySidebar = ({
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '8px'
+                    gap: spacing.sm
                   }}
                 >
                   {group.transcriptions.map(transcription => {
@@ -163,34 +167,38 @@ const HistorySidebar = ({
                           handleTranscriptionClick(transcription.text)
                         }
                         style={{
-                          padding: '12px',
+                          padding: spacing.md,
                           backgroundColor: isActive
-                            ? 'rgba(14, 165, 233, 0.15)'
-                            : '#0f172a',
-                          borderRadius: '6px',
+                            ? colors.accent.blue.backgroundHover
+                            : colors.background.primary,
+                          borderRadius: borderRadius.md,
                           cursor: 'pointer',
                           border: isActive
-                            ? '1px solid #0ea5e9'
-                            : '1px solid #334155',
+                            ? `1px solid ${colors.border.accent}`
+                            : `1px solid ${colors.border.primary}`,
                           transition: 'all 0.2s'
                         }}
                         onMouseEnter={e => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = '#1e293b';
-                            e.currentTarget.style.borderColor = '#475569';
+                            e.currentTarget.style.backgroundColor =
+                              colors.background.secondary;
+                            e.currentTarget.style.borderColor =
+                              colors.border.secondary;
                           }
                         }}
                         onMouseLeave={e => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = '#0f172a';
-                            e.currentTarget.style.borderColor = '#334155';
+                            e.currentTarget.style.backgroundColor =
+                              colors.background.primary;
+                            e.currentTarget.style.borderColor =
+                              colors.border.primary;
                           }
                         }}
                       >
                       <div
                         style={{
-                          fontSize: '11px',
-                          color: '#94a3b8',
+                          fontSize: typography.fontSize.sm,
+                          color: colors.text.tertiary,
                           marginBottom: '6px'
                         }}
                       >
@@ -198,8 +206,8 @@ const HistorySidebar = ({
                       </div>
                       <div
                         style={{
-                          fontSize: '14px',
-                          color: '#e5e7eb',
+                          fontSize: typography.fontSize.base,
+                          color: colors.text.secondary,
                           lineHeight: '1.4',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',

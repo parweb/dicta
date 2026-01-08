@@ -2,6 +2,15 @@ import { BarChart3, History, Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import HistorySidebar from '../components/HistorySidebar';
+import {
+  borderRadius,
+  colors,
+  components,
+  getRecordButtonColor,
+  getStatusColor,
+  spacing,
+  typography
+} from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import Statistics from './Statistics';
 
@@ -267,21 +276,6 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  const getStatusColor = useCallback((status: ProxyStatus): string => {
-    switch (status) {
-      case 'success':
-        return '#4ade80'; // vert
-      case 'error':
-        return '#ef4444'; // rouge
-      case 'cancelled':
-        return '#9ca3af'; // gris
-      case 'loading':
-        return '#ffffff'; // blanc
-      default:
-        return '#d1d5db'; // gris clair
-    }
-  }, []);
-
   const handleCopyTranscript = useCallback(() => {
     if (transcript) {
       navigator.clipboard.writeText(transcript);
@@ -324,11 +318,11 @@ const HomePage = () => {
       <div
         style={{
           position: 'fixed',
-          top: '12px',
-          left: '12px',
+          top: spacing.md,
+          left: spacing.md,
           zIndex: 1000,
           display: 'flex',
-          gap: '8px',
+          gap: spacing.sm,
           WebkitAppRegion: 'no-drag'
         }}
       >
@@ -337,18 +331,13 @@ const HomePage = () => {
           onClick={() => setIsHistoryOpen(!isHistoryOpen)}
           style={
             {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer'
+              ...components.button.base,
+              ...components.button.icon
             } as React.CSSProperties
           }
           title="Historique"
         >
-          <History size={18} color="#ffffff" />
+          <History size={18} color={colors.text.primary} />
         </button>
 
         {/* Statistics button */}
@@ -356,18 +345,13 @@ const HomePage = () => {
           onClick={() => setCurrentView('statistics')}
           style={
             {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px',
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer'
+              ...components.button.base,
+              ...components.button.icon
             } as React.CSSProperties
           }
           title="Statistiques"
         >
-          <BarChart3 size={18} color="#ffffff" />
+          <BarChart3 size={18} color={colors.text.primary} />
         </button>
       </div>
 
@@ -383,12 +367,12 @@ const HomePage = () => {
       <div
         style={{
           position: 'fixed',
-          top: '12px',
-          right: '12px',
+          top: spacing.md,
+          right: spacing.md,
           display: 'flex',
           gap: '6px',
-          fontSize: '9px',
-          color: '#9ca3af',
+          fontSize: typography.fontSize.xs,
+          color: colors.text.tertiary,
           zIndex: 1000
         }}
       >
@@ -396,36 +380,31 @@ const HomePage = () => {
           <div
             key={name}
             style={{
+              ...components.proxyIndicator.container,
               display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-              padding: '3px 6px',
-              color: '#e5e7eb',
-              backgroundColor: 'rgba(30, 41, 59, 0.8)',
-              backdropFilter: 'blur(4px)',
-              borderRadius: '6px',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)'
+              gap: spacing.md,
+              alignItems: 'center'
             }}
             title={`${name}: ${status}`}
           >
-            <span style={{ fontSize: '8px', opacity: 0.8, fontWeight: 500 }}>
+            <span
+              style={{
+                fontSize: typography.fontSize.xs,
+                opacity: 0.8,
+                fontWeight: typography.fontWeight.medium
+              }}
+            >
               {name}
             </span>
             <div
               style={{
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
+                ...components.proxyIndicator.dot,
                 backgroundColor: getStatusColor(status),
                 border:
                   status === 'loading'
                     ? '1px solid rgba(255, 255, 255, 0.3)'
                     : 'none',
-                boxShadow:
-                  status === 'loading'
-                    ? 'inset 0 0 2px rgba(0, 0, 0, 0.3)'
-                    : 'none'
+                boxShadow: status === 'loading' ? 'inset 0 0 2px rgba(0, 0, 0, 0.3)' : 'none'
               }}
             />
           </div>
@@ -440,7 +419,7 @@ const HomePage = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: '#0f172a',
+          backgroundColor: colors.background.primary,
           zIndex: 0
         }}
       />
@@ -454,8 +433,7 @@ const HomePage = () => {
           flexDirection: 'column',
           alignItems: 'center',
           position: 'relative',
-          zIndex: 1,
-          minHeight: '100vh'
+          zIndex: 1
         }}
       >
         <button
@@ -466,18 +444,9 @@ const HomePage = () => {
           aria-label={isRecording ? 'Recording...' : 'Start recording'}
           style={
             {
-              padding: '15px 30px',
-              fontSize: '18px',
-              backgroundColor: isRecording
-                ? '#ff4444'
-                : isLoading
-                  ? '#9ca3af'
-                  : '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
+              ...components.button.record,
+              backgroundColor: getRecordButtonColor(isRecording, isLoading),
               cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'background-color 0.3s',
               opacity: isLoading ? 0.7 : 1,
               WebkitAppRegion: 'no-drag'
             } as React.CSSProperties
@@ -497,21 +466,27 @@ const HomePage = () => {
             {
               transition: 'opacity 0.3s',
               opacity: transcript ? 1 : 0,
-              marginTop: '20px',
-              padding: '15px',
-              backgroundColor: '#1e293b',
-              borderRadius: '8px',
-              border: '1px solid #334155',
-              color: '#f9fafb',
+              marginTop: spacing.xl,
+              padding: spacing.lg,
+              backgroundColor: colors.background.secondary,
+              borderRadius: borderRadius.lg,
+              border: `1px solid ${colors.border.primary}`,
+              color: colors.text.primary,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'start',
-              gap: '10px',
+              gap: spacing.md,
               WebkitAppRegion: 'no-drag'
             } as React.CSSProperties
           }
         >
-          <h3 style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>
+          <h3
+            style={{
+              fontSize: typography.fontSize.xs,
+              color: colors.text.tertiary,
+              margin: 0
+            }}
+          >
             Transcription (copied to clipboard):
           </h3>
 
@@ -527,14 +502,10 @@ const HomePage = () => {
               }
             }}
             style={{
+              ...components.input.base,
               flex: 1,
               alignSelf: 'stretch',
-              backgroundColor: 'rgba(15, 23, 42, 0.5)',
-              padding: '10px',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              margin: 0,
-              color: '#e5e7eb'
+              margin: 0
             }}
           >
             {transcript}

@@ -11,6 +11,12 @@ import {
   YAxis
 } from 'recharts';
 
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import {
   calculateStatistics,
@@ -54,18 +60,18 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#0f172a',
+        backgroundColor: colors.background.primary,
         WebkitAppRegion: 'no-drag'
       }}
     >
       {/* Header */}
       <div
         style={{
-          padding: '20px',
-          borderBottom: '1px solid #334155',
+          padding: spacing.xl,
+          borderBottom: `1px solid ${colors.border.primary}`,
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: spacing.md
         }}
       >
         <button
@@ -74,12 +80,12 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            padding: '8px',
+            padding: spacing.sm,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: '6px',
-            color: '#e5e7eb',
+            borderRadius: borderRadius.md,
+            color: colors.text.secondary,
             transition: 'background-color 0.2s'
           }}
           onMouseEnter={e => {
@@ -94,9 +100,9 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         <h1
           style={{
             margin: 0,
-            fontSize: '24px',
-            fontWeight: 600,
-            color: '#f9fafb'
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.semibold,
+            color: colors.text.primary
           }}
         >
           Statistiques d'utilisation
@@ -108,15 +114,15 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '24px'
+          padding: spacing['2xl']
         }}
       >
         {isLoading ? (
           <div
             style={{
               textAlign: 'center',
-              padding: '40px',
-              color: '#94a3b8'
+              padding: spacing['4xl'],
+              color: colors.text.tertiary
             }}
           >
             Chargement des statistiques...
@@ -125,8 +131,8 @@ const Statistics = ({ onBack }: StatisticsProps) => {
           <div
             style={{
               textAlign: 'center',
-              padding: '40px',
-              color: '#94a3b8'
+              padding: spacing['4xl'],
+              color: colors.text.tertiary
             }}
           >
             Aucune donnée disponible. Commencez par créer des transcriptions !
@@ -138,32 +144,32 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '16px',
-                marginBottom: '32px'
+                gap: spacing.lg,
+                marginBottom: spacing['3xl']
               }}
             >
               <div
                 style={{
-                  padding: '20px',
-                  backgroundColor: '#1e293b',
-                  borderRadius: '8px',
-                  border: '1px solid #334155'
+                  padding: spacing.xl,
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.lg,
+                  border: `1px solid ${colors.border.primary}`
                 }}
               >
                 <div
                   style={{
-                    fontSize: '14px',
-                    color: '#94a3b8',
-                    marginBottom: '8px'
+                    fontSize: typography.fontSize.base,
+                    color: colors.text.tertiary,
+                    marginBottom: spacing.sm
                   }}
                 >
                   Total de requêtes
                 </div>
                 <div
                   style={{
-                    fontSize: '32px',
-                    fontWeight: 700,
-                    color: '#f9fafb'
+                    fontSize: typography.fontSize['2xl'],
+                    fontWeight: typography.fontWeight.bold,
+                    color: colors.text.primary
                   }}
                 >
                   {stats.totalTranscriptions}
@@ -172,26 +178,26 @@ const Statistics = ({ onBack }: StatisticsProps) => {
 
               <div
                 style={{
-                  padding: '20px',
-                  backgroundColor: '#1e293b',
-                  borderRadius: '8px',
-                  border: '1px solid #334155'
+                  padding: spacing.xl,
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.lg,
+                  border: `1px solid ${colors.border.primary}`
                 }}
               >
                 <div
                   style={{
-                    fontSize: '14px',
-                    color: '#94a3b8',
-                    marginBottom: '8px'
+                    fontSize: typography.fontSize.base,
+                    color: colors.text.tertiary,
+                    marginBottom: spacing.sm
                   }}
                 >
                   Durée estimée
                 </div>
                 <div
                   style={{
-                    fontSize: '32px',
-                    fontWeight: 700,
-                    color: '#f9fafb'
+                    fontSize: typography.fontSize['2xl'],
+                    fontWeight: typography.fontWeight.bold,
+                    color: colors.text.primary
                   }}
                 >
                   {formatDuration(stats.totalEstimatedMinutes)}
@@ -200,26 +206,26 @@ const Statistics = ({ onBack }: StatisticsProps) => {
 
               <div
                 style={{
-                  padding: '20px',
-                  backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                  borderRadius: '8px',
-                  border: '1px solid #0ea5e9'
+                  padding: spacing.xl,
+                  backgroundColor: colors.accent.blue.background,
+                  borderRadius: borderRadius.lg,
+                  border: `1px solid ${colors.accent.blue.primary}`
                 }}
               >
                 <div
                   style={{
-                    fontSize: '14px',
-                    color: '#38bdf8',
-                    marginBottom: '8px'
+                    fontSize: typography.fontSize.base,
+                    color: colors.accent.blue.light,
+                    marginBottom: spacing.sm
                   }}
                 >
                   Coût estimé
                 </div>
                 <div
                   style={{
-                    fontSize: '32px',
-                    fontWeight: 700,
-                    color: '#0ea5e9'
+                    fontSize: typography.fontSize['2xl'],
+                    fontWeight: typography.fontWeight.bold,
+                    color: colors.accent.blue.primary
                   }}
                 >
                   {formatCost(stats.totalEstimatedCost)}
@@ -231,42 +237,42 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             {stats.dailyUsage.length > 0 && (
               <div
                 style={{
-                  backgroundColor: '#1e293b',
-                  borderRadius: '8px',
-                  border: '1px solid #334155',
-                  padding: '24px'
+                  backgroundColor: colors.background.secondary,
+                  borderRadius: borderRadius.lg,
+                  border: `1px solid ${colors.border.primary}`,
+                  padding: spacing['2xl']
                 }}
               >
                 <h2
                   style={{
-                    margin: '0 0 24px 0',
-                    fontSize: '18px',
-                    fontWeight: 600,
-                    color: '#f9fafb'
+                    margin: `0 0 ${spacing['2xl']} 0`,
+                    fontSize: typography.fontSize.lg,
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.text.primary
                   }}
                 >
                   Utilisation quotidienne
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={stats.dailyUsage}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border.primary} />
                     <XAxis
                       dataKey="date"
-                      stroke="#94a3b8"
-                      style={{ fontSize: '12px' }}
+                      stroke={colors.text.tertiary}
+                      style={{ fontSize: typography.fontSize.sm }}
                     />
                     <YAxis
-                      stroke="#94a3b8"
-                      style={{ fontSize: '12px' }}
+                      stroke={colors.text.tertiary}
+                      style={{ fontSize: typography.fontSize.sm }}
                       allowDecimals={false}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#0f172a',
-                        border: '1px solid #334155',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#e5e7eb'
+                        backgroundColor: colors.background.primary,
+                        border: `1px solid ${colors.border.primary}`,
+                        borderRadius: borderRadius.md,
+                        fontSize: typography.fontSize.base,
+                        color: colors.text.secondary
                       }}
                       formatter={(value: number, name: string) => {
                         if (name === 'count') return [value, 'Requêtes'];
@@ -276,14 +282,14 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                       }}
                     />
                     <Legend
-                      wrapperStyle={{ fontSize: '14px', color: '#94a3b8' }}
+                      wrapperStyle={{ fontSize: typography.fontSize.base, color: colors.text.tertiary }}
                       formatter={(value: string) => {
                         if (value === 'count') return 'Requêtes';
                         if (value === 'estimatedCost') return 'Coût (USD)';
                         return value;
                       }}
                     />
-                    <Bar dataKey="count" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill={colors.accent.blue.primary} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -292,13 +298,13 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             {/* Info note */}
             <div
               style={{
-                marginTop: '24px',
-                padding: '16px',
-                backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                borderRadius: '8px',
-                border: '1px solid #eab308',
-                fontSize: '13px',
-                color: '#fef08a',
+                marginTop: spacing['2xl'],
+                padding: spacing.lg,
+                backgroundColor: colors.accent.yellow.background,
+                borderRadius: borderRadius.lg,
+                border: `1px solid ${colors.accent.yellow.primary}`,
+                fontSize: typography.fontSize.sm,
+                color: colors.accent.yellow.light,
                 lineHeight: '1.5'
               }}
             >
