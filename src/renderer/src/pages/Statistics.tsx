@@ -1,4 +1,3 @@
-import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
   Bar,
@@ -24,11 +23,7 @@ import {
   type UsageStatistics
 } from '../lib/statistics';
 
-interface StatisticsProps {
-  onBack: () => void;
-}
-
-const Statistics = ({ onBack }: StatisticsProps) => {
+const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [chartVariant, setChartVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -63,75 +58,13 @@ const Statistics = ({ onBack }: StatisticsProps) => {
   return (
     <div
       style={{
-        position: 'relative',
         width: '100%',
         height: '100vh',
-        backgroundColor: colors.background.primary,
-        WebkitAppRegion: 'no-drag'
+        overflowY: 'auto',
+        boxSizing: 'border-box'
       }}
     >
-      {/* Fixed Header */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          padding: spacing.xl,
-          backgroundColor: colors.background.primary,
-          borderBottom: `1px solid ${colors.border.primary}`,
-          display: 'flex',
-          alignItems: 'center',
-          gap: spacing.md
-        }}
-      >
-        <button
-          onClick={onBack}
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: spacing.sm,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: borderRadius.md,
-            color: colors.text.secondary,
-            transition: 'background-color 0.2s'
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <h1
-          style={{
-            margin: 0,
-            fontSize: typography.fontSize.xl,
-            fontWeight: typography.fontWeight.semibold,
-            color: colors.text.primary
-          }}
-        >
-          Statistiques d'utilisation
-        </h1>
-      </div>
-
-      {/* Scrollable Content - Full Width */}
-      <div
-        style={{
-          paddingTop: '72px',
-          height: '100%',
-          width: '100%',
-          overflowY: 'auto',
-          boxSizing: 'border-box'
-        }}
-      >
-        <div style={{ padding: spacing['2xl'], width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ padding: spacing['2xl'], width: '100%', boxSizing: 'border-box' }}>
           {isLoading ? (
             <div
               style={{
@@ -581,7 +514,6 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             )}
           </>
         )}
-        </div>
       </div>
     </div>
   );

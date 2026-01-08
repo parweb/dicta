@@ -1,7 +1,8 @@
-import { BarChart3, History, Loader2, Mic, MicOff } from 'lucide-react';
+import { Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import HistorySidebar from '../components/HistorySidebar';
+import Layout from '../components/Layout';
 import {
   borderRadius,
   colors,
@@ -292,69 +293,12 @@ const HomePage = () => {
     [proxyStatuses]
   );
 
-  // If statistics view is active, render Statistics component
-  if (currentView === 'statistics') {
-    return <Statistics onBack={() => setCurrentView('home')} />;
-  }
-
-  // Otherwise render Home view
   return (
-    <>
-      {/* Draggable area - entire window */}
-      <div
-        style={
-          {
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            WebkitAppRegion: 'drag'
-          } as React.CSSProperties
-        }
-      />
-
-      {/* Top left buttons */}
-      <div
-        style={{
-          position: 'fixed',
-          top: spacing.md,
-          left: spacing.md,
-          zIndex: 1000,
-          display: 'flex',
-          gap: spacing.sm,
-          WebkitAppRegion: 'no-drag'
-        }}
-      >
-        {/* History toggle button */}
-        <button
-          onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-          style={
-            {
-              ...components.button.base,
-              ...components.button.icon
-            } as React.CSSProperties
-          }
-          title="Historique"
-        >
-          <History size={18} color={colors.text.primary} />
-        </button>
-
-        {/* Statistics button */}
-        <button
-          onClick={() => setCurrentView('statistics')}
-          style={
-            {
-              ...components.button.base,
-              ...components.button.icon
-            } as React.CSSProperties
-          }
-          title="Statistiques"
-        >
-          <BarChart3 size={18} color={colors.text.primary} />
-        </button>
-      </div>
-
+    <Layout
+      currentView={currentView}
+      onViewChange={setCurrentView}
+      onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
+    >
       {/* History Sidebar */}
       <HistorySidebar
         isOpen={isHistoryOpen}
@@ -411,31 +355,22 @@ const HomePage = () => {
         ))}
       </div>
 
-      {/* Background */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: colors.background.primary,
-          zIndex: 0
-        }}
-      />
-
-      <div
-        style={{
-          padding: '20px',
-          maxWidth: '600px',
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          position: 'relative',
-          zIndex: 1
-        }}
-      >
+      {/* Render Statistics or Home content based on current view */}
+      {currentView === 'statistics' ? (
+        <Statistics />
+      ) : (
+        <div
+          style={{
+            padding: '20px',
+            maxWidth: '600px',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',
+            zIndex: 1
+          }}
+        >
         <button
           type="button"
           onMouseDown={startRecording}
@@ -512,7 +447,8 @@ const HomePage = () => {
           </p>
         </div>
       </div>
-    </>
+      )}
+    </Layout>
   );
 };
 
