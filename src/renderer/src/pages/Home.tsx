@@ -113,31 +113,55 @@ const HomePage = () => {
     formData.append('file', blob, 'recording.webm');
     formData.append('model', 'gpt-4o-transcribe');
 
-    try {
-      const response = await fetch(
-        'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions',
-        {
+    // Liste des proxies CORS à utiliser en parallèle
+    const proxies = [
+      'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions',
+      'https://corsproxy.io/?https://api.openai.com/v1/audio/transcriptions'
+    ];
+
+    // Fonction pour fetch avec un proxy spécifique
+    const fetchWithProxy = async (proxyUrl: string) => {
+      try {
+        console.log(`Tentative avec ${proxyUrl}`);
+        const response = await fetch(proxyUrl, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${apiKey}`
           },
           body: formData
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error?.message || `Erreur proxy: ${proxyUrl}`);
         }
-      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error('API error:', data);
-        throw new Error(data.error?.message || 'Unknown transcription error');
+        const data = await response.json();
+        console.log(`✓ Succès avec ${proxyUrl}`);
+        return data;
+      } catch (error) {
+        console.warn(`✗ Échec avec ${proxyUrl}:`, error);
+        throw error;
       }
+    };
+
+    try {
+      // Promise.any() retourne la première promesse qui RÉUSSIT
+      // Si toutes échouent, on reçoit un AggregateError
+      const data = await Promise.any(
+        proxies.map(proxy => fetchWithProxy(proxy))
+      );
 
       setTranscript(data.text);
       await navigator.clipboard.writeText(data.text);
 
       console.log('all good');
     } catch (error) {
-      console.error('Transcription error:', error);
+      if (error instanceof AggregateError) {
+        console.error('Tous les proxies ont échoué:', error.errors);
+      } else {
+        console.error('Transcription error:', error);
+      }
     }
   };
 
