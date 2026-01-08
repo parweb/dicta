@@ -341,28 +341,14 @@ const HomePage = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '8px',
-              backgroundColor: isHistoryOpen
-                ? 'rgba(14, 165, 233, 0.2)'
-                : 'rgba(255, 255, 255, 0.05)',
+              backgroundColor: 'transparent',
               border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+              cursor: 'pointer'
             } as React.CSSProperties
           }
-          onMouseEnter={e => {
-            if (!isHistoryOpen) {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-            }
-          }}
-          onMouseLeave={e => {
-            if (!isHistoryOpen) {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-            }
-          }}
           title="Historique"
         >
-          <History size={18} color={isHistoryOpen ? '#0ea5e9' : '#e5e7eb'} />
+          <History size={18} color="#ffffff" />
         </button>
 
         {/* Statistics button */}
@@ -374,22 +360,14 @@ const HomePage = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              backgroundColor: 'transparent',
               border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s'
+              cursor: 'pointer'
             } as React.CSSProperties
           }
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-          }}
           title="Statistiques"
         >
-          <BarChart3 size={18} color="#e5e7eb" />
+          <BarChart3 size={18} color="#ffffff" />
         </button>
       </div>
 
