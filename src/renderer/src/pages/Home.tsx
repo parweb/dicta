@@ -1,5 +1,8 @@
-import { Loader2, Mic, MicOff } from 'lucide-react';
+import { History, Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+
+import HistorySidebar from '../components/HistorySidebar';
+import type { Transcription } from '../lib/history';
 
 // SECURITY: Move API key to environment variables
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -39,6 +42,7 @@ const HomePage = () => {
   const [proxyStatuses, setProxyStatuses] = useState<
     Record<string, ProxyStatus>
   >(INITIAL_PROXY_STATUSES);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -64,6 +68,20 @@ const HomePage = () => {
         mediaStream.current.getTracks().forEach(track => track.stop());
       }
     };
+  }, []);
+
+  // Save transcription to history
+  const saveToHistory = useCallback(async (text: string) => {
+    try {
+      const transcription: Transcription = {
+        id: `${Date.now()}`,
+        text,
+        timestamp: Date.now()
+      };
+      await window.api?.history.save(transcription);
+    } catch (error) {
+      console.error('Error saving to history:', error);
+    }
   }, []);
 
   const transcribeAudio = useCallback(async (blob: Blob) => {
@@ -131,6 +149,8 @@ const HomePage = () => {
 
       setTranscript(data.text);
       await navigator.clipboard.writeText(data.text);
+      // Save to history
+      await saveToHistory(data.text);
     } catch (error) {
       if (error instanceof AggregateError) {
         console.error('All proxies failed:', error.errors);
@@ -138,7 +158,7 @@ const HomePage = () => {
         console.error('Transcription error:', error);
       }
     }
-  }, []);
+  }, [saveToHistory]);
 
   const startRecording = useCallback(async () => {
     try {
@@ -261,6 +281,11 @@ const HomePage = () => {
     }
   }, [transcript]);
 
+  const handleSelectTranscription = useCallback((text: string) => {
+    setTranscript(text);
+    setIsHistoryOpen(false);
+  }, []);
+
   const proxyStatusEntries = useMemo(
     () => Object.entries(proxyStatuses),
     [proxyStatuses]
@@ -278,6 +303,44 @@ const HomePage = () => {
           bottom: 0,
           WebkitAppRegion: 'drag'
         } as React.CSSProperties}
+      />
+
+      {/* History toggle button - fixed top left */}
+      <button
+        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+        style={{
+          position: 'fixed',
+          top: '12px',
+          left: '12px',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '8px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          transition: 'all 0.2s',
+          WebkitAppRegion: 'no-drag'
+        } as React.CSSProperties}
+        onMouseEnter={e => {
+          e.currentTarget.style.backgroundColor = 'rgba(243, 244, 246, 0.95)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+        }}
+        title="Historique"
+      >
+        <History size={18} color="#1f2937" />
+      </button>
+
+      {/* History Sidebar */}
+      <HistorySidebar
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        onSelectTranscription={handleSelectTranscription}
       />
 
       {/* Proxy status indicators - fixed top right */}

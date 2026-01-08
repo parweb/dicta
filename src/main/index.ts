@@ -1,6 +1,7 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
 import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
 import { exec } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import icon from '../../resources/icon.png?asset';
@@ -66,6 +67,58 @@ app.whenReady().then(() => {
       }, 200);
     } else {
       pasteClipboard();
+    }
+  });
+
+  // History management handlers
+  const historyDir = join(app.getPath('userData'), 'history');
+
+  // Ensure history directory exists
+  ipcMain.handle('history:ensure-dir', () => {
+    try {
+      if (!existsSync(historyDir)) {
+        mkdirSync(historyDir, { recursive: true });
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error creating history directory:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  // Save transcription to history
+  ipcMain.handle('history:save', (_event, transcription) => {
+    try {
+      if (!existsSync(historyDir)) {
+        mkdirSync(historyDir, { recursive: true });
+      }
+      const filename = `${Date.now()}.json`;
+      const filepath = join(historyDir, filename);
+      writeFileSync(filepath, JSON.stringify(transcription, null, 2));
+      return { success: true, filename };
+    } catch (error) {
+      console.error('Error saving transcription:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  // Load all transcriptions from history
+  ipcMain.handle('history:load-all', () => {
+    try {
+      if (!existsSync(historyDir)) {
+        return { success: true, transcriptions: [] };
+      }
+      const files = readdirSync(historyDir).filter(f => f.endsWith('.json'));
+      const transcriptions = files.map(file => {
+        const content = readFileSync(join(historyDir, file), 'utf-8');
+        return JSON.parse(content);
+      });
+      // Sort by timestamp descending (newest first)
+      transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+      return { success: true, transcriptions };
+    } catch (error) {
+      console.error('Error loading transcriptions:', error);
+      return { success: false, error: String(error), transcriptions: [] };
     }
   });
 

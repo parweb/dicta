@@ -17,6 +17,15 @@ const api = {
     callback: (event: IpcRendererEvent, ...args: unknown[]) => void
   ): void => {
     ipcRenderer.removeListener(channel, callback);
+  },
+  // History management
+  history: {
+    ensureDir: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('history:ensure-dir'),
+    save: (transcription: unknown): Promise<{ success: boolean; filename?: string; error?: string }> =>
+      ipcRenderer.invoke('history:save', transcription),
+    loadAll: (): Promise<{ success: boolean; transcriptions: unknown[]; error?: string }> =>
+      ipcRenderer.invoke('history:load-all')
   }
 };
 
