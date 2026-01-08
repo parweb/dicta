@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react';
 import {
   Bar,
   BarChart,
-  CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -32,6 +30,7 @@ interface StatisticsProps {
 const Statistics = ({ onBack }: StatisticsProps) => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [chartVariant, setChartVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   useEffect(() => {
     loadStatistics();
@@ -233,6 +232,60 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               </div>
             </div>
 
+            {/* TEMPORARY: Chart Variant Selector */}
+            <div
+              style={{
+                display: 'flex',
+                gap: spacing.sm,
+                justifyContent: 'center',
+                marginBottom: spacing.lg,
+                padding: spacing.md,
+                backgroundColor: colors.background.secondary,
+                borderRadius: borderRadius.lg,
+                border: `1px solid ${colors.border.primary}`
+              }}
+            >
+              {([1, 2, 3, 4, 5] as const).map(variant => (
+                <button
+                  key={variant}
+                  onClick={() => setChartVariant(variant)}
+                  style={{
+                    padding: `${spacing.sm} ${spacing.lg}`,
+                    backgroundColor:
+                      chartVariant === variant
+                        ? colors.accent.blue.primary
+                        : 'transparent',
+                    color:
+                      chartVariant === variant
+                        ? colors.text.primary
+                        : colors.text.tertiary,
+                    border: `1px solid ${
+                      chartVariant === variant
+                        ? colors.accent.blue.primary
+                        : colors.border.primary
+                    }`,
+                    borderRadius: borderRadius.md,
+                    cursor: 'pointer',
+                    fontSize: typography.fontSize.sm,
+                    fontWeight: typography.fontWeight.medium,
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={e => {
+                    if (chartVariant !== variant) {
+                      e.currentTarget.style.borderColor = colors.border.secondary;
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (chartVariant !== variant) {
+                      e.currentTarget.style.borderColor = colors.border.primary;
+                    }
+                  }}
+                >
+                  Variante {variant}
+                </button>
+              ))}
+            </div>
+
             {/* Chart */}
             {stats.dailyUsage.length > 0 && (
               <div
@@ -253,45 +306,287 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 >
                   Utilisation quotidienne
                 </h2>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={stats.dailyUsage}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={colors.border.primary} />
-                    <XAxis
-                      dataKey="date"
-                      stroke={colors.text.tertiary}
-                      style={{ fontSize: typography.fontSize.sm }}
-                    />
-                    <YAxis
-                      stroke={colors.text.tertiary}
-                      style={{ fontSize: typography.fontSize.sm }}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: colors.background.primary,
-                        border: `1px solid ${colors.border.primary}`,
-                        borderRadius: borderRadius.md,
-                        fontSize: typography.fontSize.base,
-                        color: colors.text.secondary
-                      }}
-                      formatter={(value: number, name: string) => {
-                        if (name === 'count') return [value, 'Requêtes'];
-                        if (name === 'estimatedCost')
-                          return [formatCost(value), 'Coût'];
-                        return [value, name];
-                      }}
-                    />
-                    <Legend
-                      wrapperStyle={{ fontSize: typography.fontSize.base, color: colors.text.tertiary }}
-                      formatter={(value: string) => {
-                        if (value === 'count') return 'Requêtes';
-                        if (value === 'estimatedCost') return 'Coût (USD)';
-                        return value;
-                      }}
-                    />
-                    <Bar dataKey="count" fill={colors.accent.blue.primary} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+
+                {/* Variant 1: Minimal bars with price on top */}
+                {chartVariant === 1 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                      <XAxis
+                        dataKey="date"
+                        stroke={colors.text.tertiary}
+                        style={{ fontSize: typography.fontSize.xs }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={false}
+                        contentStyle={{
+                          backgroundColor: colors.background.primary,
+                          border: `1px solid ${colors.border.primary}`,
+                          borderRadius: borderRadius.md,
+                          fontSize: typography.fontSize.sm,
+                          color: colors.text.secondary
+                        }}
+                        formatter={(value: number, name: string) => {
+                          if (name === 'count') return [value, 'Requêtes'];
+                          if (name === 'estimatedCost')
+                            return [formatCost(value), 'Coût'];
+                          return [value, name];
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill={colors.accent.blue.primary}
+                        radius={[6, 6, 0, 0]}
+                        label={{
+                          position: 'top',
+                          content: (props: any) => {
+                            const cost = stats.dailyUsage[props.index || 0]?.estimatedCost;
+                            return (
+                              <text
+                                x={(props.x || 0) + (props.width || 0) / 2}
+                                y={(props.y || 0) - 5}
+                                fill={colors.text.tertiary}
+                                fontSize={typography.fontSize.xs}
+                                textAnchor="middle"
+                              >
+                                {formatCost(cost || 0)}
+                              </text>
+                            );
+                          }
+                        }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+
+                {/* Variant 2: Clean bars with hover only */}
+                {chartVariant === 2 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                      <XAxis
+                        dataKey="date"
+                        stroke={colors.text.tertiary}
+                        style={{ fontSize: typography.fontSize.xs }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={Math.floor(stats.dailyUsage.length / 5)}
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={{ fill: colors.accent.blue.background }}
+                        contentStyle={{
+                          backgroundColor: colors.background.primary,
+                          border: `1px solid ${colors.border.primary}`,
+                          borderRadius: borderRadius.md,
+                          fontSize: typography.fontSize.sm,
+                          color: colors.text.secondary,
+                          padding: spacing.md
+                        }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.[0]) return null;
+                          const data = props.payload[0].payload;
+                          return (
+                            <div
+                              style={{
+                                backgroundColor: colors.background.primary,
+                                border: `1px solid ${colors.border.primary}`,
+                                borderRadius: borderRadius.md,
+                                padding: spacing.md
+                              }}
+                            >
+                              <div style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary, marginBottom: '4px' }}>
+                                {data.date}
+                              </div>
+                              <div style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+                                {data.count} requêtes
+                              </div>
+                              <div style={{ fontSize: typography.fontSize.lg, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold, marginTop: '4px' }}>
+                                {formatCost(data.estimatedCost)}
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill={colors.accent.blue.primary}
+                        radius={[8, 8, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+
+                {/* Variant 3: Simple bars with price label */}
+                {chartVariant === 3 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                      <XAxis
+                        dataKey="date"
+                        stroke={colors.text.tertiary}
+                        style={{ fontSize: typography.fontSize.xs }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={Math.floor(stats.dailyUsage.length / 4)}
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={{ fill: colors.accent.blue.background }}
+                        contentStyle={{
+                          backgroundColor: colors.background.primary,
+                          border: `1px solid ${colors.border.primary}`,
+                          borderRadius: borderRadius.md,
+                          fontSize: typography.fontSize.sm,
+                          padding: spacing.md
+                        }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.[0]) return null;
+                          const data = props.payload[0].payload;
+                          return (
+                            <div
+                              style={{
+                                backgroundColor: colors.background.primary,
+                                border: `1px solid ${colors.border.primary}`,
+                                borderRadius: borderRadius.md,
+                                padding: spacing.md
+                              }}
+                            >
+                              <div style={{ fontSize: typography.fontSize.lg, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold }}>
+                                {formatCost(data.estimatedCost)}
+                              </div>
+                              <div style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, marginTop: '4px' }}>
+                                {data.count} requêtes • {data.date}
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        radius={[8, 8, 0, 0]}
+                        fill={colors.accent.blue.primary}
+                        label={{
+                          position: 'top',
+                          content: (props: any) => {
+                            const cost = stats.dailyUsage[props.index || 0]?.estimatedCost;
+                            if ((props.index || 0) % Math.max(1, Math.floor(stats.dailyUsage.length / 5)) !== 0) return null;
+                            return (
+                              <text
+                                x={(props.x || 0) + (props.width || 0) / 2}
+                                y={(props.y || 0) - 5}
+                                fill={colors.text.tertiary}
+                                fontSize={typography.fontSize.xs}
+                                textAnchor="middle"
+                              >
+                                {formatCost(cost || 0)}
+                              </text>
+                            );
+                          }
+                        }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+
+                {/* Variant 4: Ultra minimal - no axes */}
+                {chartVariant === 4 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                      <XAxis
+                        dataKey="date"
+                        stroke={colors.text.tertiary}
+                        style={{ fontSize: typography.fontSize.xs }}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={false}
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={{
+                          backgroundColor: 'transparent',
+                          border: 'none'
+                        }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.[0]) return null;
+                          const data = props.payload[0].payload;
+                          return (
+                            <div
+                              style={{
+                                backgroundColor: colors.background.primary,
+                                border: `1px solid ${colors.border.primary}`,
+                                borderRadius: borderRadius.md,
+                                padding: spacing.sm,
+                                fontSize: typography.fontSize.sm,
+                                color: colors.text.primary,
+                                fontWeight: typography.fontWeight.semibold
+                              }}
+                            >
+                              {formatCost(data.estimatedCost)}
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill={colors.accent.blue.primary}
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={50}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+
+                {/* Variant 5: Compact bars with overlay price on hover */}
+                {chartVariant === 5 && (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }} barGap={2}>
+                      <XAxis
+                        dataKey="date"
+                        stroke={colors.text.tertiary}
+                        style={{ fontSize: typography.fontSize.xs }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval={Math.floor(stats.dailyUsage.length / 6)}
+                      />
+                      <YAxis hide />
+                      <Tooltip
+                        cursor={{ fill: 'transparent' }}
+                        contentStyle={{
+                          backgroundColor: 'transparent',
+                          border: 'none'
+                        }}
+                        content={(props) => {
+                          if (!props.active || !props.payload?.[0]) return null;
+                          const data = props.payload[0].payload;
+                          return (
+                            <div
+                              style={{
+                                backgroundColor: colors.background.primary,
+                                border: `2px solid ${colors.accent.blue.primary}`,
+                                borderRadius: borderRadius.lg,
+                                padding: spacing.md,
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
+                              }}
+                            >
+                              <div style={{ fontSize: typography.fontSize.xl, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold }}>
+                                {formatCost(data.estimatedCost)}
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar
+                        dataKey="count"
+                        fill={colors.accent.blue.primary}
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             )}
 
