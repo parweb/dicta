@@ -95,12 +95,13 @@ const HistorySidebar = ({
           left: 0,
           bottom: 0,
           width: '320px',
-          backgroundColor: '#ffffff',
-          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.15)',
+          backgroundColor: '#1e293b',
+          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.5)',
           zIndex: 1000,
           display: 'flex',
           flexDirection: 'column',
-          WebkitAppRegion: 'no-drag'
+          WebkitAppRegion: 'no-drag',
+          borderRight: '1px solid #334155'
         }}
       >
         {/* Content */}
@@ -116,7 +117,7 @@ const HistorySidebar = ({
               style={{
                 textAlign: 'center',
                 padding: '20px',
-                color: '#6b7280'
+                color: '#94a3b8'
               }}
             >
               Chargement...
@@ -126,7 +127,7 @@ const HistorySidebar = ({
               style={{
                 textAlign: 'center',
                 padding: '20px',
-                color: '#6b7280'
+                color: '#94a3b8'
               }}
             >
               Aucune transcription
@@ -138,7 +139,7 @@ const HistorySidebar = ({
                   style={{
                     fontSize: '12px',
                     fontWeight: 600,
-                    color: '#6b7280',
+                    color: '#94a3b8',
                     marginBottom: '8px',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px'
@@ -163,31 +164,33 @@ const HistorySidebar = ({
                         }
                         style={{
                           padding: '12px',
-                          backgroundColor: isActive ? '#e0f2fe' : '#f9fafb',
+                          backgroundColor: isActive
+                            ? 'rgba(14, 165, 233, 0.15)'
+                            : '#0f172a',
                           borderRadius: '6px',
                           cursor: 'pointer',
                           border: isActive
                             ? '1px solid #0ea5e9'
-                            : '1px solid #e5e7eb',
+                            : '1px solid #334155',
                           transition: 'all 0.2s'
                         }}
                         onMouseEnter={e => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = '#f3f4f6';
-                            e.currentTarget.style.borderColor = '#d1d5db';
+                            e.currentTarget.style.backgroundColor = '#1e293b';
+                            e.currentTarget.style.borderColor = '#475569';
                           }
                         }}
                         onMouseLeave={e => {
                           if (!isActive) {
-                            e.currentTarget.style.backgroundColor = '#f9fafb';
-                            e.currentTarget.style.borderColor = '#e5e7eb';
+                            e.currentTarget.style.backgroundColor = '#0f172a';
+                            e.currentTarget.style.borderColor = '#334155';
                           }
                         }}
                       >
                       <div
                         style={{
                           fontSize: '11px',
-                          color: '#9ca3af',
+                          color: '#94a3b8',
                           marginBottom: '6px'
                         }}
                       >
@@ -196,7 +199,7 @@ const HistorySidebar = ({
                       <div
                         style={{
                           fontSize: '14px',
-                          color: '#1f2937',
+                          color: '#e5e7eb',
                           lineHeight: '1.4',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',

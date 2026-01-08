@@ -342,17 +342,27 @@ const HomePage = () => {
               justifyContent: 'center',
               padding: '8px',
               backgroundColor: isHistoryOpen
-                ? 'rgba(14, 165, 233, 0.1)'
-                : 'transparent',
+                ? 'rgba(14, 165, 233, 0.2)'
+                : 'rgba(255, 255, 255, 0.05)',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
               transition: 'all 0.2s'
             } as React.CSSProperties
           }
+          onMouseEnter={e => {
+            if (!isHistoryOpen) {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            }
+          }}
+          onMouseLeave={e => {
+            if (!isHistoryOpen) {
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+            }
+          }}
           title="Historique"
         >
-          <History size={18} />
+          <History size={18} color={isHistoryOpen ? '#0ea5e9' : '#e5e7eb'} />
         </button>
 
         {/* Statistics button */}
@@ -364,16 +374,22 @@ const HomePage = () => {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '8px',
-              backgroundColor: 'transparent',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
               transition: 'all 0.2s'
             } as React.CSSProperties
           }
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+          }}
           title="Statistiques"
         >
-          <BarChart3 size={18} />
+          <BarChart3 size={18} color="#e5e7eb" />
         </button>
       </div>
 
@@ -394,7 +410,7 @@ const HomePage = () => {
           display: 'flex',
           gap: '6px',
           fontSize: '9px',
-          color: '#666',
+          color: '#9ca3af',
           zIndex: 1000
         }}
       >
@@ -406,15 +422,16 @@ const HomePage = () => {
               gap: '12px',
               alignItems: 'center',
               padding: '3px 6px',
-              color: 'white',
+              color: '#e5e7eb',
+              backgroundColor: 'rgba(30, 41, 59, 0.8)',
               backdropFilter: 'blur(4px)',
               borderRadius: '6px',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)'
             }}
             title={`${name}: ${status}`}
           >
-            <span style={{ fontSize: '8px', opacity: 0.6, fontWeight: 500 }}>
+            <span style={{ fontSize: '8px', opacity: 0.8, fontWeight: 500 }}>
               {name}
             </span>
             <div
@@ -425,17 +442,30 @@ const HomePage = () => {
                 backgroundColor: getStatusColor(status),
                 border:
                   status === 'loading'
-                    ? '1px solid rgba(0, 0, 0, 0.2)'
+                    ? '1px solid rgba(255, 255, 255, 0.3)'
                     : 'none',
                 boxShadow:
                   status === 'loading'
-                    ? 'inset 0 0 2px rgba(0, 0, 0, 0.2)'
+                    ? 'inset 0 0 2px rgba(0, 0, 0, 0.3)'
                     : 'none'
               }}
             />
           </div>
         ))}
       </div>
+
+      {/* Background */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: '#0f172a',
+          zIndex: 0
+        }}
+      />
 
       <div
         style={{
@@ -446,7 +476,8 @@ const HomePage = () => {
           flexDirection: 'column',
           alignItems: 'center',
           position: 'relative',
-          zIndex: 1
+          zIndex: 1,
+          minHeight: '100vh'
         }}
       >
         <button
@@ -490,9 +521,10 @@ const HomePage = () => {
               opacity: transcript ? 1 : 0,
               marginTop: '20px',
               padding: '15px',
-              backgroundColor: '#f0f0f0',
-              borderRadius: '5px',
-              color: 'black',
+              backgroundColor: '#1e293b',
+              borderRadius: '8px',
+              border: '1px solid #334155',
+              color: '#f9fafb',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'start',
@@ -501,7 +533,7 @@ const HomePage = () => {
             } as React.CSSProperties
           }
         >
-          <h3 style={{ fontSize: '10px', color: 'gray', margin: 0 }}>
+          <h3 style={{ fontSize: '10px', color: '#94a3b8', margin: 0 }}>
             Transcription (copied to clipboard):
           </h3>
 
@@ -519,11 +551,12 @@ const HomePage = () => {
             style={{
               flex: 1,
               alignSelf: 'stretch',
-              backgroundColor: 'rgba(0,0,0, .1)',
+              backgroundColor: 'rgba(15, 23, 42, 0.5)',
               padding: '10px',
               borderRadius: '5px',
               cursor: 'pointer',
-              margin: 0
+              margin: 0,
+              color: '#e5e7eb'
             }}
           >
             {transcript}

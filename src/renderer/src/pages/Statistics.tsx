@@ -54,7 +54,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#ffffff',
+        backgroundColor: '#0f172a',
         WebkitAppRegion: 'no-drag'
       }}
     >
@@ -62,7 +62,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
       <div
         style={{
           padding: '20px',
-          borderBottom: '1px solid #e5e7eb',
+          borderBottom: '1px solid #334155',
           display: 'flex',
           alignItems: 'center',
           gap: '12px'
@@ -79,11 +79,11 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             alignItems: 'center',
             justifyContent: 'center',
             borderRadius: '6px',
-            color: '#1f2937',
+            color: '#e5e7eb',
             transition: 'background-color 0.2s'
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = '#f3f4f6';
+            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor = 'transparent';
@@ -91,7 +91,14 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: '24px',
+            fontWeight: 600,
+            color: '#f9fafb'
+          }}
+        >
           Statistiques d'utilisation
         </h1>
       </div>
@@ -109,7 +116,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             style={{
               textAlign: 'center',
               padding: '40px',
-              color: '#6b7280'
+              color: '#94a3b8'
             }}
           >
             Chargement des statistiques...
@@ -119,7 +126,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             style={{
               textAlign: 'center',
               padding: '40px',
-              color: '#6b7280'
+              color: '#94a3b8'
             }}
           >
             Aucune donnée disponible. Commencez par créer des transcriptions !
@@ -138,15 +145,15 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               <div
                 style={{
                   padding: '20px',
-                  backgroundColor: '#f9fafb',
+                  backgroundColor: '#1e293b',
                   borderRadius: '8px',
-                  border: '1px solid #e5e7eb'
+                  border: '1px solid #334155'
                 }}
               >
                 <div
                   style={{
                     fontSize: '14px',
-                    color: '#6b7280',
+                    color: '#94a3b8',
                     marginBottom: '8px'
                   }}
                 >
@@ -156,7 +163,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                   style={{
                     fontSize: '32px',
                     fontWeight: 700,
-                    color: '#1f2937'
+                    color: '#f9fafb'
                   }}
                 >
                   {stats.totalTranscriptions}
@@ -166,15 +173,15 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               <div
                 style={{
                   padding: '20px',
-                  backgroundColor: '#f9fafb',
+                  backgroundColor: '#1e293b',
                   borderRadius: '8px',
-                  border: '1px solid #e5e7eb'
+                  border: '1px solid #334155'
                 }}
               >
                 <div
                   style={{
                     fontSize: '14px',
-                    color: '#6b7280',
+                    color: '#94a3b8',
                     marginBottom: '8px'
                   }}
                 >
@@ -184,7 +191,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                   style={{
                     fontSize: '32px',
                     fontWeight: 700,
-                    color: '#1f2937'
+                    color: '#f9fafb'
                   }}
                 >
                   {formatDuration(stats.totalEstimatedMinutes)}
@@ -194,7 +201,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               <div
                 style={{
                   padding: '20px',
-                  backgroundColor: '#f0f9ff',
+                  backgroundColor: 'rgba(14, 165, 233, 0.1)',
                   borderRadius: '8px',
                   border: '1px solid #0ea5e9'
                 }}
@@ -202,7 +209,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 <div
                   style={{
                     fontSize: '14px',
-                    color: '#0369a1',
+                    color: '#38bdf8',
                     marginBottom: '8px'
                   }}
                 >
@@ -212,7 +219,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                   style={{
                     fontSize: '32px',
                     fontWeight: 700,
-                    color: '#0c4a6e'
+                    color: '#0ea5e9'
                   }}
                 >
                   {formatCost(stats.totalEstimatedCost)}
@@ -224,9 +231,9 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             {stats.dailyUsage.length > 0 && (
               <div
                 style={{
-                  backgroundColor: '#ffffff',
+                  backgroundColor: '#1e293b',
                   borderRadius: '8px',
-                  border: '1px solid #e5e7eb',
+                  border: '1px solid #334155',
                   padding: '24px'
                 }}
               >
@@ -235,30 +242,31 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                     margin: '0 0 24px 0',
                     fontSize: '18px',
                     fontWeight: 600,
-                    color: '#1f2937'
+                    color: '#f9fafb'
                   }}
                 >
                   Utilisation quotidienne
                 </h2>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={stats.dailyUsage}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                     <XAxis
                       dataKey="date"
-                      stroke="#6b7280"
+                      stroke="#94a3b8"
                       style={{ fontSize: '12px' }}
                     />
                     <YAxis
-                      stroke="#6b7280"
+                      stroke="#94a3b8"
                       style={{ fontSize: '12px' }}
                       allowDecimals={false}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
+                        backgroundColor: '#0f172a',
+                        border: '1px solid #334155',
                         borderRadius: '6px',
-                        fontSize: '14px'
+                        fontSize: '14px',
+                        color: '#e5e7eb'
                       }}
                       formatter={(value: number, name: string) => {
                         if (name === 'count') return [value, 'Requêtes'];
@@ -268,7 +276,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                       }}
                     />
                     <Legend
-                      wrapperStyle={{ fontSize: '14px' }}
+                      wrapperStyle={{ fontSize: '14px', color: '#94a3b8' }}
                       formatter={(value: string) => {
                         if (value === 'count') return 'Requêtes';
                         if (value === 'estimatedCost') return 'Coût (USD)';
@@ -286,11 +294,11 @@ const Statistics = ({ onBack }: StatisticsProps) => {
               style={{
                 marginTop: '24px',
                 padding: '16px',
-                backgroundColor: '#fef3c7',
+                backgroundColor: 'rgba(234, 179, 8, 0.1)',
                 borderRadius: '8px',
-                border: '1px solid #fbbf24',
+                border: '1px solid #eab308',
                 fontSize: '13px',
-                color: '#92400e',
+                color: '#fef08a',
                 lineHeight: '1.5'
               }}
             >
