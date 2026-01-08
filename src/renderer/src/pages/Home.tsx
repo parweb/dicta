@@ -268,6 +268,18 @@ const HomePage = () => {
 
   return (
     <>
+      {/* Draggable area - entire window */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          WebkitAppRegion: 'drag'
+        } as React.CSSProperties}
+      />
+
       {/* Proxy status indicators - fixed top right */}
       <div
         style={{
@@ -327,7 +339,9 @@ const HomePage = () => {
           margin: '0 auto',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1
         }}
       >
         <button
@@ -349,8 +363,9 @@ const HomePage = () => {
             borderRadius: '5px',
             cursor: isLoading ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.3s',
-            opacity: isLoading ? 0.7 : 1
-          }}
+            opacity: isLoading ? 0.7 : 1,
+            WebkitAppRegion: 'no-drag'
+          } as React.CSSProperties}
         >
           {isRecording ? (
             <Mic />
@@ -373,8 +388,9 @@ const HomePage = () => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'start',
-            gap: '10px'
-          }}
+            gap: '10px',
+            WebkitAppRegion: 'no-drag'
+          } as React.CSSProperties}
         >
           <h3 style={{ fontSize: '10px', color: 'gray', margin: 0 }}>
             Transcription (copied to clipboard):
