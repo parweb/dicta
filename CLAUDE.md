@@ -20,18 +20,30 @@ The application follows standard Electron architecture with three distinct proce
 1. **Main Process** (`src/main/index.ts`):
    - Window management and lifecycle
    - Global shortcut registration (Cmd/Ctrl+Shift+X)
-   - IPC communication handlers
+   - IPC communication handlers:
+     - Recording control (`stop-recording`)
+     - History management (`history:ensure-dir`, `history:save`, `history:load-all`)
+   - File system operations for history storage in userData directory
    - Clipboard paste automation via OS-specific commands (AppleScript for macOS, PowerShell for Windows, xdotool for Linux)
    - Security note: Uses `contextIsolation: false` and `sandbox: false` for IPC communication
 
 2. **Preload Process** (`src/preload/index.ts`):
    - Exposes `window.api` and `window.electron` APIs to renderer
    - Provides IPC bridge methods: `send()`, `on()`, `removeListener()`
+   - Exposes `window.api.history` methods for transcription persistence
    - Requests microphone permissions on DOM load
 
 3. **Renderer Process** (`src/renderer/`):
    - React 19 application with TypeScript
-   - Main UI in `src/renderer/src/pages/Home.tsx`
+   - Pages:
+     - `Home.tsx`: Main recording interface with proxy status indicators
+     - `Statistics.tsx`: Usage statistics and cost visualization
+   - Components:
+     - `HistorySidebar.tsx`: Transcription history sidebar
+   - Libraries:
+     - `src/renderer/src/lib/design-system.ts`: Centralized design tokens
+     - `src/renderer/src/lib/history.ts`: History utilities and date formatting
+     - `src/renderer/src/lib/statistics.ts`: Usage calculations and cost estimation
    - Uses MediaRecorder API for audio capture
    - Implements CORS proxy race condition for transcription
 
@@ -44,6 +56,28 @@ The application follows standard Electron architecture with three distinct proce
 - First successful response wins, others are cancelled
 - Automatically copies transcription to clipboard
 
+**Transcription History** (`src/renderer/src/components/HistorySidebar.tsx`):
+- Sidebar component with overlay for viewing past transcriptions
+- Transcriptions stored as JSON files in userData/history directory
+- Grouped by day with French date labels (Aujourd'hui, Hier, etc.)
+- Uses date-fns library for relative date formatting
+- Active state highlighting for currently selected transcription
+- Click to restore and copy previous transcriptions
+- IPC handlers in main process: `history:ensure-dir`, `history:save`, `history:load-all`
+
+**Usage Statistics** (`src/renderer/src/pages/Statistics.tsx`):
+- Full-page statistics view with recharts visualization
+- Summary cards: total requests, estimated duration, estimated cost
+- Daily usage bar chart showing request count over time
+- Cost estimation based on OpenAI Whisper pricing ($0.006/minute)
+- Duration estimation from word count (~150 words/minute)
+- Statistics calculations in `src/renderer/src/lib/statistics.ts`
+
+**Window Dragging**:
+- Entire window draggable via `-webkit-app-region: drag` on main container
+- Interactive elements marked as `no-drag` (buttons, transcript, sidebar)
+- Allows repositioning window anywhere on screen
+
 **Global and Local Hotkeys**:
 - Global: Cmd/Ctrl+Shift+X triggers from any application
 - Local: Hold X key to record, release to stop
@@ -52,7 +86,11 @@ The application follows standard Electron architecture with three distinct proce
 **IPC Communication Pattern**:
 - Renderer → Main: `window.api.send('stop-recording')`
 - Main → Renderer: `mainWindow.webContents.send('show-mini-app-hot-key')`
-- Used for coordinating recording state and window visibility
+- History operations:
+  - `window.api.history.ensureDir()`: Create history directory if needed
+  - `window.api.history.save(transcription)`: Save transcription to JSON file
+  - `window.api.history.loadAll()`: Load all transcriptions sorted by timestamp
+- Used for coordinating recording state, window visibility, and data persistence
 
 ## Code Style Guidelines
 - **TypeScript**: Use strong typing, avoid `any` where possible
@@ -73,6 +111,23 @@ The application follows standard Electron architecture with three distinct proce
 - Configured in `tsconfig.json` and `electron.vite.config.ts`
 
 ## Styling System
+
+### Design System (`src/renderer/src/lib/design-system.ts`)
+- **Centralized design tokens** for consistent styling across the application
+- **Color palette**:
+  - Background colors (primary: #0f172a, secondary: #1e293b, tertiary: #334155)
+  - Text colors (primary: #f9fafb, secondary: #e5e7eb, tertiary: #94a3b8)
+  - Border colors and accent colors (blue, green, red, yellow, gray)
+  - State colors for proxy indicators (success, error, loading, cancelled, idle)
+- **Spacing scale**: xs (4px) to 4xl (40px)
+- **Typography scale**: fontSize (xs to 2xl) and fontWeight (normal to bold)
+- **Border radius values**: sm, md, lg, full
+- **Shadow definitions**: for cards and elevated surfaces
+- **Component style objects**: reusable styles for buttons, cards, sidebar, inputs, proxy indicators
+- **Helper functions**: `getStatusColor()`, `getRecordButtonColor()`
+- **Dark theme**: Applied globally with slate/gray color scheme
+
+### Tailwind CSS (Legacy)
 - **Tailwind CSS v4** via PostCSS (`@tailwindcss/postcss`)
 - Theme configuration in `src/renderer/src/index.css` using Tailwind v4's `@theme` directive
 - CSS custom properties for colors (HSL format): `--background`, `--foreground`, `--primary`, etc.
@@ -80,9 +135,22 @@ The application follows standard Electron architecture with three distinct proce
 - shadcn/ui components in `src/renderer/src/components/ui/`
 - `cn()` utility (`src/renderer/src/lib/utils.ts`) for className merging
 
+**Note**: The application primarily uses the centralized design system for inline styles. Use design system tokens when modifying or creating components for consistency.
+
+## Key Dependencies
+- **date-fns**: Date formatting and manipulation with French locale support
+- **recharts**: Data visualization for statistics charts
+- **lucide-react**: Icon library for UI components
+
 ## Environment Variables
 - `VITE_OPENAI_API_KEY`: Required for OpenAI transcription API
 - Configure in `.env` (see `.env.example`)
+
+## Data Storage
+- **History files**: Stored as JSON in `userData/history/` directory
+- Each transcription saved as `{timestamp}.json`
+- Contains: id, text, timestamp
+- Loaded on-demand when history sidebar is opened
 
 ## Important Notes
 - **Linux clipboard paste** requires `xdotool` to be installed: `sudo apt-get install xdotool`
