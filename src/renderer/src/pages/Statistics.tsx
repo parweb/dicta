@@ -298,23 +298,9 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             {stats.dailyUsage.length > 0 && (
               <div
                 style={{
-                  backgroundColor: colors.background.secondary,
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.border.primary}`,
                   padding: spacing['2xl']
                 }}
               >
-                <h2
-                  style={{
-                    margin: `0 0 ${spacing['2xl']} 0`,
-                    fontSize: typography.fontSize.lg,
-                    fontWeight: typography.fontWeight.semibold,
-                    color: colors.text.primary
-                  }}
-                >
-                  Utilisation quotidienne
-                </h2>
-
                 {/* Variant 1: Minimal bars with price on top */}
                 {chartVariant === 1 && (
                   <ResponsiveContainer width="100%" height={300}>
