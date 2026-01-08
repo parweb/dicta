@@ -84,81 +84,86 @@ const HomePage = () => {
     }
   }, []);
 
-  const transcribeAudio = useCallback(async (blob: Blob) => {
-    if (!apiKey) {
-      console.error('API key is not configured');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', blob, 'recording.webm');
-    formData.append('model', 'gpt-4o-transcribe');
-
-    // Reset proxy statuses
-    setProxyStatuses(
-      PROXY_CONFIGS.reduce(
-        (acc, proxy) => ({ ...acc, [proxy.name]: 'loading' as ProxyStatus }),
-        {}
-      )
-    );
-
-    // Fetch with specific proxy
-    const fetchWithProxy = async (
-      proxy: ProxyConfig
-    ): Promise<TranscriptionResponse> => {
-      try {
-        const response = await fetch(proxy.url, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`
-          },
-          body: formData
-        });
-
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
-          throw new Error(data.error?.message || `Proxy error: ${proxy.name}`);
-        }
-
-        const data: TranscriptionResponse = await response.json();
-        setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'success' }));
-        return data;
-      } catch (error) {
-        setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
-        throw error;
+  const transcribeAudio = useCallback(
+    async (blob: Blob) => {
+      if (!apiKey) {
+        console.error('API key is not configured');
+        return;
       }
-    };
 
-    try {
-      // Promise.any() returns the first successful promise
-      const data = await Promise.any(
-        PROXY_CONFIGS.map(proxy => fetchWithProxy(proxy))
+      const formData = new FormData();
+      formData.append('file', blob, 'recording.webm');
+      formData.append('model', 'gpt-4o-transcribe');
+
+      // Reset proxy statuses
+      setProxyStatuses(
+        PROXY_CONFIGS.reduce(
+          (acc, proxy) => ({ ...acc, [proxy.name]: 'loading' as ProxyStatus }),
+          {}
+        )
       );
 
-      // Mark remaining proxies as cancelled
-      setProxyStatuses(prev => {
-        const newStatuses = { ...prev };
-        Object.keys(newStatuses).forEach(key => {
-          if (newStatuses[key] === 'loading') {
-            newStatuses[key] = 'cancelled';
-          }
-        });
-        return newStatuses;
-      });
+      // Fetch with specific proxy
+      const fetchWithProxy = async (
+        proxy: ProxyConfig
+      ): Promise<TranscriptionResponse> => {
+        try {
+          const response = await fetch(proxy.url, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${apiKey}`
+            },
+            body: formData
+          });
 
-      setTranscript(data.text);
-      await navigator.clipboard.writeText(data.text);
-      // Save to history
-      await saveToHistory(data.text);
-    } catch (error) {
-      if (error instanceof AggregateError) {
-        console.error('All proxies failed:', error.errors);
-      } else {
-        console.error('Transcription error:', error);
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
+            throw new Error(
+              data.error?.message || `Proxy error: ${proxy.name}`
+            );
+          }
+
+          const data: TranscriptionResponse = await response.json();
+          setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'success' }));
+          return data;
+        } catch (error) {
+          setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
+          throw error;
+        }
+      };
+
+      try {
+        // Promise.any() returns the first successful promise
+        const data = await Promise.any(
+          PROXY_CONFIGS.map(proxy => fetchWithProxy(proxy))
+        );
+
+        // Mark remaining proxies as cancelled
+        setProxyStatuses(prev => {
+          const newStatuses = { ...prev };
+          Object.keys(newStatuses).forEach(key => {
+            if (newStatuses[key] === 'loading') {
+              newStatuses[key] = 'cancelled';
+            }
+          });
+          return newStatuses;
+        });
+
+        setTranscript(data.text);
+        await navigator.clipboard.writeText(data.text);
+        // Save to history
+        await saveToHistory(data.text);
+      } catch (error) {
+        if (error instanceof AggregateError) {
+          console.error('All proxies failed:', error.errors);
+        } else {
+          console.error('Transcription error:', error);
+        }
       }
-    }
-  }, [saveToHistory]);
+    },
+    [saveToHistory]
+  );
 
   const startRecording = useCallback(async () => {
     try {
@@ -295,45 +300,40 @@ const HomePage = () => {
     <>
       {/* Draggable area - entire window */}
       <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          WebkitAppRegion: 'drag'
-        } as React.CSSProperties}
+        style={
+          {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            WebkitAppRegion: 'drag'
+          } as React.CSSProperties
+        }
       />
 
       {/* History toggle button - fixed top left */}
       <button
         onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        style={{
-          position: 'fixed',
-          top: '12px',
-          left: '12px',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '8px',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          border: '1px solid rgba(0, 0, 0, 0.1)',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-          transition: 'all 0.2s',
-          WebkitAppRegion: 'no-drag'
-        } as React.CSSProperties}
-        onMouseEnter={e => {
-          e.currentTarget.style.backgroundColor = 'rgba(243, 244, 246, 0.95)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-        }}
+        style={
+          {
+            position: 'fixed',
+            top: '12px',
+            left: '12px',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            WebkitAppRegion: 'no-drag'
+          } as React.CSSProperties
+        }
         title="Historique"
       >
-        <History size={18} color="#1f2937" />
+        <History size={18} />
       </button>
 
       {/* History Sidebar */}
@@ -341,6 +341,7 @@ const HomePage = () => {
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
         onSelectTranscription={handleSelectTranscription}
+        currentTranscript={transcript}
       />
 
       {/* Proxy status indicators - fixed top right */}
@@ -413,22 +414,24 @@ const HomePage = () => {
           onMouseUp={stopRecording}
           disabled={isLoading}
           aria-label={isRecording ? 'Recording...' : 'Start recording'}
-          style={{
-            padding: '15px 30px',
-            fontSize: '18px',
-            backgroundColor: isRecording
-              ? '#ff4444'
-              : isLoading
-                ? '#9ca3af'
-                : '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-            transition: 'background-color 0.3s',
-            opacity: isLoading ? 0.7 : 1,
-            WebkitAppRegion: 'no-drag'
-          } as React.CSSProperties}
+          style={
+            {
+              padding: '15px 30px',
+              fontSize: '18px',
+              backgroundColor: isRecording
+                ? '#ff4444'
+                : isLoading
+                  ? '#9ca3af'
+                  : '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.3s',
+              opacity: isLoading ? 0.7 : 1,
+              WebkitAppRegion: 'no-drag'
+            } as React.CSSProperties
+          }
         >
           {isRecording ? (
             <Mic />
@@ -440,20 +443,22 @@ const HomePage = () => {
         </button>
 
         <div
-          style={{
-            transition: 'opacity 0.3s',
-            opacity: transcript ? 1 : 0,
-            marginTop: '20px',
-            padding: '15px',
-            backgroundColor: '#f0f0f0',
-            borderRadius: '5px',
-            color: 'black',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'start',
-            gap: '10px',
-            WebkitAppRegion: 'no-drag'
-          } as React.CSSProperties}
+          style={
+            {
+              transition: 'opacity 0.3s',
+              opacity: transcript ? 1 : 0,
+              marginTop: '20px',
+              padding: '15px',
+              backgroundColor: '#f0f0f0',
+              borderRadius: '5px',
+              color: 'black',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'start',
+              gap: '10px',
+              WebkitAppRegion: 'no-drag'
+            } as React.CSSProperties
+          }
         >
           <h3 style={{ fontSize: '10px', color: 'gray', margin: 0 }}>
             Transcription (copied to clipboard):

@@ -11,6 +11,7 @@ interface HistorySidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectTranscription: (text: string) => void;
+  currentTranscript: string;
 }
 
 interface GroupedTranscriptions {
@@ -21,7 +22,8 @@ interface GroupedTranscriptions {
 const HistorySidebar = ({
   isOpen,
   onClose,
-  onSelectTranscription
+  onSelectTranscription,
+  currentTranscript
 }: HistorySidebarProps) => {
   const [transcriptions, setTranscriptions] = useState<Transcription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,43 +103,6 @@ const HistorySidebar = ({
           WebkitAppRegion: 'no-drag'
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            padding: '16px',
-            borderBottom: '1px solid #e5e7eb',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>
-            Historique
-          </h2>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '4px',
-              color: '#6b7280'
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.backgroundColor = '#f3f4f6';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
         {/* Content */}
         <div
           style={{
@@ -181,28 +146,44 @@ const HistorySidebar = ({
                 >
                   {group.dayLabel}
                 </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {group.transcriptions.map(transcription => (
-                    <div
-                      key={transcription.id}
-                      onClick={() => handleTranscriptionClick(transcription.text)}
-                      style={{
-                        padding: '12px',
-                        backgroundColor: '#f9fafb',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        border: '1px solid #e5e7eb',
-                        transition: 'all 0.2s'
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.backgroundColor = '#f3f4f6';
-                        e.currentTarget.style.borderColor = '#d1d5db';
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.backgroundColor = '#f9fafb';
-                        e.currentTarget.style.borderColor = '#e5e7eb';
-                      }}
-                    >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}
+                >
+                  {group.transcriptions.map(transcription => {
+                    const isActive = transcription.text === currentTranscript;
+                    return (
+                      <div
+                        key={transcription.id}
+                        onClick={() =>
+                          handleTranscriptionClick(transcription.text)
+                        }
+                        style={{
+                          padding: '12px',
+                          backgroundColor: isActive ? '#e0f2fe' : '#f9fafb',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          border: isActive
+                            ? '1px solid #0ea5e9'
+                            : '1px solid #e5e7eb',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => {
+                          if (!isActive) {
+                            e.currentTarget.style.backgroundColor = '#f3f4f6';
+                            e.currentTarget.style.borderColor = '#d1d5db';
+                          }
+                        }}
+                        onMouseLeave={e => {
+                          if (!isActive) {
+                            e.currentTarget.style.backgroundColor = '#f9fafb';
+                            e.currentTarget.style.borderColor = '#e5e7eb';
+                          }
+                        }}
+                      >
                       <div
                         style={{
                           fontSize: '11px',
@@ -227,7 +208,8 @@ const HistorySidebar = ({
                         {transcription.text}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))
