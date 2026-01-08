@@ -123,7 +123,9 @@ const Statistics = ({ onBack }: StatisticsProps) => {
           overflowY: 'auto',
           padding: spacing['2xl'],
           width: '100%',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         {isLoading ? (
@@ -147,15 +149,14 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             Aucune donnée disponible. Commencez par créer des transcriptions !
           </div>
         ) : (
-          <div style={{ width: '100%' }}>
+          <>
             {/* Summary Cards */}
             <div
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                 gap: spacing.lg,
-                marginBottom: spacing['3xl'],
-                width: '100%'
+                marginBottom: spacing['3xl']
               }}
             >
               <div
@@ -241,8 +242,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 gap: spacing.sm,
                 justifyContent: 'center',
                 marginBottom: spacing.lg,
-                padding: spacing.md,
-                width: '100%'
+                padding: spacing.md
               }}
             >
               {([1, 2, 3, 4, 5] as const).map(variant => (
@@ -290,9 +290,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             {stats.dailyUsage.length > 0 && (
               <div
                 style={{
-                  padding: spacing['2xl'],
-                  width: '100%',
-                  boxSizing: 'border-box'
+                  padding: spacing['2xl']
                 }}
               >
                 {/* Variant 1: Minimal bars with price on top */}
@@ -577,7 +575,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 )}
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
