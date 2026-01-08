@@ -157,10 +157,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             >
               <div
                 style={{
-                  padding: spacing.xl,
-                  backgroundColor: colors.background.secondary,
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.border.primary}`
+                  padding: spacing.xl
                 }}
               >
                 <div
@@ -185,10 +182,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
 
               <div
                 style={{
-                  padding: spacing.xl,
-                  backgroundColor: colors.background.secondary,
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.border.primary}`
+                  padding: spacing.xl
                 }}
               >
                 <div
@@ -213,10 +207,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
 
               <div
                 style={{
-                  padding: spacing.xl,
-                  backgroundColor: colors.accent.blue.background,
-                  borderRadius: borderRadius.lg,
-                  border: `1px solid ${colors.accent.blue.primary}`
+                  padding: spacing.xl
                 }}
               >
                 <div
@@ -247,10 +238,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 gap: spacing.sm,
                 justifyContent: 'center',
                 marginBottom: spacing.lg,
-                padding: spacing.md,
-                backgroundColor: colors.background.secondary,
-                borderRadius: borderRadius.lg,
-                border: `1px solid ${colors.border.primary}`
+                padding: spacing.md
               }}
             >
               {([1, 2, 3, 4, 5] as const).map(variant => (
@@ -583,25 +571,6 @@ const Statistics = ({ onBack }: StatisticsProps) => {
                 )}
               </div>
             )}
-
-            {/* Info note */}
-            <div
-              style={{
-                marginTop: spacing['2xl'],
-                padding: spacing.lg,
-                backgroundColor: colors.accent.yellow.background,
-                borderRadius: borderRadius.lg,
-                border: `1px solid ${colors.accent.yellow.primary}`,
-                fontSize: typography.fontSize.sm,
-                color: colors.accent.yellow.light,
-                lineHeight: '1.5'
-              }}
-            >
-              <strong>Note :</strong> Les coûts sont estimés en fonction du
-              modèle Whisper d'OpenAI ($0.006/minute). La durée est estimée à
-              partir du texte transcrit (~150 mots/minute). Les coûts réels
-              peuvent varier.
-            </div>
           </>
         )}
       </div>
