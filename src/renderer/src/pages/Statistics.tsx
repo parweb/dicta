@@ -63,18 +63,23 @@ const Statistics = ({ onBack }: StatisticsProps) => {
   return (
     <div
       style={{
+        position: 'relative',
         width: '100%',
         height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
         backgroundColor: colors.background.primary,
         WebkitAppRegion: 'no-drag'
       }}
     >
-      {/* Header */}
+      {/* Fixed Header */}
       <div
         style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
           padding: spacing.xl,
+          backgroundColor: colors.background.primary,
           borderBottom: `1px solid ${colors.border.primary}`,
           display: 'flex',
           alignItems: 'center',
@@ -116,40 +121,39 @@ const Statistics = ({ onBack }: StatisticsProps) => {
         </h1>
       </div>
 
-      {/* Content */}
+      {/* Scrollable Content - Full Width */}
       <div
         style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: spacing['2xl'],
+          paddingTop: '72px',
+          height: '100%',
           width: '100%',
-          boxSizing: 'border-box',
-          display: 'flex',
-          flexDirection: 'column'
+          overflowY: 'auto',
+          boxSizing: 'border-box'
         }}
       >
-        {isLoading ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: spacing['4xl'],
-              color: colors.text.tertiary
-            }}
-          >
-            Chargement des statistiques...
-          </div>
-        ) : !stats || stats.totalTranscriptions === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: spacing['4xl'],
-              color: colors.text.tertiary
-            }}
-          >
-            Aucune donnée disponible. Commencez par créer des transcriptions !
-          </div>
-        ) : (
-          <>
+        <div style={{ padding: spacing['2xl'], width: '100%', boxSizing: 'border-box' }}>
+          {isLoading ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: spacing['4xl'],
+                color: colors.text.tertiary
+              }}
+            >
+              Chargement des statistiques...
+            </div>
+          ) : !stats || stats.totalTranscriptions === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: spacing['4xl'],
+                color: colors.text.tertiary
+              }}
+            >
+              Aucune donnée disponible. Commencez par créer des transcriptions !
+            </div>
+          ) : (
+            <>
             {/* Summary Cards */}
             <div
               style={{
@@ -577,6 +581,7 @@ const Statistics = ({ onBack }: StatisticsProps) => {
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   );
