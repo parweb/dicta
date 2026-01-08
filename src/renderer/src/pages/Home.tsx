@@ -14,9 +14,7 @@ const HomePage = () => {
     Record<string, ProxyStatus>
   >({
     corsfix: 'idle',
-    corsproxy: 'idle',
-    allorigins: 'idle',
-    codetabs: 'idle'
+    corsproxy: 'idle'
   });
 
   const mediaRecorder = useRef(null);
@@ -126,12 +124,12 @@ const HomePage = () => {
     // Réinitialiser les statuts
     setProxyStatuses({
       corsfix: 'loading',
-      corsproxy: 'loading',
-      allorigins: 'loading',
-      codetabs: 'loading'
+      corsproxy: 'loading'
     });
 
     // Liste des proxies CORS à utiliser en parallèle
+    // Note: Plusieurs proxies publics ne supportent pas les requêtes POST avec FormData + Authorization header
+    // On garde uniquement ceux qui fonctionnent réellement
     const proxies = [
       {
         name: 'corsfix',
@@ -140,14 +138,6 @@ const HomePage = () => {
       {
         name: 'corsproxy',
         url: 'https://corsproxy.io/?https://api.openai.com/v1/audio/transcriptions'
-      },
-      {
-        name: 'allorigins',
-        url: 'https://api.allorigins.win/raw?url=https://api.openai.com/v1/audio/transcriptions'
-      },
-      {
-        name: 'codetabs',
-        url: 'https://api.codetabs.com/v1/proxy?quest=https://api.openai.com/v1/audio/transcriptions'
       }
     ];
 
