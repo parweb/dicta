@@ -1,8 +1,9 @@
-import { History, Loader2, Mic, MicOff } from 'lucide-react';
+import { BarChart3, History, Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import HistorySidebar from '../components/HistorySidebar';
 import type { Transcription } from '../lib/history';
+import Statistics from './Statistics';
 
 // SECURITY: Move API key to environment variables
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -43,6 +44,7 @@ const HomePage = () => {
     Record<string, ProxyStatus>
   >(INITIAL_PROXY_STATUSES);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -296,6 +298,12 @@ const HomePage = () => {
     [proxyStatuses]
   );
 
+  // If statistics view is active, render Statistics component
+  if (currentView === 'statistics') {
+    return <Statistics onBack={() => setCurrentView('home')} />;
+  }
+
+  // Otherwise render Home view
   return (
     <>
       {/* Draggable area - entire window */}
@@ -312,29 +320,62 @@ const HomePage = () => {
         }
       />
 
-      {/* History toggle button - fixed top left */}
-      <button
-        onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-        style={
-          {
-            position: 'fixed',
-            top: '12px',
-            left: '12px',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '8px',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            WebkitAppRegion: 'no-drag'
-          } as React.CSSProperties
-        }
-        title="Historique"
+      {/* Top left buttons */}
+      <div
+        style={{
+          position: 'fixed',
+          top: '12px',
+          left: '12px',
+          zIndex: 1000,
+          display: 'flex',
+          gap: '8px',
+          WebkitAppRegion: 'no-drag'
+        }}
       >
-        <History size={18} />
-      </button>
+        {/* History toggle button */}
+        <button
+          onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+          style={
+            {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px',
+              backgroundColor: isHistoryOpen
+                ? 'rgba(14, 165, 233, 0.1)'
+                : 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            } as React.CSSProperties
+          }
+          title="Historique"
+        >
+          <History size={18} />
+        </button>
+
+        {/* Statistics button */}
+        <button
+          onClick={() => setCurrentView('statistics')}
+          style={
+            {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            } as React.CSSProperties
+          }
+          title="Statistiques"
+        >
+          <BarChart3 size={18} />
+        </button>
+      </div>
 
       {/* History Sidebar */}
       <HistorySidebar
