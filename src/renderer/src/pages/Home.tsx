@@ -106,15 +106,14 @@ const HomePage = () => {
     }
   };
 
-  const transcribeAudio = async blob => {
+  const transcribeAudio = async (blob: Blob) => {
     console.log('transcribeAudio');
 
     const formData = new FormData();
     formData.append('file', blob, 'recording.webm');
-    formData.append('model', 'whisper-1');
+    formData.append('model', 'gpt-4o-transcribe');
 
     try {
-      console.log('yala');
       const response = await fetch(
         'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions',
         {
@@ -127,8 +126,15 @@ const HomePage = () => {
       );
 
       const data = await response.json();
+
+      if (!response.ok) {
+        console.error('API error:', data);
+        throw new Error(data.error?.message || 'Unknown transcription error');
+      }
+
       setTranscript(data.text);
-      navigator.clipboard.writeText(data.text);
+      await navigator.clipboard.writeText(data.text);
+
       console.log('all good');
     } catch (error) {
       console.error('Transcription error:', error);
