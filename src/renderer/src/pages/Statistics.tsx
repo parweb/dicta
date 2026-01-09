@@ -45,13 +45,10 @@ const Statistics = () => {
     }
 
     /* Variant 1: Invisible slide with color-changing bars */
-    .brush-variant-1 .recharts-brush > rect:first-child {
-      fill: rgba(59, 130, 246, 0.3) !important;
-    }
-
     .brush-variant-1 .recharts-brush-slide {
-      fill: transparent !important;
+      fill: rgba(255, 255, 255, 0.7) !important;
       stroke: transparent !important;
+      mix-blend-mode: screen !important;
     }
 
     /* Hide travellers for variant 1 */
@@ -457,7 +454,7 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#ffffff" opacity={0.9} maxBarSize={1} />
+                          <Bar dataKey="count" fill="#60a5fa" opacity={0.8} maxBarSize={1} />
                         </BarChart>
                       </Brush>
                     </BarChart>
