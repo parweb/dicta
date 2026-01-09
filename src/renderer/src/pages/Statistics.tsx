@@ -44,11 +44,39 @@ const Statistics = () => {
       stroke: transparent !important;
     }
 
-    /* Variant 1: Gradient border with glow */
+    /* Variant 1: Invisible slide with color-changing bars */
+    .brush-variant-1 .recharts-brush > rect:first-child {
+      fill: rgba(59, 130, 246, 0.3) !important;
+    }
+
     .brush-variant-1 .recharts-brush-slide {
-      stroke: #60a5fa !important;
-      stroke-width: 2 !important;
-      filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.6));
+      fill: transparent !important;
+      stroke: transparent !important;
+    }
+
+    /* Hide travellers for variant 1 */
+    .brush-variant-1 .recharts-brush-traveller,
+    .brush-variant-1 .recharts-brush-traveller * {
+      opacity: 0 !important;
+      fill: transparent !important;
+      stroke: transparent !important;
+      outline: none !important;
+    }
+
+    .brush-variant-1 .recharts-brush-traveller:focus,
+    .brush-variant-1 .recharts-brush-traveller:focus *,
+    .brush-variant-1 .recharts-brush-traveller:hover,
+    .brush-variant-1 .recharts-brush-traveller:hover *,
+    .brush-variant-1 .recharts-brush-traveller:active,
+    .brush-variant-1 .recharts-brush-traveller:active * {
+      opacity: 0 !important;
+      fill: transparent !important;
+      stroke: transparent !important;
+      outline: none !important;
+    }
+
+    .brush-variant-1 .recharts-brush-traveller {
+      cursor: ew-resize !important;
     }
 
     /* Variant 2: Double border effect */
@@ -429,7 +457,7 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#60a5fa" opacity={0.8} maxBarSize={1} />
+                          <Bar dataKey="count" fill="#ffffff" opacity={0.9} maxBarSize={1} />
                         </BarChart>
                       </Brush>
                     </BarChart>
