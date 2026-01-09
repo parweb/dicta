@@ -1,3 +1,4 @@
+import AudioPlayerWithRetry from './AudioPlayerWithRetry';
 import RecordButton from './RecordButton';
 import TranscriptionDisplay from './TranscriptionDisplay';
 
@@ -12,6 +13,9 @@ interface HomeContentProps {
   startRecording: () => void;
   stopRecording: () => void;
   onCopyTranscript: () => void;
+  transcriptionError?: string;
+  failedAudioBlob?: Blob;
+  onRetry: () => void;
 }
 
 const HomeContent = ({
@@ -24,7 +28,10 @@ const HomeContent = ({
   audioDuration,
   startRecording,
   stopRecording,
-  onCopyTranscript
+  onCopyTranscript,
+  transcriptionError,
+  failedAudioBlob,
+  onRetry
 }: HomeContentProps) => {
   return (
     <div
@@ -44,7 +51,8 @@ const HomeContent = ({
           maxWidth: '600px',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          gap: '20px'
         }}
       >
         <RecordButton
@@ -53,6 +61,15 @@ const HomeContent = ({
           onMouseDown={startRecording}
           onMouseUp={stopRecording}
         />
+
+        {transcriptionError && failedAudioBlob && (
+          <AudioPlayerWithRetry
+            audioBlob={failedAudioBlob}
+            error={transcriptionError}
+            onRetry={onRetry}
+            isLoading={isLoading}
+          />
+        )}
 
         <TranscriptionDisplay
           transcript={transcript}
