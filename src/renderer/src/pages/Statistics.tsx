@@ -1,12 +1,8 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   Brush,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -32,6 +28,7 @@ const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [chartVariant, setChartVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [brushRange, setBrushRange] = useState<{ startIndex: number; endIndex: number } | null>(null);
 
   // Custom CSS for Brush variants - remove container border, style selection differently
   const brushStyles = `
@@ -45,12 +42,8 @@ const Statistics = () => {
     }
 
     /* Variant 1: Invisible slide with color-changing bars */
-    .brush-variant-1 .recharts-brush > rect:first-child {
-      fill: rgba(59, 130, 246, 0.7) !important;
-    }
-
     .brush-variant-1 .recharts-brush-slide {
-      fill: #0f1419 !important;
+      fill: transparent !important;
       stroke: transparent !important;
     }
 
@@ -142,6 +135,15 @@ const Statistics = () => {
     loadStatistics();
   }, []);
 
+  // Initialize brush range when stats are loaded
+  useEffect(() => {
+    if (stats && stats.dailyUsage.length > 0 && !brushRange) {
+      const startIndex = Math.max(0, stats.dailyUsage.length - 30);
+      const endIndex = stats.dailyUsage.length - 1;
+      setBrushRange({ startIndex, endIndex });
+    }
+  }, [stats, brushRange]);
+
   const loadStatistics = async () => {
     setIsLoading(true);
     try {
@@ -216,36 +218,49 @@ const Statistics = () => {
       <style>{brushStyles}</style>
       <svg width="0" height="0">
         <defs>
-          <linearGradient id="rainbowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id="rainbowGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor="#06b6d4" />
             <stop offset="50%" stopColor="#a855f7" />
             <stop offset="100%" stopColor="#ec4899" />
           </linearGradient>
         </defs>
       </svg>
-      <div style={{ padding: spacing['2xl'], width: '100%', maxWidth: '1200px', boxSizing: 'border-box' }}>
-          {isLoading ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: spacing['4xl'],
-                color: colors.text.tertiary
-              }}
-            >
-              Chargement des statistiques...
-            </div>
-          ) : !stats || stats.totalTranscriptions === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: spacing['4xl'],
-                color: colors.text.tertiary
-              }}
-            >
-              Aucune donnée disponible. Commencez par créer des transcriptions !
-            </div>
-          ) : (
-            <>
+      <div
+        style={{
+          padding: spacing['2xl'],
+          width: '100%',
+          maxWidth: '1200px',
+          boxSizing: 'border-box'
+        }}
+      >
+        {isLoading ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: spacing['4xl'],
+              color: colors.text.tertiary
+            }}
+          >
+            Chargement des statistiques...
+          </div>
+        ) : !stats || stats.totalTranscriptions === 0 ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: spacing['4xl'],
+              color: colors.text.tertiary
+            }}
+          >
+            Aucune donnée disponible. Commencez par créer des transcriptions !
+          </div>
+        ) : (
+          <>
             {/* Summary Cards */}
             <div
               style={{
@@ -333,14 +348,16 @@ const Statistics = () => {
 
             {/* TEMPORARY: Chart Variant Selector */}
             <div
-              style={{
-                display: 'flex',
-                gap: spacing.sm,
-                justifyContent: 'center',
-                marginBottom: spacing.lg,
-                padding: spacing.md,
-                WebkitAppRegion: 'no-drag'
-              } as React.CSSProperties}
+              style={
+                {
+                  display: 'flex',
+                  gap: spacing.sm,
+                  justifyContent: 'center',
+                  marginBottom: spacing.lg,
+                  padding: spacing.md,
+                  WebkitAppRegion: 'no-drag'
+                } as React.CSSProperties
+              }
             >
               {([1, 2, 3, 4, 5] as const).map(variant => (
                 <button
@@ -369,7 +386,8 @@ const Statistics = () => {
                   }}
                   onMouseEnter={e => {
                     if (chartVariant !== variant) {
-                      e.currentTarget.style.borderColor = colors.border.secondary;
+                      e.currentTarget.style.borderColor =
+                        colors.border.secondary;
                     }
                   }}
                   onMouseLeave={e => {
@@ -386,19 +404,42 @@ const Statistics = () => {
             {/* Chart */}
             {stats.dailyUsage.length > 0 && (
               <div
-                style={{
-                  padding: spacing['2xl'],
-                  WebkitAppRegion: 'no-drag'
-                } as React.CSSProperties}
+                style={
+                  {
+                    padding: spacing['2xl'],
+                    WebkitAppRegion: 'no-drag'
+                  } as React.CSSProperties
+                }
               >
                 {/* Variant 1: Vertical gradient from dark to light blue */}
                 {chartVariant === 1 && (
-                  <ResponsiveContainer width="100%" height={400} className="brush-variant-1">
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={400}
+                    className="brush-variant-1"
+                  >
+                    <BarChart
+                      data={stats.dailyUsage}
+                      margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
+                    >
                       <defs>
-                        <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1e3a8a" stopOpacity={1} />
-                          <stop offset="100%" stopColor="#60a5fa" stopOpacity={1} />
+                        <linearGradient
+                          id="blueGradient"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#1e3a8a"
+                            stopOpacity={1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#60a5fa"
+                            stopOpacity={1}
+                          />
                         </linearGradient>
                       </defs>
                       <XAxis
@@ -433,7 +474,8 @@ const Statistics = () => {
                         label={{
                           position: 'top',
                           content: (props: any) => {
-                            const cost = stats.dailyUsage[props.index || 0]?.estimatedCost;
+                            const cost =
+                              stats.dailyUsage[props.index || 0]?.estimatedCost;
                             return (
                               <text
                                 x={(props.x || 0) + (props.width || 0) / 2}
@@ -455,9 +497,33 @@ const Statistics = () => {
                         fill="transparent"
                         travellerWidth={6}
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                        onChange={(range: any) => {
+                          if (range && range.startIndex !== undefined && range.endIndex !== undefined) {
+                            setBrushRange({ startIndex: range.startIndex, endIndex: range.endIndex });
+                          }
+                        }}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#ffffff" opacity={1} maxBarSize={1} />
+                          <Bar
+                            dataKey="count"
+                            opacity={1}
+                            maxBarSize={1}
+                            shape={(props: any) => {
+                              const { x, y, width, height, index } = props;
+                              const isInRange = brushRange
+                                ? index >= brushRange.startIndex && index <= brushRange.endIndex
+                                : index >= Math.max(0, stats.dailyUsage.length - 30);
+                              return (
+                                <rect
+                                  x={x}
+                                  y={y}
+                                  width={width}
+                                  height={height}
+                                  fill={isInRange ? '#ffffff' : '#60a5fa'}
+                                />
+                              );
+                            }}
+                          />
                         </BarChart>
                       </Brush>
                     </BarChart>
@@ -466,8 +532,15 @@ const Statistics = () => {
 
                 {/* Variant 2: Heat map with dynamic colors (low=blue, high=pink) */}
                 {chartVariant === 2 && (
-                  <ResponsiveContainer width="100%" height={400} className="brush-variant-2">
-                    <BarChart data={stats.dailyUsage} margin={{ top: 10, right: 0, left: 0, bottom: 20 }}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={400}
+                    className="brush-variant-2"
+                  >
+                    <BarChart
+                      data={stats.dailyUsage}
+                      margin={{ top: 10, right: 0, left: 0, bottom: 20 }}
+                    >
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -487,7 +560,7 @@ const Statistics = () => {
                           color: colors.text.secondary,
                           padding: spacing.md
                         }}
-                        content={(props) => {
+                        content={props => {
                           if (!props.active || !props.payload?.[0]) return null;
                           const data = props.payload[0].payload;
                           return (
@@ -499,13 +572,32 @@ const Statistics = () => {
                                 padding: spacing.md
                               }}
                             >
-                              <div style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary, marginBottom: '4px' }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.sm,
+                                  color: colors.text.secondary,
+                                  marginBottom: '4px'
+                                }}
+                              >
                                 {data.date}
                               </div>
-                              <div style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.base,
+                                  color: colors.text.primary,
+                                  fontWeight: typography.fontWeight.semibold
+                                }}
+                              >
                                 {data.count} requêtes
                               </div>
-                              <div style={{ fontSize: typography.fontSize.lg, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold, marginTop: '4px' }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.lg,
+                                  color: colors.accent.blue.primary,
+                                  fontWeight: typography.fontWeight.bold,
+                                  marginTop: '4px'
+                                }}
+                              >
                                 {formatCost(data.estimatedCost)}
                               </div>
                             </div>
@@ -539,7 +631,12 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#ec4899" opacity={0.8} maxBarSize={1} />
+                          <Bar
+                            dataKey="count"
+                            fill="#ec4899"
+                            opacity={0.8}
+                            maxBarSize={1}
+                          />
                         </BarChart>
                       </Brush>
                     </BarChart>
@@ -548,8 +645,15 @@ const Statistics = () => {
 
                 {/* Variant 3: Opacity-based (same color, varying opacity) */}
                 {chartVariant === 3 && (
-                  <ResponsiveContainer width="100%" height={400} className="brush-variant-3">
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={400}
+                    className="brush-variant-3"
+                  >
+                    <BarChart
+                      data={stats.dailyUsage}
+                      margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
+                    >
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -568,7 +672,7 @@ const Statistics = () => {
                           fontSize: typography.fontSize.sm,
                           padding: spacing.md
                         }}
-                        content={(props) => {
+                        content={props => {
                           if (!props.active || !props.payload?.[0]) return null;
                           const data = props.payload[0].payload;
                           return (
@@ -580,10 +684,22 @@ const Statistics = () => {
                                 padding: spacing.md
                               }}
                             >
-                              <div style={{ fontSize: typography.fontSize.lg, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.lg,
+                                  color: colors.accent.blue.primary,
+                                  fontWeight: typography.fontWeight.bold
+                                }}
+                              >
                                 {formatCost(data.estimatedCost)}
                               </div>
-                              <div style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, marginTop: '4px' }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.sm,
+                                  color: colors.text.tertiary,
+                                  marginTop: '4px'
+                                }}
+                              >
                                 {data.count} requêtes • {data.date}
                               </div>
                             </div>
@@ -610,8 +726,17 @@ const Statistics = () => {
                         label={{
                           position: 'top',
                           content: (props: any) => {
-                            const cost = stats.dailyUsage[props.index || 0]?.estimatedCost;
-                            if ((props.index || 0) % Math.max(1, Math.floor(stats.dailyUsage.length / 5)) !== 0) return null;
+                            const cost =
+                              stats.dailyUsage[props.index || 0]?.estimatedCost;
+                            if (
+                              (props.index || 0) %
+                                Math.max(
+                                  1,
+                                  Math.floor(stats.dailyUsage.length / 5)
+                                ) !==
+                              0
+                            )
+                              return null;
                             return (
                               <text
                                 x={(props.x || 0) + (props.width || 0) / 2}
@@ -635,7 +760,12 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#3b82f6" opacity={0.8} maxBarSize={1} />
+                          <Bar
+                            dataKey="count"
+                            fill="#3b82f6"
+                            opacity={0.8}
+                            maxBarSize={1}
+                          />
                         </BarChart>
                       </Brush>
                     </BarChart>
@@ -644,8 +774,15 @@ const Statistics = () => {
 
                 {/* Variant 4: Green to blue gradient based on value */}
                 {chartVariant === 4 && (
-                  <ResponsiveContainer width="100%" height={400} className="brush-variant-4">
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={400}
+                    className="brush-variant-4"
+                  >
+                    <BarChart
+                      data={stats.dailyUsage}
+                      margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
+                    >
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -661,7 +798,7 @@ const Statistics = () => {
                           backgroundColor: 'transparent',
                           border: 'none'
                         }}
-                        content={(props) => {
+                        content={props => {
                           if (!props.active || !props.payload?.[0]) return null;
                           const data = props.payload[0].payload;
                           return (
@@ -709,7 +846,12 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#22d3ee" opacity={0.8} maxBarSize={1} />
+                          <Bar
+                            dataKey="count"
+                            fill="#22d3ee"
+                            opacity={0.8}
+                            maxBarSize={1}
+                          />
                         </BarChart>
                       </Brush>
                     </BarChart>
@@ -718,12 +860,34 @@ const Statistics = () => {
 
                 {/* Variant 5: Dual-tone gradient (dark bottom, light top) */}
                 {chartVariant === 5 && (
-                  <ResponsiveContainer width="100%" height={400} className="brush-variant-5">
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }} barGap={2}>
+                  <ResponsiveContainer
+                    width="100%"
+                    height={400}
+                    className="brush-variant-5"
+                  >
+                    <BarChart
+                      data={stats.dailyUsage}
+                      margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
+                      barGap={2}
+                    >
                       <defs>
-                        <linearGradient id="dualGradient" x1="0" y1="1" x2="0" y2="0">
-                          <stop offset="0%" stopColor="#1e40af" stopOpacity={1} />
-                          <stop offset="100%" stopColor="#7dd3fc" stopOpacity={1} />
+                        <linearGradient
+                          id="dualGradient"
+                          x1="0"
+                          y1="1"
+                          x2="0"
+                          y2="0"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#1e40af"
+                            stopOpacity={1}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#7dd3fc"
+                            stopOpacity={1}
+                          />
                         </linearGradient>
                       </defs>
                       <XAxis
@@ -741,7 +905,7 @@ const Statistics = () => {
                           backgroundColor: 'transparent',
                           border: 'none'
                         }}
-                        content={(props) => {
+                        content={props => {
                           if (!props.active || !props.payload?.[0]) return null;
                           const data = props.payload[0].payload;
                           return (
@@ -754,7 +918,13 @@ const Statistics = () => {
                                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)'
                               }}
                             >
-                              <div style={{ fontSize: typography.fontSize.xl, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold }}>
+                              <div
+                                style={{
+                                  fontSize: typography.fontSize.xl,
+                                  color: colors.accent.blue.primary,
+                                  fontWeight: typography.fontWeight.bold
+                                }}
+                              >
                                 {formatCost(data.estimatedCost)}
                               </div>
                             </div>
@@ -776,7 +946,12 @@ const Statistics = () => {
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                       >
                         <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                          <Bar dataKey="count" fill="#a855f7" opacity={0.8} maxBarSize={1} />
+                          <Bar
+                            dataKey="count"
+                            fill="#a855f7"
+                            opacity={0.8}
+                            maxBarSize={1}
+                          />
                         </BarChart>
                       </Brush>
                     </BarChart>
