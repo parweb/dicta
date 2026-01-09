@@ -12,6 +12,7 @@ import {
   typography
 } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
+import { formatDuration } from '../lib/statistics';
 import Statistics from './Statistics';
 
 // SECURITY: Move API key to environment variables
@@ -55,6 +56,7 @@ const HomePage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
+  const [audioDuration, setAudioDuration] = useState<number | undefined>(undefined);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -245,7 +247,8 @@ const HomePage = () => {
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
         const { duration, amplitudes } = await analyzeAudio(audioBlob);
 
-        // Store amplitudes for visualization
+        // Store duration and amplitudes for visualization
+        setAudioDuration(duration);
         setAudioAmplitudes(amplitudes);
 
         await transcribeAudio(audioBlob, duration);
@@ -510,16 +513,35 @@ const HomePage = () => {
                 marginTop: spacing.md
               }}
             >
-              <h4
+              <div
                 style={{
-                  fontSize: typography.fontSize.xs,
-                  color: colors.text.tertiary,
-                  margin: 0,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                   marginBottom: spacing.sm
                 }}
               >
-                Forme d'onde audio:
-              </h4>
+                <h4
+                  style={{
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary,
+                    margin: 0
+                  }}
+                >
+                  Forme d'onde audio:
+                </h4>
+                {audioDuration !== undefined && (
+                  <span
+                    style={{
+                      fontSize: typography.fontSize.xs,
+                      color: colors.text.tertiary,
+                      fontWeight: typography.fontWeight.medium
+                    }}
+                  >
+                    {formatDuration(audioDuration / 60)}
+                  </span>
+                )}
+              </div>
               <div
                 style={{
                   display: 'flex',
