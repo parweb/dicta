@@ -32,12 +32,17 @@ const INITIAL_PROXY_STATUSES: Record<string, ProxyStatus> = PROXY_CONFIGS.reduce
 // SECURITY: Move API key to environment variables
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
 
+export interface TranscriptionResult {
+  text?: string;
+  error?: string;
+}
+
 export interface UseTranscriptionAPIReturn {
   transcribeAudio: (
     blob: Blob,
     durationMs?: number,
     audioAmplitudes?: number[]
-  ) => Promise<string | undefined>;
+  ) => Promise<TranscriptionResult>;
   proxyStatuses: Record<string, ProxyStatus>;
   isLoading: boolean;
   saveToHistory: (
@@ -133,10 +138,10 @@ export function useTranscriptionAPI(
       blob: Blob,
       durationMs?: number,
       audioAmplitudes?: number[]
-    ): Promise<string | undefined> => {
+    ): Promise<TranscriptionResult> => {
       if (!apiKey) {
         console.error('API key is not configured');
-        return undefined;
+        return { error: 'API key is not configured' };
       }
 
       setIsLoading(true);
@@ -201,15 +206,17 @@ export function useTranscriptionAPI(
         await saveToHistory(data.text, durationMs, audioAmplitudes);
 
         setIsLoading(false);
-        return data.text;
+        return { text: data.text };
       } catch (error) {
         setIsLoading(false);
+        let errorMessage = 'Transcription failed';
         if (error instanceof AggregateError) {
           console.error('All proxies failed:', error.errors);
+          errorMessage = 'All transcription proxies failed. Please try again.';
         } else {
           console.error('Transcription error:', error);
         }
-        return undefined;
+        return { error: errorMessage };
       }
     },
     [saveToHistory]
