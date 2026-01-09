@@ -346,6 +346,7 @@ const HomePage = () => {
     setAudioAmplitudes(transcription.audioAmplitudes || []);
     setAudioDuration(transcription.durationMs);
     setIsHistoryOpen(false);
+    setCurrentView('home');
   }, []);
 
   const proxyStatusEntries = useMemo(
