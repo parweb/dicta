@@ -1,9 +1,9 @@
-import { format, startOfDay } from 'date-fns';
+import { format, startOfMinute } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 import type { Transcription } from './history';
 
-export interface DailyUsage {
+export interface UsageData {
   date: string;
   count: number;
   estimatedMinutes: number;
@@ -14,7 +14,7 @@ export interface UsageStatistics {
   totalTranscriptions: number;
   totalEstimatedMinutes: number;
   totalEstimatedCost: number;
-  dailyUsage: DailyUsage[];
+  dailyUsage: UsageData[];
 }
 
 // OpenAI Whisper pricing: $0.006 per minute
@@ -37,34 +37,34 @@ function estimateAudioDuration(text: string): number {
 export function calculateStatistics(
   transcriptions: Transcription[]
 ): UsageStatistics {
-  const dailyMap = new Map<string, DailyUsage>();
+  const minuteMap = new Map<string, UsageData>();
 
   let totalEstimatedMinutes = 0;
 
   transcriptions.forEach(transcription => {
-    const date = startOfDay(new Date(transcription.timestamp));
-    const dateKey = format(date, 'yyyy-MM-dd');
+    const minute = startOfMinute(new Date(transcription.timestamp));
+    const minuteKey = format(minute, 'yyyy-MM-dd HH:mm');
     const estimatedMinutes = estimateAudioDuration(transcription.text);
 
     totalEstimatedMinutes += estimatedMinutes;
 
-    if (!dailyMap.has(dateKey)) {
-      dailyMap.set(dateKey, {
-        date: format(date, 'd MMM', { locale: fr }),
+    if (!minuteMap.has(minuteKey)) {
+      minuteMap.set(minuteKey, {
+        date: format(minute, 'd MMM HH:mm', { locale: fr }),
         count: 0,
         estimatedMinutes: 0,
         estimatedCost: 0
       });
     }
 
-    const daily = dailyMap.get(dateKey)!;
-    daily.count += 1;
-    daily.estimatedMinutes += estimatedMinutes;
-    daily.estimatedCost = daily.estimatedMinutes * COST_PER_MINUTE;
+    const minuteData = minuteMap.get(minuteKey)!;
+    minuteData.count += 1;
+    minuteData.estimatedMinutes += estimatedMinutes;
+    minuteData.estimatedCost = minuteData.estimatedMinutes * COST_PER_MINUTE;
   });
 
   // Sort by date (oldest to newest for chart)
-  const dailyUsage = Array.from(dailyMap.entries())
+  const dailyUsage = Array.from(minuteMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, value]) => value);
 
