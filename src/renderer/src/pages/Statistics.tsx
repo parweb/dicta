@@ -64,7 +64,7 @@ const Statistics = () => {
       stroke-width: 2 !important;
       fill: rgba(59, 130, 246, 0.08) !important;
       rx: 4 !important;
-      ry: 4 !important;
+      ry: 2.86 !important;
       transform: translateY(-15%) scaleY(1.4);
       transform-box: fill-box;
       transform-origin: center center;
