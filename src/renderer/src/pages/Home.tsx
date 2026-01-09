@@ -60,7 +60,6 @@ const HomePage = () => {
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
   const mediaStream = useRef<MediaStream | null>(null);
   const xKeyIsDown = useRef(false);
-  const recordingStartTime = useRef<number>(0);
 
   // Request microphone permissions on mount
   useEffect(() => {
@@ -80,6 +79,20 @@ const HomePage = () => {
         mediaStream.current.getTracks().forEach(track => track.stop());
       }
     };
+  }, []);
+
+  // Extract audio duration from blob using Web Audio API
+  const getAudioDuration = useCallback(async (blob: Blob): Promise<number | undefined> => {
+    try {
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      await audioContext.close();
+      return audioBuffer.duration;
+    } catch (error) {
+      console.error('Error getting audio duration:', error);
+      return undefined;
+    }
   }, []);
 
   // Save transcription to history
@@ -202,12 +215,10 @@ const HomePage = () => {
       recorder.onstop = async () => {
         setIsLoading(true);
 
-        // Calculate recording duration in seconds
-        const durationSeconds = recordingStartTime.current > 0
-          ? (Date.now() - recordingStartTime.current) / 1000
-          : undefined;
-
+        // Create audio blob and extract its real duration
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+        const durationSeconds = await getAudioDuration(audioBlob);
+
         await transcribeAudio(audioBlob, durationSeconds);
         setIsLoading(false);
 
@@ -218,14 +229,12 @@ const HomePage = () => {
         }
       };
 
-      // Capture start time and start recording
-      recordingStartTime.current = Date.now();
       recorder.start();
     } catch (error) {
       console.error('Failed to start recording:', error);
       setIsRecording(false);
     }
-  }, [transcribeAudio]);
+  }, [transcribeAudio, getAudioDuration]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
