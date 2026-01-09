@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   Bar,
   BarChart,
@@ -37,7 +37,7 @@ const Statistics = () => {
     try {
       // TEMPORARY: Use mock data for testing
       if (USE_MOCK_DATA) {
-        const mockTranscriptions = generateMockTranscriptions(30);
+        const mockTranscriptions = generateMockTranscriptions(365);
         const statistics = calculateStatistics(mockTranscriptions);
         setStats(statistics);
       } else {
@@ -55,16 +55,55 @@ const Statistics = () => {
     }
   };
 
+  // Calculate relative values for gradient effects
+  const maxCount = useMemo(() => {
+    if (!stats || stats.dailyUsage.length === 0) return 0;
+    return Math.max(...stats.dailyUsage.map(d => d.count));
+  }, [stats]);
+
+  const getGradientColor = (count: number, variant: number) => {
+    if (maxCount === 0) return colors.accent.blue.primary;
+    const ratio = count / maxCount;
+
+    switch (variant) {
+      case 1:
+        // Vertical gradient from dark to light blue
+        return `url(#blueGradient)`;
+      case 2:
+        // Heat map: low (blue) -> medium (purple) -> high (pink)
+        const r = Math.floor(59 + ratio * 196); // 59 -> 255
+        const g = Math.floor(130 - ratio * 70); // 130 -> 60
+        const b = Math.floor(246 - ratio * 94); // 246 -> 152
+        return `rgb(${r}, ${g}, ${b})`;
+      case 3:
+        // Opacity-based: same color, varying opacity
+        return `rgba(59, 130, 246, ${0.3 + ratio * 0.7})`;
+      case 4:
+        // Green to blue gradient based on value
+        const green = Math.floor(134 * (1 - ratio));
+        const blue = Math.floor(187 + ratio * 59);
+        return `rgb(34, ${green}, ${blue})`;
+      case 5:
+        // Dual-tone gradient
+        return `url(#dualGradient)`;
+      default:
+        return colors.accent.blue.primary;
+    }
+  };
+
   return (
     <div
       style={{
         width: '100%',
         height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         overflowY: 'auto',
         boxSizing: 'border-box'
       }}
     >
-      <div style={{ padding: spacing['2xl'], width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ padding: spacing['2xl'], width: '100%', maxWidth: '1200px', boxSizing: 'border-box' }}>
           {isLoading ? (
             <div
               style={{
@@ -179,8 +218,9 @@ const Statistics = () => {
                 gap: spacing.sm,
                 justifyContent: 'center',
                 marginBottom: spacing.lg,
-                padding: spacing.md
-              }}
+                padding: spacing.md,
+                WebkitAppRegion: 'no-drag'
+              } as React.CSSProperties}
             >
               {([1, 2, 3, 4, 5] as const).map(variant => (
                 <button
@@ -227,13 +267,20 @@ const Statistics = () => {
             {stats.dailyUsage.length > 0 && (
               <div
                 style={{
-                  padding: spacing['2xl']
-                }}
+                  padding: spacing['2xl'],
+                  WebkitAppRegion: 'no-drag'
+                } as React.CSSProperties}
               >
-                {/* Variant 1: Minimal bars with price on top */}
+                {/* Variant 1: Vertical gradient from dark to light blue */}
                 {chartVariant === 1 && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#1e3a8a" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#60a5fa" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -261,8 +308,8 @@ const Statistics = () => {
                       />
                       <Bar
                         dataKey="count"
-                        fill={colors.accent.blue.primary}
-                        radius={[6, 6, 0, 0]}
+                        fill="url(#blueGradient)"
+                        radius={[8, 8, 0, 0]}
                         label={{
                           position: 'top',
                           content: (props: any) => {
@@ -285,7 +332,7 @@ const Statistics = () => {
                   </ResponsiveContainer>
                 )}
 
-                {/* Variant 2: Clean bars with hover only */}
+                {/* Variant 2: Heat map with dynamic colors (low=blue, high=pink) */}
                 {chartVariant === 2 && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={stats.dailyUsage} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
@@ -299,7 +346,7 @@ const Statistics = () => {
                       />
                       <YAxis hide />
                       <Tooltip
-                        cursor={{ fill: colors.accent.blue.background }}
+                        cursor={false}
                         contentStyle={{
                           backgroundColor: colors.background.primary,
                           border: `1px solid ${colors.border.primary}`,
@@ -335,14 +382,27 @@ const Statistics = () => {
                       />
                       <Bar
                         dataKey="count"
-                        fill={colors.accent.blue.primary}
                         radius={[8, 8, 0, 0]}
+                        shape={(props: any) => {
+                          const { x, y, width, height, payload } = props;
+                          return (
+                            <rect
+                              x={x}
+                              y={y}
+                              width={width}
+                              height={height}
+                              fill={getGradientColor(payload.count, 2)}
+                              rx={8}
+                              ry={8}
+                            />
+                          );
+                        }}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
-                {/* Variant 3: Simple bars with price label */}
+                {/* Variant 3: Opacity-based (same color, varying opacity) */}
                 {chartVariant === 3 && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
@@ -356,7 +416,7 @@ const Statistics = () => {
                       />
                       <YAxis hide />
                       <Tooltip
-                        cursor={{ fill: colors.accent.blue.background }}
+                        cursor={false}
                         contentStyle={{
                           backgroundColor: colors.background.primary,
                           border: `1px solid ${colors.border.primary}`,
@@ -389,7 +449,20 @@ const Statistics = () => {
                       <Bar
                         dataKey="count"
                         radius={[8, 8, 0, 0]}
-                        fill={colors.accent.blue.primary}
+                        shape={(props: any) => {
+                          const { x, y, width, height, payload } = props;
+                          return (
+                            <rect
+                              x={x}
+                              y={y}
+                              width={width}
+                              height={height}
+                              fill={getGradientColor(payload.count, 3)}
+                              rx={8}
+                              ry={8}
+                            />
+                          );
+                        }}
                         label={{
                           position: 'top',
                           content: (props: any) => {
@@ -413,7 +486,7 @@ const Statistics = () => {
                   </ResponsiveContainer>
                 )}
 
-                {/* Variant 4: Ultra minimal - no axes */}
+                {/* Variant 4: Green to blue gradient based on value */}
                 {chartVariant === 4 && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
@@ -427,7 +500,7 @@ const Statistics = () => {
                       />
                       <YAxis hide />
                       <Tooltip
-                        cursor={{ fill: 'transparent' }}
+                        cursor={false}
                         contentStyle={{
                           backgroundColor: 'transparent',
                           border: 'none'
@@ -454,18 +527,37 @@ const Statistics = () => {
                       />
                       <Bar
                         dataKey="count"
-                        fill={colors.accent.blue.primary}
                         radius={[8, 8, 0, 0]}
                         maxBarSize={50}
+                        shape={(props: any) => {
+                          const { x, y, width, height, payload } = props;
+                          return (
+                            <rect
+                              x={x}
+                              y={y}
+                              width={width}
+                              height={height}
+                              fill={getGradientColor(payload.count, 4)}
+                              rx={8}
+                              ry={8}
+                            />
+                          );
+                        }}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
-                {/* Variant 5: Compact bars with overlay price on hover */}
+                {/* Variant 5: Dual-tone gradient (dark bottom, light top) */}
                 {chartVariant === 5 && (
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }} barGap={2}>
+                      <defs>
+                        <linearGradient id="dualGradient" x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#1e40af" stopOpacity={1} />
+                          <stop offset="100%" stopColor="#7dd3fc" stopOpacity={1} />
+                        </linearGradient>
+                      </defs>
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -476,7 +568,7 @@ const Statistics = () => {
                       />
                       <YAxis hide />
                       <Tooltip
-                        cursor={{ fill: 'transparent' }}
+                        cursor={false}
                         contentStyle={{
                           backgroundColor: 'transparent',
                           border: 'none'
@@ -503,7 +595,7 @@ const Statistics = () => {
                       />
                       <Bar
                         dataKey="count"
-                        fill={colors.accent.blue.primary}
+                        fill="url(#dualGradient)"
                         radius={[4, 4, 0, 0]}
                         maxBarSize={40}
                       />
