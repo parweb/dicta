@@ -63,16 +63,23 @@ const Statistics = () => {
       stroke: rgba(59, 130, 246, 0.6) !important;
       stroke-width: 2 !important;
       fill: rgba(59, 130, 246, 0.08) !important;
-      rx: 6 !important;
-      ry: 6 !important;
+      rx: 4 !important;
+      ry: 4 !important;
       transform: translateY(-15%) scaleY(1.4);
       transform-box: fill-box;
       transform-origin: center center;
     }
 
-    /* Hide travellers completely in all states but keep them functional */
+    /* Hide travellers visually but keep them interactive */
+    .brush-variant-3 .recharts-brush-traveller > * {
+      opacity: 0 !important;
+      fill: transparent !important;
+      stroke: transparent !important;
+    }
+
     .brush-variant-3 .recharts-brush-traveller {
-      visibility: hidden !important;
+      pointer-events: auto !important;
+      cursor: ew-resize !important;
     }
 
     /* Variant 4: Thick border with inner shadow */
