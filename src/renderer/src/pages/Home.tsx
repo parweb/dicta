@@ -16,6 +16,8 @@ const HomePage = () => {
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(undefined);
+  const [transcriptionError, setTranscriptionError] = useState<string | undefined>(undefined);
+  const [failedAudioBlob, setFailedAudioBlob] = useState<Blob | undefined>(undefined);
 
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
 
@@ -43,6 +45,9 @@ const HomePage = () => {
     // Switch to home view and close sidebar when starting recording
     setCurrentView('home');
     setIsHistoryOpen(false);
+    // Clear any previous error and failed audio
+    setTranscriptionError(undefined);
+    setFailedAudioBlob(undefined);
 
     await startAudioRecording(async (audioBlob) => {
       // Analyze audio
@@ -50,20 +55,26 @@ const HomePage = () => {
       setAudioDuration(durationMs);
       setAudioAmplitudes(amplitudes);
 
-      // Transcribe and get the text
-      const text = await transcribeAudio(audioBlob, durationMs, amplitudes);
-      if (text) {
-        setTranscript(text);
+      // Transcribe and get the result
+      const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
+      if (result.text) {
+        setTranscript(result.text);
+        setTranscriptionError(undefined);
+        setFailedAudioBlob(undefined);
         // The transcription ID is set by the useTranscriptionAPI hook via reloadTranscriptions
         // We need to manually set it after save
-        const result = await window.api?.history.loadAll();
-        if (result?.success && result.transcriptions) {
-          const transcriptions = result.transcriptions as Transcription[];
+        const historyResult = await window.api?.history.loadAll();
+        if (historyResult?.success && historyResult.transcriptions) {
+          const transcriptions = historyResult.transcriptions as Transcription[];
           transcriptions.sort((a, b) => b.timestamp - a.timestamp);
           if (transcriptions.length > 0) {
             setCurrentTranscriptionId(transcriptions[0].id);
           }
         }
+      } else if (result.error) {
+        // Store the error and audio blob for retry
+        setTranscriptionError(result.error);
+        setFailedAudioBlob(audioBlob);
       }
     });
   }, [startAudioRecording, analyzeAudio, transcribeAudio, setCurrentTranscriptionId]);
@@ -71,6 +82,33 @@ const HomePage = () => {
   const stopRecording = useCallback(() => {
     stopAudioRecording();
   }, [stopAudioRecording]);
+
+  const retryTranscription = useCallback(async () => {
+    if (!failedAudioBlob) return;
+
+    // Clear the error while retrying
+    setTranscriptionError(undefined);
+
+    // Retry the transcription with the stored audio blob
+    const result = await transcribeAudio(failedAudioBlob, audioDuration, audioAmplitudes);
+    if (result.text) {
+      setTranscript(result.text);
+      setTranscriptionError(undefined);
+      setFailedAudioBlob(undefined);
+      // Load the updated history
+      const historyResult = await window.api?.history.loadAll();
+      if (historyResult?.success && historyResult.transcriptions) {
+        const transcriptions = historyResult.transcriptions as Transcription[];
+        transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+        if (transcriptions.length > 0) {
+          setCurrentTranscriptionId(transcriptions[0].id);
+        }
+      }
+    } else if (result.error) {
+      // Set the error again if retry failed
+      setTranscriptionError(result.error);
+    }
+  }, [failedAudioBlob, audioDuration, audioAmplitudes, transcribeAudio, setCurrentTranscriptionId]);
 
   // Use keyboard shortcuts hook
   useKeyboardShortcuts({
@@ -148,6 +186,9 @@ const HomePage = () => {
           startRecording={startRecording}
           stopRecording={stopRecording}
           onCopyTranscript={handleCopyTranscript}
+          transcriptionError={transcriptionError}
+          failedAudioBlob={failedAudioBlob}
+          onRetry={retryTranscription}
         />
       )}
     </Layout>
