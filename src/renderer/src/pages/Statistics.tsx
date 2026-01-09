@@ -16,7 +16,6 @@ import {
   typography
 } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
-import { generateMockTranscriptions, USE_MOCK_DATA } from '../lib/mockData';
 import {
   calculateStatistics,
   formatCost,
@@ -144,18 +143,11 @@ const Statistics = () => {
   const loadStatistics = async () => {
     setIsLoading(true);
     try {
-      // TEMPORARY: Use mock data for testing
-      if (USE_MOCK_DATA) {
-        const mockTranscriptions = generateMockTranscriptions(365);
-        const statistics = calculateStatistics(mockTranscriptions);
+      const result = await window.api?.history.loadAll();
+      if (result?.success && result.transcriptions) {
+        const transcriptions = result.transcriptions as Transcription[];
+        const statistics = calculateStatistics(transcriptions);
         setStats(statistics);
-      } else {
-        const result = await window.api?.history.loadAll();
-        if (result?.success && result.transcriptions) {
-          const transcriptions = result.transcriptions as Transcription[];
-          const statistics = calculateStatistics(transcriptions);
-          setStats(statistics);
-        }
       }
     } catch (error) {
       console.error('Error loading statistics:', error);
