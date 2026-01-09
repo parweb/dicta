@@ -27,7 +27,8 @@ const WORDS_PER_MINUTE = 150;
  * Estimate audio duration in minutes based on transcription text
  */
 function estimateAudioDuration(text: string): number {
-  const words = text.trim().split(/\s+/).length;
+  if (!text || typeof text !== 'string') return 0;
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
   return words / WORDS_PER_MINUTE;
 }
 
@@ -46,9 +47,14 @@ export function calculateStatistics(
     const minuteKey = format(minute, 'yyyy-MM-dd HH:mm');
 
     // Use real duration if available, otherwise estimate from text
-    const durationMinutes = transcription.durationSeconds
+    let durationMinutes = transcription.durationSeconds
       ? transcription.durationSeconds / 60
-      : estimateAudioDuration(transcription.text);
+      : estimateAudioDuration(transcription.text || '');
+
+    // Ensure we have a valid number
+    if (!isFinite(durationMinutes) || durationMinutes < 0) {
+      durationMinutes = 0;
+    }
 
     totalMinutes += durationMinutes;
 
@@ -84,6 +90,7 @@ export function calculateStatistics(
  * Format cost in USD
  */
 export function formatCost(cost: number): string {
+  if (!isFinite(cost)) return '$0.00';
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
     currency: 'USD',
@@ -96,6 +103,7 @@ export function formatCost(cost: number): string {
  * Format duration in minutes
  */
 export function formatDuration(minutes: number): string {
+  if (!isFinite(minutes) || minutes < 0) return '0s';
   if (minutes < 1) {
     const seconds = Math.round(minutes * 60);
     return `${seconds}s`;
