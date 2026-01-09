@@ -71,14 +71,27 @@ const Statistics = () => {
     }
 
     /* Hide travellers visually but keep them interactive */
-    .brush-variant-3 .recharts-brush-traveller > * {
+    .brush-variant-3 .recharts-brush-traveller,
+    .brush-variant-3 .recharts-brush-traveller * {
       opacity: 0 !important;
       fill: transparent !important;
       stroke: transparent !important;
+      outline: none !important;
+    }
+
+    .brush-variant-3 .recharts-brush-traveller:focus,
+    .brush-variant-3 .recharts-brush-traveller:focus *,
+    .brush-variant-3 .recharts-brush-traveller:hover,
+    .brush-variant-3 .recharts-brush-traveller:hover *,
+    .brush-variant-3 .recharts-brush-traveller:active,
+    .brush-variant-3 .recharts-brush-traveller:active * {
+      opacity: 0 !important;
+      fill: transparent !important;
+      stroke: transparent !important;
+      outline: none !important;
     }
 
     .brush-variant-3 .recharts-brush-traveller {
-      pointer-events: auto !important;
       cursor: ew-resize !important;
     }
 
