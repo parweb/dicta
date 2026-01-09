@@ -1,7 +1,12 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
+  Brush,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -273,8 +278,8 @@ const Statistics = () => {
               >
                 {/* Variant 1: Vertical gradient from dark to light blue */}
                 {chartVariant === 1 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
                       <defs>
                         <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#1e3a8a" stopOpacity={1} />
@@ -328,14 +333,26 @@ const Statistics = () => {
                           }
                         }}
                       />
+                      <Brush
+                        dataKey="date"
+                        height={40}
+                        stroke="#60a5fa"
+                        fill="transparent"
+                        travellerWidth={8}
+                        startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                      >
+                        <LineChart data={stats.dailyUsage}>
+                          <Line type="monotone" dataKey="count" stroke="#60a5fa" strokeWidth={1} dot={false} />
+                        </LineChart>
+                      </Brush>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
                 {/* Variant 2: Heat map with dynamic colors (low=blue, high=pink) */}
                 {chartVariant === 2 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.dailyUsage} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 10, right: 0, left: 0, bottom: 20 }}>
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -398,14 +415,32 @@ const Statistics = () => {
                           );
                         }}
                       />
+                      <Brush
+                        dataKey="date"
+                        height={50}
+                        stroke="#ec4899"
+                        fill="transparent"
+                        travellerWidth={12}
+                        startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                      >
+                        <AreaChart data={stats.dailyUsage}>
+                          <defs>
+                            <linearGradient id="brushGradient2" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#ec4899" stopOpacity={0.6} />
+                              <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                            </linearGradient>
+                          </defs>
+                          <Area type="monotone" dataKey="count" stroke="#ec4899" strokeWidth={2} fill="url(#brushGradient2)" />
+                        </AreaChart>
+                      </Brush>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
                 {/* Variant 3: Opacity-based (same color, varying opacity) */}
                 {chartVariant === 3 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -482,14 +517,26 @@ const Statistics = () => {
                           }
                         }}
                       />
+                      <Brush
+                        dataKey="date"
+                        height={45}
+                        stroke="#3b82f6"
+                        fill="transparent"
+                        travellerWidth={6}
+                        startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                      >
+                        <BarChart data={stats.dailyUsage} barCategoryGap="20%">
+                          <Bar dataKey="count" fill="#3b82f6" opacity={0.8} maxBarSize={1} />
+                        </BarChart>
+                      </Brush>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
                 {/* Variant 4: Green to blue gradient based on value */}
                 {chartVariant === 4 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
                       <XAxis
                         dataKey="date"
                         stroke={colors.text.tertiary}
@@ -544,14 +591,32 @@ const Statistics = () => {
                           );
                         }}
                       />
+                      <Brush
+                        dataKey="date"
+                        height={40}
+                        stroke="#22d3ee"
+                        fill="#1e293b"
+                        travellerWidth={14}
+                        startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                      >
+                        <LineChart data={stats.dailyUsage}>
+                          <Line
+                            type="monotone"
+                            dataKey="count"
+                            stroke="none"
+                            dot={{ fill: '#22d3ee', r: 2 }}
+                            activeDot={false}
+                          />
+                        </LineChart>
+                      </Brush>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
 
                 {/* Variant 5: Dual-tone gradient (dark bottom, light top) */}
                 {chartVariant === 5 && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 0 }} barGap={2}>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }} barGap={2}>
                       <defs>
                         <linearGradient id="dualGradient" x1="0" y1="1" x2="0" y2="0">
                           <stop offset="0%" stopColor="#1e40af" stopOpacity={1} />
@@ -599,6 +664,32 @@ const Statistics = () => {
                         radius={[4, 4, 0, 0]}
                         maxBarSize={40}
                       />
+                      <Brush
+                        dataKey="date"
+                        height={48}
+                        stroke="#a855f7"
+                        fill="transparent"
+                        travellerWidth={10}
+                        startIndex={Math.max(0, stats.dailyUsage.length - 30)}
+                      >
+                        <AreaChart data={stats.dailyUsage}>
+                          <defs>
+                            <linearGradient id="brushGradient5" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.8} />
+                              <stop offset="50%" stopColor="#a855f7" stopOpacity={0.8} />
+                              <stop offset="100%" stopColor="#ec4899" stopOpacity={0.8} />
+                            </linearGradient>
+                          </defs>
+                          <Area
+                            type="monotone"
+                            dataKey="count"
+                            stroke="url(#brushGradient5)"
+                            strokeWidth={3}
+                            fill="url(#brushGradient5)"
+                            fillOpacity={0.2}
+                          />
+                        </AreaChart>
+                      </Brush>
                     </BarChart>
                   </ResponsiveContainer>
                 )}
