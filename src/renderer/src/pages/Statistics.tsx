@@ -92,15 +92,15 @@ const Statistics = () => {
     }
   };
 
-  // Calculate relative values for opacity-based coloring
-  const maxCount = useMemo(() => {
+  // Calculate relative values for opacity-based coloring (based on duration)
+  const maxMinutes = useMemo(() => {
     if (!stats || stats.dailyUsage.length === 0) return 0;
-    return Math.max(...stats.dailyUsage.map(d => d.count));
+    return Math.max(...stats.dailyUsage.map(d => d.minutes));
   }, [stats]);
 
-  const getBarColor = (count: number) => {
-    if (maxCount === 0) return colors.accent.blue.primary;
-    const ratio = count / maxCount;
+  const getBarColor = (minutes: number) => {
+    if (maxMinutes === 0) return colors.accent.blue.primary;
+    const ratio = minutes / maxMinutes;
     // Opacity-based: same color, varying opacity
     return `rgba(59, 130, 246, ${0.3 + ratio * 0.7})`;
   };
@@ -305,7 +305,7 @@ const Statistics = () => {
                       }}
                     />
                     <Bar
-                      dataKey="count"
+                      dataKey="minutes"
                       radius={[8, 8, 0, 0]}
                       shape={(props: any) => {
                         const { x, y, width, height, payload } = props;
@@ -315,7 +315,7 @@ const Statistics = () => {
                             y={y}
                             width={width}
                             height={height}
-                            fill={getBarColor(payload.count)}
+                            fill={getBarColor(payload.minutes)}
                             rx={8}
                             ry={8}
                           />
@@ -359,7 +359,7 @@ const Statistics = () => {
                     >
                       <BarChart data={stats.dailyUsage} barCategoryGap="20%">
                         <Bar
-                          dataKey="count"
+                          dataKey="minutes"
                           fill="#3b82f6"
                           opacity={0.8}
                           maxBarSize={1}
