@@ -70,19 +70,28 @@ const Statistics = () => {
       transform-origin: center center;
     }
 
-    /* Hide travellers completely but keep them functional */
-    .brush-variant-3 .recharts-brush-traveller {
+    /* Hide travellers completely in all states but keep them functional */
+    .brush-variant-3 .recharts-brush-traveller,
+    .brush-variant-3 .recharts-brush-traveller:hover,
+    .brush-variant-3 .recharts-brush-traveller:focus,
+    .brush-variant-3 .recharts-brush-traveller:active {
       fill: transparent !important;
       stroke: transparent !important;
       opacity: 0 !important;
     }
 
-    .brush-variant-3 .recharts-brush-traveller rect {
+    .brush-variant-3 .recharts-brush-traveller rect,
+    .brush-variant-3 .recharts-brush-traveller:hover rect,
+    .brush-variant-3 .recharts-brush-traveller:focus rect,
+    .brush-variant-3 .recharts-brush-traveller:active rect {
       fill: transparent !important;
       stroke: transparent !important;
     }
 
-    .brush-variant-3 .recharts-brush-traveller-line {
+    .brush-variant-3 .recharts-brush-traveller-line,
+    .brush-variant-3 .recharts-brush-traveller:hover .recharts-brush-traveller-line,
+    .brush-variant-3 .recharts-brush-traveller:focus .recharts-brush-traveller-line,
+    .brush-variant-3 .recharts-brush-traveller:active .recharts-brush-traveller-line {
       stroke: transparent !important;
     }
 
