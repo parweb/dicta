@@ -57,6 +57,9 @@ const HomePage = () => {
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(undefined);
+  const [allTranscriptions, setAllTranscriptions] = useState<Transcription[]>([]);
+  const [currentTranscriptionId, setCurrentTranscriptionId] = useState<string | null>(null);
+  const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -82,6 +85,24 @@ const HomePage = () => {
         mediaStream.current.getTracks().forEach(track => track.stop());
       }
     };
+  }, []);
+
+  // Load all transcriptions for navigation
+  useEffect(() => {
+    const loadTranscriptions = async () => {
+      try {
+        const result = await window.api?.history.loadAll();
+        if (result?.success && result.transcriptions) {
+          const transcriptions = result.transcriptions as Transcription[];
+          // Sort by timestamp (most recent first)
+          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+          setAllTranscriptions(transcriptions);
+        }
+      } catch (error) {
+        console.error('Error loading transcriptions:', error);
+      }
+    };
+    loadTranscriptions();
   }, []);
 
   // Extract audio duration and amplitude data from blob using Web Audio API
@@ -135,6 +156,17 @@ const HomePage = () => {
           audioAmplitudes
         };
         await window.api?.history.save(transcription);
+
+        // Update current transcription ID and reload list
+        setCurrentTranscriptionId(transcription.id);
+
+        // Reload transcriptions to include the new one
+        const result = await window.api?.history.loadAll();
+        if (result?.success && result.transcriptions) {
+          const transcriptions = result.transcriptions as Transcription[];
+          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+          setAllTranscriptions(transcriptions);
+        }
       } catch (error) {
         console.error('Error saving to history:', error);
       }
@@ -345,9 +377,73 @@ const HomePage = () => {
     setTranscript(transcription.text);
     setAudioAmplitudes(transcription.audioAmplitudes || []);
     setAudioDuration(transcription.durationMs);
+    setCurrentTranscriptionId(transcription.id);
     setIsHistoryOpen(false);
     setCurrentView('home');
   }, []);
+
+  // Navigate to next/previous transcription
+  const navigateTranscription = useCallback((direction: 'next' | 'previous') => {
+    if (allTranscriptions.length === 0) return;
+
+    let targetIndex = 0;
+    if (currentTranscriptionId) {
+      const currentIndex = allTranscriptions.findIndex(t => t.id === currentTranscriptionId);
+      if (currentIndex !== -1) {
+        if (direction === 'next') {
+          // Next = more recent (lower index, since sorted desc by timestamp)
+          targetIndex = Math.max(0, currentIndex - 1);
+        } else {
+          // Previous = older (higher index)
+          targetIndex = Math.min(allTranscriptions.length - 1, currentIndex + 1);
+        }
+      }
+    }
+
+    const targetTranscription = allTranscriptions[targetIndex];
+    if (targetTranscription) {
+      // Set slide direction and trigger animation
+      setSlideDirection(direction === 'next' ? 'up' : 'down');
+
+      // Apply transcription after a short delay for animation
+      setTimeout(() => {
+        setTranscript(targetTranscription.text);
+        setAudioAmplitudes(targetTranscription.audioAmplitudes || []);
+        setAudioDuration(targetTranscription.durationMs);
+        setCurrentTranscriptionId(targetTranscription.id);
+
+        // Reset animation
+        setTimeout(() => setSlideDirection(null), 300);
+      }, 50);
+    }
+  }, [allTranscriptions, currentTranscriptionId]);
+
+  // Keyboard navigation (Arrow Up/Down)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only on home view, not recording, and not in an input
+      if (
+        currentView !== 'home' ||
+        isRecording ||
+        isHistoryOpen ||
+        (e.target as HTMLElement).tagName === 'INPUT' ||
+        (e.target as HTMLElement).tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateTranscription('next'); // Up = future = more recent
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        navigateTranscription('previous'); // Down = past = older
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentView, isRecording, isHistoryOpen, navigateTranscription]);
 
   const proxyStatusEntries = useMemo(
     () => Object.entries(proxyStatuses),
@@ -465,8 +561,13 @@ const HomePage = () => {
         <div
           style={
             {
-              transition: 'opacity 0.3s',
+              transition: 'opacity 0.3s, transform 0.3s ease-out',
               opacity: transcript ? 1 : 0,
+              transform: slideDirection === 'up'
+                ? 'translateY(-20px)'
+                : slideDirection === 'down'
+                ? 'translateY(20px)'
+                : 'translateY(0)',
               marginTop: spacing.xl,
               padding: spacing.lg,
               backgroundColor: colors.background.secondary,
