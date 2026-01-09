@@ -1,6 +1,7 @@
 import { Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
+import AudioWaveform from '../components/AudioWaveform';
 import Layout from '../components/Layout';
 import {
   borderRadius,
@@ -12,7 +13,6 @@ import {
   typography
 } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
-import { formatDuration } from '../lib/statistics';
 import Statistics from './Statistics';
 
 // SECURITY: Move API key to environment variables
@@ -124,22 +124,26 @@ const HomePage = () => {
   }, []);
 
   // Save transcription to history
-  const saveToHistory = useCallback(async (text: string, durationSeconds?: number) => {
-    try {
-      const transcription: Transcription = {
-        id: `${Date.now()}`,
-        text,
-        timestamp: Date.now(),
-        durationSeconds
-      };
-      await window.api?.history.save(transcription);
-    } catch (error) {
-      console.error('Error saving to history:', error);
-    }
-  }, []);
+  const saveToHistory = useCallback(
+    async (text: string, durationSeconds?: number, audioAmplitudes?: number[]) => {
+      try {
+        const transcription: Transcription = {
+          id: `${Date.now()}`,
+          text,
+          timestamp: Date.now(),
+          durationSeconds,
+          audioAmplitudes
+        };
+        await window.api?.history.save(transcription);
+      } catch (error) {
+        console.error('Error saving to history:', error);
+      }
+    },
+    []
+  );
 
   const transcribeAudio = useCallback(
-    async (blob: Blob, durationSeconds?: number) => {
+    async (blob: Blob, durationSeconds?: number, audioAmplitudes?: number[]) => {
       if (!apiKey) {
         console.error('API key is not configured');
         return;
@@ -207,7 +211,7 @@ const HomePage = () => {
         setTranscript(data.text);
         await navigator.clipboard.writeText(data.text);
         // Save to history
-        await saveToHistory(data.text, durationSeconds);
+        await saveToHistory(data.text, durationSeconds, audioAmplitudes);
       } catch (error) {
         if (error instanceof AggregateError) {
           console.error('All proxies failed:', error.errors);
@@ -251,7 +255,7 @@ const HomePage = () => {
         setAudioDuration(duration);
         setAudioAmplitudes(amplitudes);
 
-        await transcribeAudio(audioBlob, duration);
+        await transcribeAudio(audioBlob, duration, amplitudes);
         setIsLoading(false);
 
         // Cleanup stream
@@ -507,78 +511,13 @@ const HomePage = () => {
 
           {/* Audio waveform visualization */}
           {audioAmplitudes.length > 0 && (
-            <div
-              style={{
-                alignSelf: 'stretch',
-                marginTop: spacing.md
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: spacing.sm
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: typography.fontSize.xs,
-                    color: colors.text.tertiary,
-                    margin: 0
-                  }}
-                >
-                  Forme d'onde audio:
-                </h4>
-                {audioDuration !== undefined && (
-                  <span
-                    style={{
-                      fontSize: typography.fontSize.xs,
-                      color: colors.text.tertiary,
-                      fontWeight: typography.fontWeight.medium
-                    }}
-                  >
-                    {formatDuration(audioDuration / 60)}
-                  </span>
-                )}
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '1px',
-                  height: '60px',
-                  alignItems: 'flex-end',
-                  backgroundColor: colors.background.primary,
-                  borderRadius: borderRadius.md,
-                  padding: spacing.sm
-                }}
-              >
-                {audioAmplitudes.map((amplitude, index) => {
-                  // Normalize amplitude to 0-1 range
-                  const maxAmplitude = Math.max(...audioAmplitudes);
-                  const normalizedHeight = maxAmplitude > 0
-                    ? (amplitude / maxAmplitude) * 100
-                    : 0;
-
-                  // Color based on amplitude (quiet = blue, loud = white)
-                  const opacity = 0.3 + (amplitude / maxAmplitude) * 0.7;
-
-                  return (
-                    <div
-                      key={index}
-                      style={{
-                        flex: 1,
-                        height: `${Math.max(2, normalizedHeight)}%`,
-                        backgroundColor: colors.accent.blue.primary,
-                        opacity,
-                        borderRadius: '1px',
-                        minWidth: '1px'
-                      }}
-                      title={`Segment ${index + 1}: ${(amplitude * 100).toFixed(1)}%`}
-                    />
-                  );
-                })}
-              </div>
+            <div style={{ marginTop: spacing.md }}>
+              <AudioWaveform
+                amplitudes={audioAmplitudes}
+                duration={audioDuration}
+                showDuration={true}
+                height={60}
+              />
             </div>
           )}
         </div>

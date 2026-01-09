@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import AudioWaveform from './AudioWaveform';
 import {
   borderRadius,
   colors,
@@ -223,11 +224,22 @@ const HistorySidebar = ({
                           textOverflow: 'ellipsis',
                           display: '-webkit-box',
                           WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical'
+                          WebkitBoxOrient: 'vertical',
+                          marginBottom: transcription.audioAmplitudes ? spacing.sm : 0
                         }}
                       >
                         {transcription.text}
                       </div>
+
+                      {/* Audio waveform visualization */}
+                      {transcription.audioAmplitudes && transcription.audioAmplitudes.length > 0 && (
+                        <AudioWaveform
+                          amplitudes={transcription.audioAmplitudes}
+                          duration={transcription.durationSeconds}
+                          showDuration={false}
+                          height={40}
+                        />
+                      )}
                     </div>
                     );
                   })}

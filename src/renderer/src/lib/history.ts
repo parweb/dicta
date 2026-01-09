@@ -6,6 +6,7 @@ export interface Transcription {
   text: string;
   timestamp: number;
   durationSeconds?: number; // Duration of the audio recording in seconds
+  audioAmplitudes?: number[]; // Audio waveform amplitude data for visualization
 }
 
 export interface TranscriptionsByDay {
