@@ -2,48 +2,95 @@ import { BarChart3, History } from 'lucide-react';
 import { ReactNode } from 'react';
 
 import { components, colors, spacing } from '../lib/design-system';
+import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
   children: ReactNode;
   currentView: 'home' | 'statistics';
   onViewChange: (view: 'home' | 'statistics') => void;
   onHistoryToggle: () => void;
+  onHistoryClose: () => void;
+  isHistoryOpen: boolean;
+  currentTranscript: string;
+  onSelectTranscription: (text: string) => void;
 }
 
 const Layout = ({
   children,
   currentView,
   onViewChange,
-  onHistoryToggle
+  onHistoryToggle,
+  onHistoryClose,
+  isHistoryOpen,
+  currentTranscript,
+  onSelectTranscription
 }: LayoutProps) => {
   return (
     <>
-      {/* Draggable area - entire window */}
+      {/* Main layout context */}
       <div
-        style={
-          {
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          isolation: 'isolate',
+          zIndex: 0
+        }}
+      >
+        {/* Draggable area - entire window */}
+        <div
+          style={
+            {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 0,
+              WebkitAppRegion: 'drag'
+            } as React.CSSProperties
+          }
+        />
+
+        {/* Background */}
+        <div
+          style={{
             position: 'fixed',
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            WebkitAppRegion: 'drag'
-          } as React.CSSProperties
-        }
-      />
+            backgroundColor: colors.background.primary,
+            zIndex: 1
+          }}
+        />
 
-      {/* Top left buttons */}
-      <div
-        style={{
-          position: 'fixed',
-          top: spacing.md,
-          left: spacing.md,
-          zIndex: 1000,
-          display: 'flex',
-          gap: spacing.sm,
-          WebkitAppRegion: 'no-drag'
-        }}
-      >
+        {/* Content */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: '100vh',
+            zIndex: 2
+          }}
+        >
+          {children}
+        </div>
+
+        {/* Top left buttons */}
+        <div
+          style={{
+            position: 'fixed',
+            top: spacing.md,
+            left: spacing.md,
+            zIndex: 3,
+            display: 'flex',
+            gap: spacing.sm,
+            WebkitAppRegion: 'no-drag'
+          }}
+        >
         {/* History toggle button */}
         <button
           onClick={onHistoryToggle}
@@ -80,8 +127,9 @@ const Layout = ({
           />
         </button>
       </div>
+      </div>
 
-      {/* Background */}
+      {/* Sidebar context - isolated and above main layout */}
       <div
         style={{
           position: 'fixed',
@@ -89,21 +137,17 @@ const Layout = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: colors.background.primary,
-          zIndex: 0
-        }}
-      />
-
-      {/* Content */}
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '100vh',
-          zIndex: 1
+          isolation: 'isolate',
+          zIndex: 1,
+          pointerEvents: isHistoryOpen ? 'auto' : 'none'
         }}
       >
-        {children}
+        <HistorySidebar
+          isOpen={isHistoryOpen}
+          onClose={onHistoryClose}
+          onSelectTranscription={onSelectTranscription}
+          currentTranscript={currentTranscript}
+        />
       </div>
     </>
   );

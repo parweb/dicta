@@ -1,7 +1,6 @@
 import { Loader2, Mic, MicOff } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
-import HistorySidebar from '../components/HistorySidebar';
 import Layout from '../components/Layout';
 import {
   borderRadius,
@@ -179,6 +178,10 @@ const HomePage = () => {
 
   const startRecording = useCallback(async () => {
     try {
+      // Switch to home view and close sidebar when starting recording
+      setCurrentView('home');
+      setIsHistoryOpen(false);
+
       setIsRecording(true);
       audioChunks.current = [];
 
@@ -298,14 +301,11 @@ const HomePage = () => {
       currentView={currentView}
       onViewChange={setCurrentView}
       onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
+      onHistoryClose={() => setIsHistoryOpen(false)}
+      isHistoryOpen={isHistoryOpen}
+      currentTranscript={transcript}
+      onSelectTranscription={handleSelectTranscription}
     >
-      {/* History Sidebar */}
-      <HistorySidebar
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        onSelectTranscription={handleSelectTranscription}
-        currentTranscript={transcript}
-      />
 
       {/* Proxy status indicators - fixed top right */}
       <div
@@ -317,7 +317,7 @@ const HomePage = () => {
           gap: '6px',
           fontSize: typography.fontSize.xs,
           color: colors.text.tertiary,
-          zIndex: 1000
+          zIndex: 3
         }}
       >
         {proxyStatusEntries.map(([name, status]) => (
@@ -361,16 +361,24 @@ const HomePage = () => {
       ) : (
         <div
           style={{
-            padding: '20px',
-            maxWidth: '600px',
-            margin: '0 auto',
+            width: '100%',
+            height: '100vh',
             display: 'flex',
-            flexDirection: 'column',
+            justifyContent: 'center',
             alignItems: 'center',
             position: 'relative',
             zIndex: 1
           }}
         >
+          <div
+            style={{
+              padding: '20px',
+              maxWidth: '600px',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
         <button
           type="button"
           onMouseDown={startRecording}
@@ -447,6 +455,7 @@ const HomePage = () => {
           </p>
         </div>
       </div>
+        </div>
       )}
     </Layout>
   );

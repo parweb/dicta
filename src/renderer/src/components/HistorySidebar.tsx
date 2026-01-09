@@ -88,7 +88,7 @@ const HistorySidebar = ({
           right: 0,
           bottom: 0,
           backgroundColor: colors.background.overlay,
-          zIndex: 999,
+          zIndex: 0,
           WebkitAppRegion: 'no-drag'
         }}
       />
@@ -102,7 +102,7 @@ const HistorySidebar = ({
           left: 0,
           bottom: 0,
           width: '320px',
-          zIndex: 1000,
+          zIndex: 1,
           display: 'flex',
           flexDirection: 'column',
           WebkitAppRegion: 'no-drag'
