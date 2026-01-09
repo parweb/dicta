@@ -45,12 +45,14 @@ const Statistics = () => {
     .brush-variant-1 .recharts-brush-slide {
       fill: transparent !important;
       stroke: transparent !important;
+      cursor: move !important;
+      pointer-events: all !important;
     }
 
-    /* Hide travellers for variant 1 */
+    /* Hide travellers for variant 1 but keep them interactive */
     .brush-variant-1 .recharts-brush-traveller,
     .brush-variant-1 .recharts-brush-traveller * {
-      opacity: 0 !important;
+      opacity: 0.01 !important;
       fill: transparent !important;
       stroke: transparent !important;
       outline: none !important;
@@ -62,7 +64,7 @@ const Statistics = () => {
     .brush-variant-1 .recharts-brush-traveller:hover *,
     .brush-variant-1 .recharts-brush-traveller:active,
     .brush-variant-1 .recharts-brush-traveller:active * {
-      opacity: 0 !important;
+      opacity: 0.01 !important;
       fill: transparent !important;
       stroke: transparent !important;
       outline: none !important;
@@ -70,6 +72,7 @@ const Statistics = () => {
 
     .brush-variant-1 .recharts-brush-traveller {
       cursor: ew-resize !important;
+      pointer-events: all !important;
     }
 
     /* Variant 2: Double border effect */
