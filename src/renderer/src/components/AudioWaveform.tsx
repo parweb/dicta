@@ -20,15 +20,17 @@ const AudioWaveform = ({
 
   // Downsample amplitudes if maxBars is specified and we have more bars
   // Use MAX instead of average to preserve peak shape and visual consistency
+  // Distribute bars uniformly across entire audio length
   let displayAmplitudes = amplitudes;
   if (maxBars && amplitudes.length > maxBars) {
-    const samplesPerBar = Math.ceil(amplitudes.length / maxBars);
     displayAmplitudes = [];
     for (let i = 0; i < maxBars; i++) {
-      const start = i * samplesPerBar;
-      const end = Math.min(start + samplesPerBar, amplitudes.length);
+      // Calculate uniform position in original array
+      const start = Math.floor((i * amplitudes.length) / maxBars);
+      const end = Math.floor(((i + 1) * amplitudes.length) / maxBars);
+
       let max = 0;
-      for (let j = start; j < end; j++) {
+      for (let j = start; j < end && j < amplitudes.length; j++) {
         max = Math.max(max, amplitudes[j]);
       }
       displayAmplitudes.push(max);

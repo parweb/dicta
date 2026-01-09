@@ -522,7 +522,7 @@ const HomePage = () => {
                 duration={audioDuration}
                 showDuration={true}
                 height={60}
-                maxBars={120}
+                maxBars={100}
               />
             </div>
           )}
