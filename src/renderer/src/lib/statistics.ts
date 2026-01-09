@@ -6,14 +6,14 @@ import type { Transcription } from './history';
 export interface UsageData {
   date: string;
   count: number;
-  estimatedMinutes: number;
-  estimatedCost: number;
+  minutes: number;
+  cost: number;
 }
 
 export interface UsageStatistics {
   totalTranscriptions: number;
-  totalEstimatedMinutes: number;
-  totalEstimatedCost: number;
+  totalMinutes: number;
+  totalCost: number;
   dailyUsage: UsageData[];
 }
 
@@ -39,7 +39,7 @@ export function calculateStatistics(
 ): UsageStatistics {
   const minuteMap = new Map<string, UsageData>();
 
-  let totalEstimatedMinutes = 0;
+  let totalMinutes = 0;
 
   transcriptions.forEach(transcription => {
     const minute = startOfMinute(new Date(transcription.timestamp));
@@ -50,21 +50,21 @@ export function calculateStatistics(
       ? transcription.durationSeconds / 60
       : estimateAudioDuration(transcription.text);
 
-    totalEstimatedMinutes += durationMinutes;
+    totalMinutes += durationMinutes;
 
     if (!minuteMap.has(minuteKey)) {
       minuteMap.set(minuteKey, {
         date: format(minute, 'd MMM HH:mm', { locale: fr }),
         count: 0,
-        estimatedMinutes: 0,
-        estimatedCost: 0
+        minutes: 0,
+        cost: 0
       });
     }
 
     const minuteData = minuteMap.get(minuteKey)!;
     minuteData.count += 1;
-    minuteData.estimatedMinutes += durationMinutes;
-    minuteData.estimatedCost = minuteData.estimatedMinutes * COST_PER_MINUTE;
+    minuteData.minutes += durationMinutes;
+    minuteData.cost = minuteData.minutes * COST_PER_MINUTE;
   });
 
   // Sort by date (oldest to newest for chart)
@@ -74,8 +74,8 @@ export function calculateStatistics(
 
   return {
     totalTranscriptions: transcriptions.length,
-    totalEstimatedMinutes,
-    totalEstimatedCost: totalEstimatedMinutes * COST_PER_MINUTE,
+    totalMinutes,
+    totalCost: totalMinutes * COST_PER_MINUTE,
     dailyUsage
   };
 }

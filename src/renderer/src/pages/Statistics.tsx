@@ -194,7 +194,7 @@ const Statistics = () => {
                     marginBottom: spacing.sm
                   }}
                 >
-                  Durée estimée
+                  Durée totale
                 </div>
                 <div
                   style={{
@@ -203,7 +203,7 @@ const Statistics = () => {
                     color: colors.text.primary
                   }}
                 >
-                  {formatDuration(stats.totalEstimatedMinutes)}
+                  {formatDuration(stats.totalMinutes)}
                 </div>
               </div>
 
@@ -219,7 +219,7 @@ const Statistics = () => {
                     marginBottom: spacing.sm
                   }}
                 >
-                  Coût estimé
+                  Coût total
                 </div>
                 <div
                   style={{
@@ -228,7 +228,7 @@ const Statistics = () => {
                     color: colors.accent.blue.primary
                   }}
                 >
-                  {formatCost(stats.totalEstimatedCost)}
+                  {formatCost(stats.totalCost)}
                 </div>
               </div>
             </div>
@@ -289,7 +289,7 @@ const Statistics = () => {
                                 fontWeight: typography.fontWeight.bold
                               }}
                             >
-                              {formatCost(data.estimatedCost)}
+                              {formatCost(data.cost)}
                             </div>
                             <div
                               style={{
@@ -325,7 +325,7 @@ const Statistics = () => {
                         position: 'top',
                         content: (props: any) => {
                           const cost =
-                            stats.dailyUsage[props.index || 0]?.estimatedCost;
+                            stats.dailyUsage[props.index || 0]?.cost;
                           if (
                             (props.index || 0) %
                               Math.max(
