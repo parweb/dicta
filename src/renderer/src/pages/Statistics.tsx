@@ -284,21 +284,31 @@ const Statistics = () => {
                           >
                             <div
                               style={{
-                                fontSize: typography.fontSize.lg,
-                                color: colors.accent.blue.primary,
-                                fontWeight: typography.fontWeight.bold
+                                fontSize: typography.fontSize.sm,
+                                color: colors.text.tertiary,
+                                marginBottom: '4px'
                               }}
                             >
-                              {formatCost(data.cost)}
+                              {data.date}
                             </div>
                             <div
                               style={{
-                                fontSize: typography.fontSize.sm,
-                                color: colors.text.tertiary,
+                                fontSize: typography.fontSize.base,
+                                color: colors.text.primary,
+                                fontWeight: typography.fontWeight.semibold
+                              }}
+                            >
+                              {data.count} requêtes • {formatDuration(data.minutes)}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: typography.fontSize.lg,
+                                color: colors.accent.blue.primary,
+                                fontWeight: typography.fontWeight.bold,
                                 marginTop: '4px'
                               }}
                             >
-                              {data.count} requêtes • {data.date}
+                              {formatCost(data.cost)}
                             </div>
                           </div>
                         );
@@ -320,33 +330,6 @@ const Statistics = () => {
                             ry={8}
                           />
                         );
-                      }}
-                      label={{
-                        position: 'top',
-                        content: (props: any) => {
-                          const cost =
-                            stats.dailyUsage[props.index || 0]?.cost;
-                          if (
-                            (props.index || 0) %
-                              Math.max(
-                                1,
-                                Math.floor(stats.dailyUsage.length / 5)
-                              ) !==
-                            0
-                          )
-                            return null;
-                          return (
-                            <text
-                              x={(props.x || 0) + (props.width || 0) / 2}
-                              y={(props.y || 0) - 5}
-                              fill={colors.text.tertiary}
-                              fontSize={typography.fontSize.xs}
-                              textAnchor="middle"
-                            >
-                              {formatCost(cost || 0)}
-                            </text>
-                          );
-                        }
                       }}
                     />
                     <Brush
