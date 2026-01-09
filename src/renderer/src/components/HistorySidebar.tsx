@@ -1,19 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-import AudioWaveform from './AudioWaveform';
-import {
-  borderRadius,
-  colors,
-  components,
-  spacing,
-  typography
-} from '../lib/design-system';
-import {
-  formatRelativeTime,
-  getDayLabel,
-  type Transcription
-} from '../lib/history';
-import { formatDuration } from '../lib/statistics';
+import TranscriptionGroup from './history/TranscriptionGroup';
+import EmptyState from './shared/EmptyState';
+import LoadingState from './shared/LoadingState';
+import Overlay from './shared/Overlay';
+import { useHistoryData } from '../hooks/useHistoryData';
+import { components, spacing } from '../lib/design-system';
+import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
   isOpen: boolean;
@@ -33,28 +26,13 @@ const HistorySidebar = ({
   onSelectTranscription,
   currentTranscript
 }: HistorySidebarProps) => {
-  const [transcriptions, setTranscriptions] = useState<Transcription[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { transcriptions, isLoading, loadHistory } = useHistoryData();
 
   useEffect(() => {
     if (isOpen) {
       loadHistory();
     }
-  }, [isOpen]);
-
-  const loadHistory = async () => {
-    setIsLoading(true);
-    try {
-      const result = await window.api?.history.loadAll();
-      if (result?.success && result.transcriptions) {
-        setTranscriptions(result.transcriptions as Transcription[]);
-      }
-    } catch (error) {
-      console.error('Error loading history:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [isOpen, loadHistory]);
 
   // Group transcriptions by day
   const groupedTranscriptions: GroupedTranscriptions[] = transcriptions.reduce(
@@ -80,20 +58,7 @@ const HistorySidebar = ({
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: colors.background.overlay,
-          zIndex: 0,
-          WebkitAppRegion: 'no-drag'
-        }}
-      />
+      <Overlay onClose={onClose} />
 
       {/* Sidebar */}
       <div
@@ -119,133 +84,18 @@ const HistorySidebar = ({
           }}
         >
           {isLoading ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: spacing.xl,
-                color: colors.text.tertiary
-              }}
-            >
-              Chargement...
-            </div>
+            <LoadingState message="Chargement..." />
           ) : transcriptions.length === 0 ? (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: spacing.xl,
-                color: colors.text.tertiary
-              }}
-            >
-              Aucune transcription
-            </div>
+            <EmptyState message="Aucune transcription" />
           ) : (
             groupedTranscriptions.map(group => (
-              <div key={group.dayLabel} style={{ marginBottom: spacing['2xl'] }}>
-                <h3
-                  style={{
-                    fontSize: typography.fontSize.sm,
-                    fontWeight: typography.fontWeight.semibold,
-                    color: colors.text.tertiary,
-                    marginBottom: spacing.sm,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px'
-                  }}
-                >
-                  {group.dayLabel}
-                </h3>
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: spacing.sm
-                  }}
-                >
-                  {group.transcriptions.map(transcription => {
-                    const isActive = transcription.text === currentTranscript;
-                    return (
-                      <div
-                        key={transcription.id}
-                        onClick={() =>
-                          handleTranscriptionClick(transcription)
-                        }
-                        style={{
-                          padding: spacing.md,
-                          backgroundColor: isActive
-                            ? colors.accent.blue.backgroundHover
-                            : colors.background.primary,
-                          borderRadius: borderRadius.md,
-                          cursor: 'pointer',
-                          border: isActive
-                            ? `1px solid ${colors.border.accent}`
-                            : `1px solid ${colors.border.primary}`,
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseEnter={e => {
-                          if (!isActive) {
-                            e.currentTarget.style.backgroundColor =
-                              colors.background.secondary;
-                            e.currentTarget.style.borderColor =
-                              colors.border.secondary;
-                          }
-                        }}
-                        onMouseLeave={e => {
-                          if (!isActive) {
-                            e.currentTarget.style.backgroundColor =
-                              colors.background.primary;
-                            e.currentTarget.style.borderColor =
-                              colors.border.primary;
-                          }
-                        }}
-                      >
-                      <div
-                        style={{
-                          fontSize: typography.fontSize.sm,
-                          color: colors.text.tertiary,
-                          marginBottom: '6px',
-                          display: 'flex',
-                          gap: spacing.sm,
-                          alignItems: 'center'
-                        }}
-                      >
-                        <span>{formatRelativeTime(transcription.timestamp)}</span>
-                        {transcription.durationMs && (
-                          <>
-                            <span>•</span>
-                            <span>{formatDuration(transcription.durationMs / 60000)}</span>
-                          </>
-                        )}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: typography.fontSize.base,
-                          color: colors.text.secondary,
-                          lineHeight: '1.4',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 3,
-                          WebkitBoxOrient: 'vertical',
-                          marginBottom: transcription.audioAmplitudes ? spacing.sm : 0
-                        }}
-                      >
-                        {transcription.text}
-                      </div>
-
-                      {/* Audio waveform visualization */}
-                      {transcription.audioAmplitudes && transcription.audioAmplitudes.length > 0 && (
-                        <AudioWaveform
-                          amplitudes={transcription.audioAmplitudes}
-                          duration={transcription.durationMs}
-                          showDuration={false}
-                          height={40}
-                          maxBars={80}
-                        />
-                      )}
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <TranscriptionGroup
+                key={group.dayLabel}
+                dayLabel={group.dayLabel}
+                transcriptions={group.transcriptions}
+                currentTranscript={currentTranscript}
+                onSelectTranscription={handleTranscriptionClick}
+              />
             ))
           )}
         </div>
