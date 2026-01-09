@@ -33,6 +33,16 @@ const Statistics = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [chartVariant, setChartVariant] = useState<1 | 2 | 3 | 4 | 5>(1);
 
+  // Custom CSS for Brush variant 3 - remove container border but keep selection border
+  const brushVariant3Style = `
+    .brush-variant-3 .recharts-brush > rect:first-child {
+      stroke: transparent !important;
+    }
+    .brush-variant-3 .recharts-brush-slide {
+      stroke: #3b82f6 !important;
+    }
+  `;
+
   useEffect(() => {
     loadStatistics();
   }, []);
@@ -108,6 +118,7 @@ const Statistics = () => {
         boxSizing: 'border-box'
       }}
     >
+      <style>{brushVariant3Style}</style>
       <div style={{ padding: spacing['2xl'], width: '100%', maxWidth: '1200px', boxSizing: 'border-box' }}>
           {isLoading ? (
             <div
@@ -439,7 +450,7 @@ const Statistics = () => {
 
                 {/* Variant 3: Opacity-based (same color, varying opacity) */}
                 {chartVariant === 3 && (
-                  <ResponsiveContainer width="100%" height={400}>
+                  <ResponsiveContainer width="100%" height={400} className="brush-variant-3">
                     <BarChart data={stats.dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
                       <XAxis
                         dataKey="date"
@@ -520,7 +531,7 @@ const Statistics = () => {
                       <Brush
                         dataKey="date"
                         height={45}
-                        stroke="#3b82f6"
+                        stroke="transparent"
                         fill="transparent"
                         travellerWidth={6}
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
