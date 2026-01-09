@@ -50,29 +50,23 @@ const Statistics = () => {
     }
 
     /* Hide travellers for variant 1 but keep them interactive */
-    .brush-variant-1 .recharts-brush-traveller,
-    .brush-variant-1 .recharts-brush-traveller * {
-      opacity: 0.01 !important;
-      fill: transparent !important;
-      stroke: transparent !important;
-      outline: none !important;
-    }
-
-    .brush-variant-1 .recharts-brush-traveller:focus,
-    .brush-variant-1 .recharts-brush-traveller:focus *,
-    .brush-variant-1 .recharts-brush-traveller:hover,
-    .brush-variant-1 .recharts-brush-traveller:hover *,
-    .brush-variant-1 .recharts-brush-traveller:active,
-    .brush-variant-1 .recharts-brush-traveller:active * {
-      opacity: 0.01 !important;
-      fill: transparent !important;
-      stroke: transparent !important;
-      outline: none !important;
-    }
-
     .brush-variant-1 .recharts-brush-traveller {
       cursor: ew-resize !important;
       pointer-events: all !important;
+    }
+
+    .brush-variant-1 .recharts-brush-traveller rect {
+      fill: rgba(255, 255, 255, 0.15) !important;
+      stroke: transparent !important;
+      outline: none !important;
+    }
+
+    .brush-variant-1 .recharts-brush-traveller line {
+      stroke: transparent !important;
+    }
+
+    .brush-variant-1 .recharts-brush-traveller:hover rect {
+      fill: rgba(255, 255, 255, 0.25) !important;
     }
 
     /* Variant 2: Double border effect */
@@ -498,7 +492,7 @@ const Statistics = () => {
                         height={45}
                         stroke="transparent"
                         fill="transparent"
-                        travellerWidth={6}
+                        travellerWidth={20}
                         startIndex={Math.max(0, stats.dailyUsage.length - 30)}
                         onChange={(range: any) => {
                           if (range && range.startIndex !== undefined && range.endIndex !== undefined) {
