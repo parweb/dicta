@@ -1,4 +1,4 @@
-import { format, startOfMinute } from 'date-fns';
+import { addMinutes, format, startOfMinute } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 import type { Transcription } from './history';
@@ -38,10 +38,40 @@ function estimateAudioDuration(text: string): number {
 export function calculateStatistics(
   transcriptions: Transcription[]
 ): UsageStatistics {
-  const minuteMap = new Map<string, UsageData>();
+  if (transcriptions.length === 0) {
+    return {
+      totalTranscriptions: 0,
+      totalMinutes: 0,
+      totalCost: 0,
+      dailyUsage: []
+    };
+  }
 
+  const minuteMap = new Map<string, UsageData>();
   let totalMinutes = 0;
 
+  // Find min and max timestamps to fill all intervals
+  const timestamps = transcriptions.map(t => t.timestamp);
+  const minTimestamp = Math.min(...timestamps);
+  const maxTimestamp = Math.max(...timestamps);
+
+  const startMinute = startOfMinute(new Date(minTimestamp));
+  const endMinute = startOfMinute(new Date(maxTimestamp));
+
+  // Generate all minute intervals between start and end
+  let currentMinute = startMinute;
+  while (currentMinute <= endMinute) {
+    const minuteKey = format(currentMinute, 'yyyy-MM-dd HH:mm');
+    minuteMap.set(minuteKey, {
+      date: format(currentMinute, 'd MMM HH:mm', { locale: fr }),
+      count: 0,
+      minutes: 0,
+      cost: 0
+    });
+    currentMinute = addMinutes(currentMinute, 1);
+  }
+
+  // Fill in actual data
   transcriptions.forEach(transcription => {
     const minute = startOfMinute(new Date(transcription.timestamp));
     const minuteKey = format(minute, 'yyyy-MM-dd HH:mm');
@@ -58,22 +88,13 @@ export function calculateStatistics(
 
     totalMinutes += durationMinutes;
 
-    if (!minuteMap.has(minuteKey)) {
-      minuteMap.set(minuteKey, {
-        date: format(minute, 'd MMM HH:mm', { locale: fr }),
-        count: 0,
-        minutes: 0,
-        cost: 0
-      });
-    }
-
     const minuteData = minuteMap.get(minuteKey)!;
     minuteData.count += 1;
     minuteData.minutes += durationMinutes;
     minuteData.cost = minuteData.minutes * COST_PER_MINUTE;
   });
 
-  // Sort by date (oldest to newest for chart)
+  // Convert to sorted array (oldest to newest for chart)
   const dailyUsage = Array.from(minuteMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, value]) => value);
