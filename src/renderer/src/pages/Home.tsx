@@ -3,6 +3,10 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import AudioWaveform from '../components/AudioWaveform';
 import Layout from '../components/Layout';
+import { useAudioRecorder } from '../hooks/useAudioRecorder';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
+import { useTranscriptionNavigation } from '../hooks/useTranscriptionNavigation';
 import {
   borderRadius,
   colors,
@@ -15,344 +19,77 @@ import {
 import type { Transcription } from '../lib/history';
 import Statistics from './Statistics';
 
-// SECURITY: Move API key to environment variables
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-
-type ProxyStatus = 'idle' | 'loading' | 'success' | 'error' | 'cancelled';
-
-interface ProxyConfig {
-  name: string;
-  url: string;
-}
-
-interface TranscriptionResponse {
-  text: string;
-}
-
-const PROXY_CONFIGS: ProxyConfig[] = [
-  {
-    name: 'corsfix',
-    url: 'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions'
-  },
-  {
-    name: 'corsproxy',
-    url: 'https://corsproxy.io/?https://api.openai.com/v1/audio/transcriptions'
-  }
-];
-
-const INITIAL_PROXY_STATUSES: Record<string, ProxyStatus> =
-  PROXY_CONFIGS.reduce(
-    (acc, proxy) => ({ ...acc, [proxy.name]: 'idle' as ProxyStatus }),
-    {}
-  );
-
 const HomePage = () => {
-  const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [proxyStatuses, setProxyStatuses] = useState<
-    Record<string, ProxyStatus>
-  >(INITIAL_PROXY_STATUSES);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(undefined);
-  const [allTranscriptions, setAllTranscriptions] = useState<Transcription[]>([]);
-  const [currentTranscriptionId, setCurrentTranscriptionId] = useState<string | null>(null);
-  const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
 
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
-  const mediaStream = useRef<MediaStream | null>(null);
-  const xKeyIsDown = useRef(false);
 
-  // Request microphone permissions on mount
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then(stream => {
-        // Stop the stream immediately, we just wanted to request permission
-        stream.getTracks().forEach(track => track.stop());
-      })
-      .catch(err => console.error('Microphone access denied:', err));
-  }, []);
+  // Use custom hooks
+  const { isRecording, startRecording: startAudioRecording, stopRecording: stopAudioRecording } = useAudioRecorder();
 
-  // Cleanup media stream on unmount
-  useEffect(() => {
-    return () => {
-      if (mediaStream.current) {
-        mediaStream.current.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
+  const {
+    allTranscriptions,
+    currentTranscriptionId,
+    slideDirection,
+    navigateTranscription,
+    setCurrentTranscriptionId,
+    reloadTranscriptions
+  } = useTranscriptionNavigation();
 
-  // Load all transcriptions for navigation
-  useEffect(() => {
-    const loadTranscriptions = async () => {
-      try {
-        const result = await window.api?.history.loadAll();
-        if (result?.success && result.transcriptions) {
-          const transcriptions = result.transcriptions as Transcription[];
-          // Sort by timestamp (most recent first)
-          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
-          setAllTranscriptions(transcriptions);
-        }
-      } catch (error) {
-        console.error('Error loading transcriptions:', error);
-      }
-    };
-    loadTranscriptions();
-  }, []);
+  const {
+    transcribeAudio,
+    proxyStatuses,
+    isLoading,
+    analyzeAudio
+  } = useTranscriptionAPI(reloadTranscriptions);
 
-  // Extract audio duration and amplitude data from blob using Web Audio API
-  const analyzeAudio = useCallback(async (blob: Blob): Promise<{ durationMs?: number; amplitudes: number[] }> => {
-    try {
-      const arrayBuffer = await blob.arrayBuffer();
-      const audioContext = new AudioContext();
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-      // Extract audio samples from first channel
-      const channelData = audioBuffer.getChannelData(0);
-      const samples = channelData.length;
-      const durationMs = audioBuffer.duration * 1000; // Convert to milliseconds for precision
-
-      // Calculate amplitudes for visualization (divide into ~200 segments)
-      const segmentCount = Math.min(200, Math.floor(samples / 100));
-      const samplesPerSegment = Math.floor(samples / segmentCount);
-      const amplitudes: number[] = [];
-
-      for (let i = 0; i < segmentCount; i++) {
-        const start = i * samplesPerSegment;
-        const end = start + samplesPerSegment;
-        let sum = 0;
-
-        // Calculate RMS (Root Mean Square) for this segment
-        for (let j = start; j < end && j < samples; j++) {
-          sum += channelData[j] * channelData[j];
-        }
-
-        const rms = Math.sqrt(sum / samplesPerSegment);
-        amplitudes.push(rms);
-      }
-
-      await audioContext.close();
-      return { durationMs, amplitudes };
-    } catch (error) {
-      console.error('Error analyzing audio:', error);
-      return { amplitudes: [] };
-    }
-  }, []);
-
-  // Save transcription to history
-  const saveToHistory = useCallback(
-    async (text: string, durationMs?: number, audioAmplitudes?: number[]) => {
-      try {
-        const transcription: Transcription = {
-          id: `${Date.now()}`,
-          text,
-          timestamp: Date.now(),
-          durationMs,
-          audioAmplitudes
-        };
-        await window.api?.history.save(transcription);
-
-        // Update current transcription ID and reload list
-        setCurrentTranscriptionId(transcription.id);
-
-        // Reload transcriptions to include the new one
-        const result = await window.api?.history.loadAll();
-        if (result?.success && result.transcriptions) {
-          const transcriptions = result.transcriptions as Transcription[];
-          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
-          setAllTranscriptions(transcriptions);
-        }
-      } catch (error) {
-        console.error('Error saving to history:', error);
-      }
-    },
-    []
-  );
-
-  const transcribeAudio = useCallback(
-    async (blob: Blob, durationMs?: number, audioAmplitudes?: number[]) => {
-      if (!apiKey) {
-        console.error('API key is not configured');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('file', blob, 'recording.webm');
-      formData.append('model', 'gpt-4o-transcribe');
-
-      // Reset proxy statuses
-      setProxyStatuses(
-        PROXY_CONFIGS.reduce(
-          (acc, proxy) => ({ ...acc, [proxy.name]: 'loading' as ProxyStatus }),
-          {}
-        )
-      );
-
-      // Fetch with specific proxy
-      const fetchWithProxy = async (
-        proxy: ProxyConfig
-      ): Promise<TranscriptionResponse> => {
-        try {
-          const response = await fetch(proxy.url, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${apiKey}`
-            },
-            body: formData
-          });
-
-          if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
-            throw new Error(
-              data.error?.message || `Proxy error: ${proxy.name}`
-            );
-          }
-
-          const data: TranscriptionResponse = await response.json();
-          setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'success' }));
-          return data;
-        } catch (error) {
-          setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
-          throw error;
-        }
-      };
-
-      try {
-        // Promise.any() returns the first successful promise
-        const data = await Promise.any(
-          PROXY_CONFIGS.map(proxy => fetchWithProxy(proxy))
-        );
-
-        // Mark remaining proxies as cancelled
-        setProxyStatuses(prev => {
-          const newStatuses = { ...prev };
-          Object.keys(newStatuses).forEach(key => {
-            if (newStatuses[key] === 'loading') {
-              newStatuses[key] = 'cancelled';
-            }
-          });
-          return newStatuses;
-        });
-
-        setTranscript(data.text);
-        await navigator.clipboard.writeText(data.text);
-        // Save to history
-        await saveToHistory(data.text, durationMs, audioAmplitudes);
-      } catch (error) {
-        if (error instanceof AggregateError) {
-          console.error('All proxies failed:', error.errors);
-        } else {
-          console.error('Transcription error:', error);
-        }
-      }
-    },
-    [saveToHistory]
-  );
-
+  // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
-    try {
-      // Switch to home view and close sidebar when starting recording
-      setCurrentView('home');
-      setIsHistoryOpen(false);
+    // Switch to home view and close sidebar when starting recording
+    setCurrentView('home');
+    setIsHistoryOpen(false);
 
-      setIsRecording(true);
-      audioChunks.current = [];
+    await startAudioRecording(async (audioBlob) => {
+      // Analyze audio
+      const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
+      setAudioDuration(durationMs);
+      setAudioAmplitudes(amplitudes);
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStream.current = stream;
-
-      const recorder = new MediaRecorder(stream);
-      mediaRecorder.current = recorder;
-
-      recorder.ondataavailable = (e: BlobEvent) => {
-        if (e.data.size > 0) {
-          audioChunks.current.push(e.data);
+      // Transcribe and get the text
+      const text = await transcribeAudio(audioBlob, durationMs, amplitudes);
+      if (text) {
+        setTranscript(text);
+        // The transcription ID is set by the useTranscriptionAPI hook via reloadTranscriptions
+        // We need to manually set it after save
+        const result = await window.api?.history.loadAll();
+        if (result?.success && result.transcriptions) {
+          const transcriptions = result.transcriptions as Transcription[];
+          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+          if (transcriptions.length > 0) {
+            setCurrentTranscriptionId(transcriptions[0].id);
+          }
         }
-      };
-
-      recorder.onstop = async () => {
-        setIsLoading(true);
-
-        // Create audio blob and analyze it (duration + amplitudes)
-        const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
-
-        // Store duration and amplitudes for visualization
-        setAudioDuration(durationMs);
-        setAudioAmplitudes(amplitudes);
-
-        await transcribeAudio(audioBlob, durationMs, amplitudes);
-        setIsLoading(false);
-
-        // Cleanup stream
-        if (mediaStream.current) {
-          mediaStream.current.getTracks().forEach(track => track.stop());
-          mediaStream.current = null;
-        }
-      };
-
-      recorder.start();
-    } catch (error) {
-      console.error('Failed to start recording:', error);
-      setIsRecording(false);
-    }
-  }, [transcribeAudio, analyzeAudio]);
+      }
+    });
+  }, [startAudioRecording, analyzeAudio, transcribeAudio, setCurrentTranscriptionId]);
 
   const stopRecording = useCallback(() => {
-    if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
-      mediaRecorder.current.stop();
-      setIsRecording(false);
-      window.api?.send('stop-recording');
-    }
-  }, []);
+    stopAudioRecording();
+  }, [stopAudioRecording]);
 
-  // Hot key handler
-  useEffect(() => {
-    const handler = () => {
-      startRecording();
-    };
-
-    window.api?.on('show-mini-app-hot-key', handler);
-    return () => {
-      window.api?.removeListener('show-mini-app-hot-key', handler);
-    };
-  }, [startRecording]);
-
-  // Keyboard shortcut handler (X key)
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'x' && !xKeyIsDown.current) {
-        xKeyIsDown.current = true;
-        startRecording();
-      }
-    };
-
-    const handleKeyUp = () => {
-      if (isRecording) {
-        xKeyIsDown.current = false;
-        stopRecording();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown, {
-      signal: controller.signal
-    });
-    document.addEventListener('keyup', handleKeyUp, {
-      signal: controller.signal
-    });
-
-    return () => {
-      controller.abort();
-    };
-  }, [isRecording, startRecording, stopRecording]);
+  // Use keyboard shortcuts hook
+  useKeyboardShortcuts({
+    isRecording,
+    isHistoryOpen,
+    currentView,
+    startRecording,
+    stopRecording,
+    onNavigate: navigateTranscription
+  });
 
   // Auto-select transcript text
   useEffect(() => {
@@ -380,70 +117,19 @@ const HomePage = () => {
     setCurrentTranscriptionId(transcription.id);
     setIsHistoryOpen(false);
     setCurrentView('home');
-  }, []);
+  }, [setCurrentTranscriptionId]);
 
-  // Navigate to next/previous transcription
-  const navigateTranscription = useCallback((direction: 'next' | 'previous') => {
-    if (allTranscriptions.length === 0) return;
-
-    let targetIndex = 0;
-    if (currentTranscriptionId) {
-      const currentIndex = allTranscriptions.findIndex(t => t.id === currentTranscriptionId);
-      if (currentIndex !== -1) {
-        if (direction === 'next') {
-          // Next = more recent (lower index, since sorted desc by timestamp)
-          targetIndex = Math.max(0, currentIndex - 1);
-        } else {
-          // Previous = older (higher index)
-          targetIndex = Math.min(allTranscriptions.length - 1, currentIndex + 1);
-        }
-      }
-    }
-
-    const targetTranscription = allTranscriptions[targetIndex];
-    if (targetTranscription) {
-      // Set slide direction and trigger animation
-      setSlideDirection(direction === 'next' ? 'up' : 'down');
-
-      // Apply transcription after a short delay for animation
-      setTimeout(() => {
-        setTranscript(targetTranscription.text);
-        setAudioAmplitudes(targetTranscription.audioAmplitudes || []);
-        setAudioDuration(targetTranscription.durationMs);
-        setCurrentTranscriptionId(targetTranscription.id);
-
-        // Reset animation
-        setTimeout(() => setSlideDirection(null), 300);
-      }, 50);
-    }
-  }, [allTranscriptions, currentTranscriptionId]);
-
-  // Keyboard navigation (Arrow Up/Down)
+  // Update transcript when navigation changes currentTranscriptionId
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only on home view, not recording, and not in an input
-      if (
-        currentView !== 'home' ||
-        isRecording ||
-        isHistoryOpen ||
-        (e.target as HTMLElement).tagName === 'INPUT' ||
-        (e.target as HTMLElement).tagName === 'TEXTAREA'
-      ) {
-        return;
+    if (currentTranscriptionId && allTranscriptions.length > 0) {
+      const transcription = allTranscriptions.find(t => t.id === currentTranscriptionId);
+      if (transcription) {
+        setTranscript(transcription.text);
+        setAudioAmplitudes(transcription.audioAmplitudes || []);
+        setAudioDuration(transcription.durationMs);
       }
-
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        navigateTranscription('next'); // Up = future = more recent
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        navigateTranscription('previous'); // Down = past = older
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentView, isRecording, isHistoryOpen, navigateTranscription]);
+    }
+  }, [currentTranscriptionId, allTranscriptions]);
 
   const proxyStatusEntries = useMemo(
     () => Object.entries(proxyStatuses),
