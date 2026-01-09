@@ -65,7 +65,7 @@ const Statistics = () => {
       fill: rgba(59, 130, 246, 0.08) !important;
       rx: 12 !important;
       ry: 12 !important;
-      transform: scaleY(1.3);
+      transform: scaleY(1.4) translateY(-7px);
       transform-origin: center;
     }
 
