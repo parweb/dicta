@@ -474,6 +474,8 @@ const HomePage = () => {
               flexDirection: 'column',
               alignItems: 'start',
               gap: spacing.md,
+              maxHeight: '70vh',
+              overflowY: 'auto',
               WebkitAppRegion: 'no-drag'
             } as React.CSSProperties
           }
@@ -501,9 +503,10 @@ const HomePage = () => {
             }}
             style={{
               ...components.input.base,
-              flex: 1,
               alignSelf: 'stretch',
-              margin: 0
+              margin: 0,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
             }}
           >
             {transcript}
@@ -511,7 +514,7 @@ const HomePage = () => {
 
           {/* Audio waveform visualization */}
           {audioAmplitudes.length > 0 && (
-            <div style={{ marginTop: spacing.md }}>
+            <div style={{ marginTop: spacing.md, alignSelf: 'stretch' }}>
               <AudioWaveform
                 amplitudes={audioAmplitudes}
                 duration={audioDuration}

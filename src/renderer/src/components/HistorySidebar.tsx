@@ -238,6 +238,7 @@ const HistorySidebar = ({
                           duration={transcription.durationSeconds}
                           showDuration={false}
                           height={40}
+                          maxBars={80}
                         />
                       )}
                     </div>

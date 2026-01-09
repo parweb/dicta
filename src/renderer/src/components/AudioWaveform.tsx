@@ -6,17 +6,35 @@ interface AudioWaveformProps {
   duration?: number;
   showDuration?: boolean;
   height?: number;
+  maxBars?: number; // Maximum number of bars to display (for responsive)
 }
 
 const AudioWaveform = ({
   amplitudes,
   duration,
   showDuration = true,
-  height = 60
+  height = 60,
+  maxBars
 }: AudioWaveformProps) => {
   if (amplitudes.length === 0) return null;
 
-  const maxAmplitude = Math.max(...amplitudes);
+  // Downsample amplitudes if maxBars is specified and we have more bars
+  let displayAmplitudes = amplitudes;
+  if (maxBars && amplitudes.length > maxBars) {
+    const samplesPerBar = Math.ceil(amplitudes.length / maxBars);
+    displayAmplitudes = [];
+    for (let i = 0; i < maxBars; i++) {
+      const start = i * samplesPerBar;
+      const end = Math.min(start + samplesPerBar, amplitudes.length);
+      let sum = 0;
+      for (let j = start; j < end; j++) {
+        sum += amplitudes[j];
+      }
+      displayAmplitudes.push(sum / (end - start));
+    }
+  }
+
+  const maxAmplitude = Math.max(...displayAmplitudes);
 
   return (
     <div
@@ -67,7 +85,7 @@ const AudioWaveform = ({
           padding: spacing.sm
         }}
       >
-        {amplitudes.map((amplitude, index) => {
+        {displayAmplitudes.map((amplitude, index) => {
           // Normalize amplitude to 0-1 range
           const normalizedHeight =
             maxAmplitude > 0 ? (amplitude / maxAmplitude) * 100 : 0;
