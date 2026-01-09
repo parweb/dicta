@@ -12,6 +12,7 @@ import {
   getDayLabel,
   type Transcription
 } from '../lib/history';
+import { formatDuration } from '../lib/statistics';
 
 interface HistorySidebarProps {
   isOpen: boolean;
@@ -199,10 +200,19 @@ const HistorySidebar = ({
                         style={{
                           fontSize: typography.fontSize.sm,
                           color: colors.text.tertiary,
-                          marginBottom: '6px'
+                          marginBottom: '6px',
+                          display: 'flex',
+                          gap: spacing.sm,
+                          alignItems: 'center'
                         }}
                       >
-                        {formatRelativeTime(transcription.timestamp)}
+                        <span>{formatRelativeTime(transcription.timestamp)}</span>
+                        {transcription.durationSeconds && (
+                          <>
+                            <span>•</span>
+                            <span>{formatDuration(transcription.durationSeconds / 60)}</span>
+                          </>
+                        )}
                       </div>
                       <div
                         style={{
