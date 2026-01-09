@@ -64,12 +64,20 @@ const Layout = ({
           style={
             {
               ...components.button.base,
-              ...components.button.icon
+              ...components.button.icon,
+              ...(currentView === 'statistics' && {
+                backgroundColor: colors.text.primary,
+                borderRadius: '50%',
+                padding: spacing.sm
+              })
             } as React.CSSProperties
           }
           title={currentView === 'home' ? 'Statistiques' : 'Accueil'}
         >
-          <BarChart3 size={18} color={colors.text.primary} />
+          <BarChart3
+            size={18}
+            color={currentView === 'statistics' ? colors.background.primary : colors.text.primary}
+          />
         </button>
       </div>
 
