@@ -2,6 +2,7 @@ import { BarChart3, History } from 'lucide-react';
 import { ReactNode } from 'react';
 
 import { components, colors, spacing } from '../lib/design-system';
+import type { Transcription } from '../lib/history';
 import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
@@ -12,7 +13,7 @@ interface LayoutProps {
   onHistoryClose: () => void;
   isHistoryOpen: boolean;
   currentTranscript: string;
-  onSelectTranscription: (text: string) => void;
+  onSelectTranscription: (transcription: Transcription) => void;
 }
 
 const Layout = ({

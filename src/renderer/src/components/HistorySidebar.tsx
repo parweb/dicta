@@ -18,7 +18,7 @@ import { formatDuration } from '../lib/statistics';
 interface HistorySidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectTranscription: (text: string) => void;
+  onSelectTranscription: (transcription: Transcription) => void;
   currentTranscript: string;
 }
 
@@ -71,9 +71,9 @@ const HistorySidebar = ({
     [] as GroupedTranscriptions[]
   );
 
-  const handleTranscriptionClick = (text: string) => {
-    onSelectTranscription(text);
-    navigator.clipboard.writeText(text);
+  const handleTranscriptionClick = (transcription: Transcription) => {
+    onSelectTranscription(transcription);
+    navigator.clipboard.writeText(transcription.text);
   };
 
   if (!isOpen) return null;
@@ -166,7 +166,7 @@ const HistorySidebar = ({
                       <div
                         key={transcription.id}
                         onClick={() =>
-                          handleTranscriptionClick(transcription.text)
+                          handleTranscriptionClick(transcription)
                         }
                         style={{
                           padding: spacing.md,

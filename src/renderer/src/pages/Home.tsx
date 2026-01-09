@@ -341,8 +341,10 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  const handleSelectTranscription = useCallback((text: string) => {
-    setTranscript(text);
+  const handleSelectTranscription = useCallback((transcription: Transcription) => {
+    setTranscript(transcription.text);
+    setAudioAmplitudes(transcription.audioAmplitudes || []);
+    setAudioDuration(transcription.durationSeconds);
     setIsHistoryOpen(false);
   }, []);
 
