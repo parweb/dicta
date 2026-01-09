@@ -1,76 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  Brush,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
-} from 'recharts';
 
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../lib/design-system';
+import EmptyState from '../components/shared/EmptyState';
+import LoadingState from '../components/shared/LoadingState';
+import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
+import UsageChart from '../components/statistics/UsageChart';
+import { colors, spacing } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
-import {
-  calculateStatistics,
-  formatCost,
-  formatDuration,
-  type UsageStatistics
-} from '../lib/statistics';
+import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
 const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Custom CSS for Brush - magnifying glass effect with hidden travellers
-  const brushStyles = `
-    /* Remove container border */
-    .statistics-chart .recharts-brush > rect:first-child {
-      stroke: transparent !important;
-    }
-
-    /* Magnifying glass effect on brush slide */
-    .statistics-chart .recharts-brush-slide {
-      stroke: rgba(59, 130, 246, 0.6) !important;
-      stroke-width: 2 !important;
-      fill: rgba(59, 130, 246, 0.08) !important;
-      rx: 4 !important;
-      ry: 2.86 !important;
-      transform: translateY(-15%) scaleY(1.4);
-      transform-box: fill-box;
-      transform-origin: center center;
-    }
-
-    /* Hide travellers visually but keep them interactive */
-    .statistics-chart .recharts-brush-traveller,
-    .statistics-chart .recharts-brush-traveller * {
-      opacity: 0 !important;
-      fill: transparent !important;
-      stroke: transparent !important;
-      outline: none !important;
-    }
-
-    .statistics-chart .recharts-brush-traveller:focus,
-    .statistics-chart .recharts-brush-traveller:focus *,
-    .statistics-chart .recharts-brush-traveller:hover,
-    .statistics-chart .recharts-brush-traveller:hover *,
-    .statistics-chart .recharts-brush-traveller:active,
-    .statistics-chart .recharts-brush-traveller:active * {
-      opacity: 0 !important;
-      fill: transparent !important;
-      stroke: transparent !important;
-      outline: none !important;
-    }
-
-    .statistics-chart .recharts-brush-traveller {
-      cursor: ew-resize !important;
-    }
-  `;
 
   useEffect(() => {
     loadStatistics();
@@ -117,7 +57,6 @@ const Statistics = () => {
         boxSizing: 'border-box'
       }}
     >
-      <style>{brushStyles}</style>
       <div
         style={{
           padding: spacing['2xl'],
@@ -127,232 +66,17 @@ const Statistics = () => {
         }}
       >
         {isLoading ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: spacing['4xl'],
-              color: colors.text.tertiary
-            }}
-          >
-            Chargement des statistiques...
-          </div>
+          <LoadingState message="Chargement des statistiques..." />
         ) : !stats || stats.totalTranscriptions === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: spacing['4xl'],
-              color: colors.text.tertiary
-            }}
-          >
-            Aucune donnée disponible. Commencez par créer des transcriptions !
-          </div>
+          <EmptyState message="Aucune donnée disponible. Commencez par créer des transcriptions !" />
         ) : (
           <>
-            {/* Summary Cards */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: spacing.lg,
-                marginBottom: spacing['3xl']
-              }}
-            >
-              <div
-                style={{
-                  padding: spacing.xl
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: typography.fontSize.base,
-                    color: colors.text.tertiary,
-                    marginBottom: spacing.sm
-                  }}
-                >
-                  Total de requêtes
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.fontSize['2xl'],
-                    fontWeight: typography.fontWeight.bold,
-                    color: colors.text.primary
-                  }}
-                >
-                  {stats.totalTranscriptions}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: spacing.xl
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: typography.fontSize.base,
-                    color: colors.text.tertiary,
-                    marginBottom: spacing.sm
-                  }}
-                >
-                  Durée totale
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.fontSize['2xl'],
-                    fontWeight: typography.fontWeight.bold,
-                    color: colors.text.primary
-                  }}
-                >
-                  {formatDuration(stats.totalMinutes)}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: spacing.xl
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: typography.fontSize.base,
-                    color: colors.accent.blue.light,
-                    marginBottom: spacing.sm
-                  }}
-                >
-                  Coût total
-                </div>
-                <div
-                  style={{
-                    fontSize: typography.fontSize['2xl'],
-                    fontWeight: typography.fontWeight.bold,
-                    color: colors.accent.blue.primary
-                  }}
-                >
-                  {formatCost(stats.totalCost)}
-                </div>
-              </div>
-            </div>
-
-            {/* Chart */}
-            {stats.dailyUsage.length > 0 && (
-              <div
-                style={
-                  {
-                    padding: spacing['2xl'],
-                    WebkitAppRegion: 'no-drag'
-                  } as React.CSSProperties
-                }
-              >
-                <ResponsiveContainer
-                  width="100%"
-                  height={400}
-                  className="statistics-chart"
-                >
-                  <BarChart
-                    data={stats.dailyUsage}
-                    margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
-                  >
-                    <XAxis
-                      dataKey="date"
-                      stroke={colors.text.tertiary}
-                      style={{ fontSize: typography.fontSize.xs }}
-                      axisLine={false}
-                      tickLine={false}
-                      interval={Math.floor(stats.dailyUsage.length / 4)}
-                    />
-                    <YAxis hide />
-                    <Tooltip
-                      cursor={false}
-                      contentStyle={{
-                        backgroundColor: colors.background.primary,
-                        border: `1px solid ${colors.border.primary}`,
-                        borderRadius: borderRadius.md,
-                        fontSize: typography.fontSize.sm,
-                        padding: spacing.md
-                      }}
-                      content={props => {
-                        if (!props.active || !props.payload?.[0]) return null;
-                        const data = props.payload[0].payload;
-                        return (
-                          <div
-                            style={{
-                              backgroundColor: colors.background.primary,
-                              border: `1px solid ${colors.border.primary}`,
-                              borderRadius: borderRadius.md,
-                              padding: spacing.md
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: typography.fontSize.sm,
-                                color: colors.text.tertiary,
-                                marginBottom: '4px'
-                              }}
-                            >
-                              {data.date}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: typography.fontSize.base,
-                                color: colors.text.primary,
-                                fontWeight: typography.fontWeight.semibold
-                              }}
-                            >
-                              {data.count} requêtes • {formatDuration(data.minutes)}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: typography.fontSize.lg,
-                                color: colors.accent.blue.primary,
-                                fontWeight: typography.fontWeight.bold,
-                                marginTop: '4px'
-                              }}
-                            >
-                              {formatCost(data.cost)}
-                            </div>
-                          </div>
-                        );
-                      }}
-                    />
-                    <Bar
-                      dataKey="minutes"
-                      radius={[8, 8, 0, 0]}
-                      shape={(props: any) => {
-                        const { x, y, width, height, payload } = props;
-                        return (
-                          <rect
-                            x={x}
-                            y={y}
-                            width={width}
-                            height={height}
-                            fill={getBarColor(payload.minutes)}
-                            rx={8}
-                            ry={8}
-                          />
-                        );
-                      }}
-                    />
-                    <Brush
-                      dataKey="date"
-                      height={45}
-                      stroke="transparent"
-                      fill="transparent"
-                      travellerWidth={6}
-                      startIndex={Math.max(0, stats.dailyUsage.length - 30)}
-                    >
-                      <BarChart data={stats.dailyUsage} barCategoryGap="20%">
-                        <Bar
-                          dataKey="minutes"
-                          fill="#3b82f6"
-                          opacity={0.8}
-                          maxBarSize={1}
-                        />
-                      </BarChart>
-                    </Brush>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+            <StatsSummaryCards
+              totalTranscriptions={stats.totalTranscriptions}
+              totalMinutes={stats.totalMinutes}
+              totalCost={stats.totalCost}
+            />
+            <UsageChart dailyUsage={stats.dailyUsage} getBarColor={getBarColor} />
           </>
         )}
       </div>
