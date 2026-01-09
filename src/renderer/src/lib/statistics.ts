@@ -44,9 +44,13 @@ export function calculateStatistics(
   transcriptions.forEach(transcription => {
     const minute = startOfMinute(new Date(transcription.timestamp));
     const minuteKey = format(minute, 'yyyy-MM-dd HH:mm');
-    const estimatedMinutes = estimateAudioDuration(transcription.text);
 
-    totalEstimatedMinutes += estimatedMinutes;
+    // Use real duration if available, otherwise estimate from text
+    const durationMinutes = transcription.durationSeconds
+      ? transcription.durationSeconds / 60
+      : estimateAudioDuration(transcription.text);
+
+    totalEstimatedMinutes += durationMinutes;
 
     if (!minuteMap.has(minuteKey)) {
       minuteMap.set(minuteKey, {
@@ -59,7 +63,7 @@ export function calculateStatistics(
 
     const minuteData = minuteMap.get(minuteKey)!;
     minuteData.count += 1;
-    minuteData.estimatedMinutes += estimatedMinutes;
+    minuteData.estimatedMinutes += durationMinutes;
     minuteData.estimatedCost = minuteData.estimatedMinutes * COST_PER_MINUTE;
   });
 

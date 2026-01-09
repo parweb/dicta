@@ -60,6 +60,7 @@ const HomePage = () => {
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
   const mediaStream = useRef<MediaStream | null>(null);
   const xKeyIsDown = useRef(false);
+  const recordingStartTime = useRef<number>(0);
 
   // Request microphone permissions on mount
   useEffect(() => {
@@ -82,12 +83,13 @@ const HomePage = () => {
   }, []);
 
   // Save transcription to history
-  const saveToHistory = useCallback(async (text: string) => {
+  const saveToHistory = useCallback(async (text: string, durationSeconds?: number) => {
     try {
       const transcription: Transcription = {
         id: `${Date.now()}`,
         text,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        durationSeconds
       };
       await window.api?.history.save(transcription);
     } catch (error) {
@@ -96,7 +98,7 @@ const HomePage = () => {
   }, []);
 
   const transcribeAudio = useCallback(
-    async (blob: Blob) => {
+    async (blob: Blob, durationSeconds?: number) => {
       if (!apiKey) {
         console.error('API key is not configured');
         return;
@@ -164,7 +166,7 @@ const HomePage = () => {
         setTranscript(data.text);
         await navigator.clipboard.writeText(data.text);
         // Save to history
-        await saveToHistory(data.text);
+        await saveToHistory(data.text, durationSeconds);
       } catch (error) {
         if (error instanceof AggregateError) {
           console.error('All proxies failed:', error.errors);
@@ -199,8 +201,14 @@ const HomePage = () => {
 
       recorder.onstop = async () => {
         setIsLoading(true);
+
+        // Calculate recording duration in seconds
+        const durationSeconds = recordingStartTime.current > 0
+          ? (Date.now() - recordingStartTime.current) / 1000
+          : undefined;
+
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        await transcribeAudio(audioBlob);
+        await transcribeAudio(audioBlob, durationSeconds);
         setIsLoading(false);
 
         // Cleanup stream
@@ -210,6 +218,8 @@ const HomePage = () => {
         }
       };
 
+      // Capture start time and start recording
+      recordingStartTime.current = Date.now();
       recorder.start();
     } catch (error) {
       console.error('Failed to start recording:', error);

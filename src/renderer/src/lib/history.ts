@@ -5,6 +5,7 @@ export interface Transcription {
   id: string;
   text: string;
   timestamp: number;
+  durationSeconds?: number; // Duration of the audio recording in seconds
 }
 
 export interface TranscriptionsByDay {
