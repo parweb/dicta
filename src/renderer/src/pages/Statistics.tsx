@@ -517,6 +517,7 @@ const Statistics = () => {
                                   width={width}
                                   height={height}
                                   fill={isInRange ? '#ffffff' : '#60a5fa'}
+                                  style={{ pointerEvents: 'none' }}
                                 />
                               );
                             }}
