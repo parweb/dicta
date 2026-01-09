@@ -54,6 +54,7 @@ const HomePage = () => {
   >(INITIAL_PROXY_STATUSES);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
+  const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
 
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
@@ -81,17 +82,42 @@ const HomePage = () => {
     };
   }, []);
 
-  // Extract audio duration from blob using Web Audio API
-  const getAudioDuration = useCallback(async (blob: Blob): Promise<number | undefined> => {
+  // Extract audio duration and amplitude data from blob using Web Audio API
+  const analyzeAudio = useCallback(async (blob: Blob): Promise<{ duration?: number; amplitudes: number[] }> => {
     try {
       const arrayBuffer = await blob.arrayBuffer();
       const audioContext = new AudioContext();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+      // Extract audio samples from first channel
+      const channelData = audioBuffer.getChannelData(0);
+      const samples = channelData.length;
+      const duration = audioBuffer.duration;
+
+      // Calculate amplitudes for visualization (divide into ~200 segments)
+      const segmentCount = Math.min(200, Math.floor(samples / 100));
+      const samplesPerSegment = Math.floor(samples / segmentCount);
+      const amplitudes: number[] = [];
+
+      for (let i = 0; i < segmentCount; i++) {
+        const start = i * samplesPerSegment;
+        const end = start + samplesPerSegment;
+        let sum = 0;
+
+        // Calculate RMS (Root Mean Square) for this segment
+        for (let j = start; j < end && j < samples; j++) {
+          sum += channelData[j] * channelData[j];
+        }
+
+        const rms = Math.sqrt(sum / samplesPerSegment);
+        amplitudes.push(rms);
+      }
+
       await audioContext.close();
-      return audioBuffer.duration;
+      return { duration, amplitudes };
     } catch (error) {
-      console.error('Error getting audio duration:', error);
-      return undefined;
+      console.error('Error analyzing audio:', error);
+      return { amplitudes: [] };
     }
   }, []);
 
@@ -215,11 +241,14 @@ const HomePage = () => {
       recorder.onstop = async () => {
         setIsLoading(true);
 
-        // Create audio blob and extract its real duration
+        // Create audio blob and analyze it (duration + amplitudes)
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        const durationSeconds = await getAudioDuration(audioBlob);
+        const { duration, amplitudes } = await analyzeAudio(audioBlob);
 
-        await transcribeAudio(audioBlob, durationSeconds);
+        // Store amplitudes for visualization
+        setAudioAmplitudes(amplitudes);
+
+        await transcribeAudio(audioBlob, duration);
         setIsLoading(false);
 
         // Cleanup stream
@@ -234,7 +263,7 @@ const HomePage = () => {
       console.error('Failed to start recording:', error);
       setIsRecording(false);
     }
-  }, [transcribeAudio, getAudioDuration]);
+  }, [transcribeAudio, analyzeAudio]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
@@ -472,6 +501,64 @@ const HomePage = () => {
           >
             {transcript}
           </p>
+
+          {/* Audio waveform visualization */}
+          {audioAmplitudes.length > 0 && (
+            <div
+              style={{
+                alignSelf: 'stretch',
+                marginTop: spacing.md
+              }}
+            >
+              <h4
+                style={{
+                  fontSize: typography.fontSize.xs,
+                  color: colors.text.tertiary,
+                  margin: 0,
+                  marginBottom: spacing.sm
+                }}
+              >
+                Forme d'onde audio:
+              </h4>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '1px',
+                  height: '60px',
+                  alignItems: 'flex-end',
+                  backgroundColor: colors.background.primary,
+                  borderRadius: borderRadius.md,
+                  padding: spacing.sm
+                }}
+              >
+                {audioAmplitudes.map((amplitude, index) => {
+                  // Normalize amplitude to 0-1 range
+                  const maxAmplitude = Math.max(...audioAmplitudes);
+                  const normalizedHeight = maxAmplitude > 0
+                    ? (amplitude / maxAmplitude) * 100
+                    : 0;
+
+                  // Color based on amplitude (quiet = blue, loud = white)
+                  const opacity = 0.3 + (amplitude / maxAmplitude) * 0.7;
+
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        flex: 1,
+                        height: `${Math.max(2, normalizedHeight)}%`,
+                        backgroundColor: colors.accent.blue.primary,
+                        opacity,
+                        borderRadius: '1px',
+                        minWidth: '1px'
+                      }}
+                      title={`Segment ${index + 1}: ${(amplitude * 100).toFixed(1)}%`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
         </div>
