@@ -85,7 +85,7 @@ const HomePage = () => {
   }, []);
 
   // Extract audio duration and amplitude data from blob using Web Audio API
-  const analyzeAudio = useCallback(async (blob: Blob): Promise<{ duration?: number; amplitudes: number[] }> => {
+  const analyzeAudio = useCallback(async (blob: Blob): Promise<{ durationMs?: number; amplitudes: number[] }> => {
     try {
       const arrayBuffer = await blob.arrayBuffer();
       const audioContext = new AudioContext();
@@ -94,7 +94,7 @@ const HomePage = () => {
       // Extract audio samples from first channel
       const channelData = audioBuffer.getChannelData(0);
       const samples = channelData.length;
-      const duration = audioBuffer.duration;
+      const durationMs = audioBuffer.duration * 1000; // Convert to milliseconds for precision
 
       // Calculate amplitudes for visualization (divide into ~200 segments)
       const segmentCount = Math.min(200, Math.floor(samples / 100));
@@ -116,7 +116,7 @@ const HomePage = () => {
       }
 
       await audioContext.close();
-      return { duration, amplitudes };
+      return { durationMs, amplitudes };
     } catch (error) {
       console.error('Error analyzing audio:', error);
       return { amplitudes: [] };
@@ -125,13 +125,13 @@ const HomePage = () => {
 
   // Save transcription to history
   const saveToHistory = useCallback(
-    async (text: string, durationSeconds?: number, audioAmplitudes?: number[]) => {
+    async (text: string, durationMs?: number, audioAmplitudes?: number[]) => {
       try {
         const transcription: Transcription = {
           id: `${Date.now()}`,
           text,
           timestamp: Date.now(),
-          durationSeconds,
+          durationMs,
           audioAmplitudes
         };
         await window.api?.history.save(transcription);
@@ -143,7 +143,7 @@ const HomePage = () => {
   );
 
   const transcribeAudio = useCallback(
-    async (blob: Blob, durationSeconds?: number, audioAmplitudes?: number[]) => {
+    async (blob: Blob, durationMs?: number, audioAmplitudes?: number[]) => {
       if (!apiKey) {
         console.error('API key is not configured');
         return;
@@ -211,7 +211,7 @@ const HomePage = () => {
         setTranscript(data.text);
         await navigator.clipboard.writeText(data.text);
         // Save to history
-        await saveToHistory(data.text, durationSeconds, audioAmplitudes);
+        await saveToHistory(data.text, durationMs, audioAmplitudes);
       } catch (error) {
         if (error instanceof AggregateError) {
           console.error('All proxies failed:', error.errors);
@@ -249,13 +249,13 @@ const HomePage = () => {
 
         // Create audio blob and analyze it (duration + amplitudes)
         const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-        const { duration, amplitudes } = await analyzeAudio(audioBlob);
+        const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
 
         // Store duration and amplitudes for visualization
-        setAudioDuration(duration);
+        setAudioDuration(durationMs);
         setAudioAmplitudes(amplitudes);
 
-        await transcribeAudio(audioBlob, duration, amplitudes);
+        await transcribeAudio(audioBlob, durationMs, amplitudes);
         setIsLoading(false);
 
         // Cleanup stream
@@ -344,7 +344,7 @@ const HomePage = () => {
   const handleSelectTranscription = useCallback((transcription: Transcription) => {
     setTranscript(transcription.text);
     setAudioAmplitudes(transcription.audioAmplitudes || []);
-    setAudioDuration(transcription.durationSeconds);
+    setAudioDuration(transcription.durationMs);
     setIsHistoryOpen(false);
   }, []);
 

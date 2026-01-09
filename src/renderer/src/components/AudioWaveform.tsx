@@ -3,7 +3,7 @@ import { formatDuration } from '../lib/statistics';
 
 interface AudioWaveformProps {
   amplitudes: number[];
-  duration?: number;
+  duration?: number; // Duration in milliseconds
   showDuration?: boolean;
   height?: number;
   maxBars?: number; // Maximum number of bars to display (for responsive)
@@ -71,7 +71,7 @@ const AudioWaveform = ({
               fontWeight: typography.fontWeight.medium
             }}
           >
-            {formatDuration(duration / 60)}
+            {formatDuration(duration / 60000)}
           </span>
         )}
       </div>

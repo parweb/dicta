@@ -46,9 +46,9 @@ export function calculateStatistics(
     const minute = startOfMinute(new Date(transcription.timestamp));
     const minuteKey = format(minute, 'yyyy-MM-dd HH:mm');
 
-    // Use real duration if available, otherwise estimate from text
-    let durationMinutes = transcription.durationSeconds
-      ? transcription.durationSeconds / 60
+    // Use real duration if available (stored in ms), otherwise estimate from text
+    let durationMinutes = transcription.durationMs
+      ? transcription.durationMs / 60000
       : estimateAudioDuration(transcription.text || '');
 
     // Ensure we have a valid number

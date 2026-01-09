@@ -208,10 +208,10 @@ const HistorySidebar = ({
                         }}
                       >
                         <span>{formatRelativeTime(transcription.timestamp)}</span>
-                        {transcription.durationSeconds && (
+                        {transcription.durationMs && (
                           <>
                             <span>•</span>
-                            <span>{formatDuration(transcription.durationSeconds / 60)}</span>
+                            <span>{formatDuration(transcription.durationMs / 60000)}</span>
                           </>
                         )}
                       </div>
@@ -235,7 +235,7 @@ const HistorySidebar = ({
                       {transcription.audioAmplitudes && transcription.audioAmplitudes.length > 0 && (
                         <AudioWaveform
                           amplitudes={transcription.audioAmplitudes}
-                          duration={transcription.durationSeconds}
+                          duration={transcription.durationMs}
                           showDuration={false}
                           height={40}
                           maxBars={80}

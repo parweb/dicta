@@ -5,7 +5,7 @@ export interface Transcription {
   id: string;
   text: string;
   timestamp: number;
-  durationSeconds?: number; // Duration of the audio recording in seconds
+  durationMs?: number; // Duration of the audio recording in milliseconds
   audioAmplitudes?: number[]; // Audio waveform amplitude data for visualization
 }
 
