@@ -299,12 +299,12 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   color: colors.text.tertiary,
                   alignItems: 'center',
                   paddingLeft: '64px',
-                  paddingTop: spacing.xs,
+                  paddingTop: isHovered ? spacing.xs : '0',
                   opacity: isHovered ? 1 : 0,
                   transform: isHovered ? 'translateY(0)' : 'translateY(-4px)',
-                  transition: 'opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1), transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
+                  transition: 'max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding-top 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s',
                   pointerEvents: 'none',
-                  height: isHovered ? 'auto' : '0',
+                  maxHeight: isHovered ? '50px' : '0',
                   overflow: 'hidden'
                 }}
               >
