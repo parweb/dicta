@@ -160,7 +160,8 @@ export const shadows = {
 
 export const charts = {
   bar: {
-    fill: '#3b82f6' // sky-500 for recharts compatibility
+    fill: '#3b82f6', // sky-500 for recharts compatibility
+    rgb: '59, 130, 246' // RGB values for dynamic opacity
   },
   brush: {
     stroke: 'rgba(59, 130, 246, 0.6)', // sky-500 with opacity

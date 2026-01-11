@@ -4,7 +4,7 @@ import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
 import UsageChart from '../components/statistics/UsageChart';
-import { colors, spacing } from '../lib/design-system';
+import { colors, spacing, charts } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
@@ -42,7 +42,7 @@ const Statistics = () => {
     if (maxMinutes === 0) return colors.accent.blue.primary;
     const ratio = minutes / maxMinutes;
     // Opacity-based: same color, varying opacity
-    return `rgba(59, 130, 246, ${0.3 + ratio * 0.7})`;
+    return `rgba(${charts.bar.rgb}, ${0.3 + ratio * 0.7})`;
   };
 
   return (
