@@ -10,10 +10,10 @@ import {
 
 import ChartTooltip from './ChartTooltip';
 import { colors, spacing, typography, charts } from '../../lib/design-system';
-import type { DailyUsage } from '../../lib/statistics';
+import type { UsageData } from '../../lib/statistics';
 
 interface UsageChartProps {
-  dailyUsage: DailyUsage[];
+  dailyUsage: UsageData[];
   getBarColor: (minutes: number) => string;
 }
 

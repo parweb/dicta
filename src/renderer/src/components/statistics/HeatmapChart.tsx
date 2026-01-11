@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
-import type { DailyUsage } from '../../lib/statistics';
+import type { UsageData } from '../../lib/statistics';
 
 interface HeatmapChartProps {
-  dailyUsage: DailyUsage[];
+  dailyUsage: UsageData[];
 }
 
 interface HeatmapCell {
@@ -12,8 +12,7 @@ interface HeatmapCell {
   count: number;
   minutes: number;
   cost: number;
-  dayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
-  weekIndex: number;
+  dayOfWeek: number; // 0 = Monday, 1 = Tuesday, etc.
 }
 
 const HeatmapChart = ({ dailyUsage }: HeatmapChartProps) => {
@@ -22,42 +21,60 @@ const HeatmapChart = ({ dailyUsage }: HeatmapChartProps) => {
 
   if (dailyUsage.length === 0) return null;
 
-  // Prepare data: create a map of date -> usage
-  const usageMap = new Map<string, DailyUsage>();
-  dailyUsage.forEach(day => {
-    usageMap.set(day.date, day);
+  // Aggregate usage data by day (dailyUsage is per minute, we need per day)
+  const dailyAggregated = new Map<string, { count: number; minutes: number; cost: number }>();
+
+  dailyUsage.forEach(usage => {
+    // Parse the date string format "12 Jan 14:30" to extract day
+    const dateMatch = usage.date.match(/(\d{1,2})\s+(\w+)/);
+    if (!dateMatch) return;
+
+    const [, day, month] = dateMatch;
+    const monthNum = ['jan', 'fév', 'mars', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc']
+      .findIndex(m => month.toLowerCase().startsWith(m));
+
+    if (monthNum === -1) return;
+
+    const year = new Date().getFullYear();
+    const dateKey = `${year}-${String(monthNum + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    const existing = dailyAggregated.get(dateKey) || { count: 0, minutes: 0, cost: 0 };
+    existing.count += usage.count;
+    existing.minutes += usage.minutes;
+    existing.cost += usage.cost;
+    dailyAggregated.set(dateKey, existing);
   });
 
   // Calculate heatmap grid (last 12 weeks)
   const weeks = 12;
   const today = new Date();
   const startDate = new Date(today);
-  startDate.setDate(today.getDate() - weeks * 7);
+  startDate.setDate(today.getDate() - weeks * 7 + 1);
+
+  // Start from the first Monday
+  const dayOfWeek = startDate.getDay();
+  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+  startDate.setDate(startDate.getDate() + diff);
 
   // Generate all cells
   const cells: HeatmapCell[] = [];
   const currentDate = new Date(startDate);
 
-  // Start from the first day of the week (Monday)
-  const dayOfWeek = currentDate.getDay();
-  const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days, else go to Monday
-  currentDate.setDate(currentDate.getDate() + diff);
-
-  let weekIndex = 0;
   for (let i = 0; i < weeks * 7; i++) {
+    const dateKey = currentDate.toISOString().split('T')[0];
     const dateStr = currentDate.toLocaleDateString('fr-FR', {
       day: '2-digit',
       month: '2-digit'
     });
-    const usage = usageMap.get(dateStr);
+
+    const usage = dailyAggregated.get(dateKey) || { count: 0, minutes: 0, cost: 0 };
 
     cells.push({
       date: dateStr,
-      count: usage?.count || 0,
-      minutes: usage?.minutes || 0,
-      cost: usage?.cost || 0,
-      dayOfWeek: (currentDate.getDay() + 6) % 7, // Convert to Monday = 0
-      weekIndex: Math.floor(i / 7)
+      count: usage.count,
+      minutes: usage.minutes,
+      cost: usage.cost,
+      dayOfWeek: (currentDate.getDay() + 6) % 7 // Convert to Monday = 0
     });
 
     currentDate.setDate(currentDate.getDate() + 1);
@@ -92,11 +109,13 @@ const HeatmapChart = ({ dailyUsage }: HeatmapChartProps) => {
 
   return (
     <div
-      style={{
-        padding: spacing['2xl'],
-        WebkitAppRegion: 'no-drag',
-        position: 'relative'
-      }}
+      style={
+        {
+          padding: spacing['2xl'],
+          WebkitAppRegion: 'no-drag',
+          position: 'relative'
+        } as React.CSSProperties
+      }
     >
       <div
         style={{
@@ -113,7 +132,7 @@ const HeatmapChart = ({ dailyUsage }: HeatmapChartProps) => {
             paddingTop: '20px'
           }}
         >
-          {dayLabels.map((label, index) => (
+          {dayLabels.map((label) => (
             <div
               key={label}
               style={{
