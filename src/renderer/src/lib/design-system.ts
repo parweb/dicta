@@ -104,6 +104,18 @@ export const typography = {
     medium: 500,
     semibold: 600,
     bold: 700
+  },
+  lineHeight: {
+    tight: '1.2',
+    normal: '1.4',
+    relaxed: '1.6',
+    loose: '1.8'
+  },
+  letterSpacing: {
+    tight: '-0.5px',
+    normal: '0px',
+    wide: '0.5px',
+    wider: '1px'
   }
 } as const;
 
@@ -112,10 +124,23 @@ export const typography = {
 // =============================================================================
 
 export const borderRadius = {
+  xs: '1px',
   sm: '5px',
   md: '6px',
   lg: '8px',
   full: '50%'
+} as const;
+
+// =============================================================================
+// BORDERS
+// =============================================================================
+
+export const borders = {
+  light: '1px solid rgba(255, 255, 255, 0.1)',
+  medium: '1px solid rgba(255, 255, 255, 0.3)',
+  primary: `1px solid ${colors.border.primary}`,
+  secondary: `1px solid ${colors.border.secondary}`,
+  accent: `1px solid ${colors.border.accent}`
 } as const;
 
 // =============================================================================
@@ -127,6 +152,20 @@ export const shadows = {
   md: '0 4px 6px rgba(0, 0, 0, 0.3)',
   lg: '2px 0 8px rgba(0, 0, 0, 0.5)',
   inner: 'inset 0 0 2px rgba(0, 0, 0, 0.3)'
+} as const;
+
+// =============================================================================
+// CHARTS
+// =============================================================================
+
+export const charts = {
+  bar: {
+    fill: '#3b82f6' // sky-500 for recharts compatibility
+  },
+  brush: {
+    stroke: 'rgba(59, 130, 246, 0.6)', // sky-500 with opacity
+    fill: 'rgba(59, 130, 246, 0.08)' // sky-500 with low opacity
+  }
 } as const;
 
 // =============================================================================
