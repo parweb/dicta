@@ -9,12 +9,13 @@ import SimpleHourlyChart from '../components/statistics/SimpleHourlyChart';
 import SimpleHybridChart from '../components/statistics/SimpleHybridChart';
 import SimpleTimelineChart from '../components/statistics/SimpleTimelineChart';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
+import TimelineGridChart from '../components/statistics/TimelineGridChart';
 import UsageChart from '../components/statistics/UsageChart';
 import { borderRadius, colors, spacing, charts, components, typography } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
-type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid' | 'enhanced';
+type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid' | 'enhanced' | 'grid';
 
 const chartOptions: { value: ChartType; label: string; description: string }[] = [
   { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
@@ -22,7 +23,8 @@ const chartOptions: { value: ChartType; label: string; description: string }[] =
   { value: 'timeline', label: 'Timeline', description: 'Événements sur axe temporel' },
   { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
   { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' },
-  { value: 'enhanced', label: 'Vue hybride améliorée', description: 'Design minimal avec modal et timeline' }
+  { value: 'enhanced', label: 'Vue hybride améliorée', description: 'Design minimal avec modal et timeline' },
+  { value: 'grid', label: 'Grille de timelines', description: 'Graphiques détaillés pour chaque heure' }
 ];
 
 const Statistics = () => {
@@ -246,6 +248,9 @@ const Statistics = () => {
             )}
             {chartType === 'enhanced' && (
               <EnhancedHybridChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'grid' && (
+              <TimelineGridChart transcriptions={transcriptions} />
             )}
           </>
         )}
