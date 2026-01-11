@@ -1,16 +1,19 @@
+import { BarChart3, Grid3x3 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
+import HeatmapChart from '../components/statistics/HeatmapChart';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
 import UsageChart from '../components/statistics/UsageChart';
-import { colors, spacing, charts } from '../lib/design-system';
+import { borderRadius, colors, spacing, charts, components, typography } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
 const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [chartType, setChartType] = useState<'bar' | 'heatmap'>('bar');
 
   useEffect(() => {
     loadStatistics();
@@ -71,12 +74,69 @@ const Statistics = () => {
           <EmptyState message="Aucune donnée disponible. Commencez par créer des transcriptions !" />
         ) : (
           <>
+            {/* Toggle button for chart type */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: spacing.lg,
+                gap: spacing.sm,
+                WebkitAppRegion: 'no-drag'
+              } as React.CSSProperties}
+            >
+              <button
+                onClick={() => setChartType('bar')}
+                style={{
+                  ...components.button.base,
+                  padding: spacing.md,
+                  backgroundColor: chartType === 'bar' ? colors.accent.blue.background : 'transparent',
+                  border: `1px solid ${chartType === 'bar' ? colors.accent.blue.primary : colors.border.primary}`,
+                  borderRadius: borderRadius.md,
+                  color: chartType === 'bar' ? colors.accent.blue.primary : colors.text.secondary,
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.xs
+                }}
+                title="Vue en barres"
+              >
+                <BarChart3 size={16} />
+                <span>Barres</span>
+              </button>
+              <button
+                onClick={() => setChartType('heatmap')}
+                style={{
+                  ...components.button.base,
+                  padding: spacing.md,
+                  backgroundColor: chartType === 'heatmap' ? colors.accent.blue.background : 'transparent',
+                  border: `1px solid ${chartType === 'heatmap' ? colors.accent.blue.primary : colors.border.primary}`,
+                  borderRadius: borderRadius.md,
+                  color: chartType === 'heatmap' ? colors.accent.blue.primary : colors.text.secondary,
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.xs
+                }}
+                title="Vue heatmap"
+              >
+                <Grid3x3 size={16} />
+                <span>Heatmap</span>
+              </button>
+            </div>
+
             <StatsSummaryCards
               totalTranscriptions={stats.totalTranscriptions}
               totalMinutes={stats.totalMinutes}
               totalCost={stats.totalCost}
             />
-            <UsageChart dailyUsage={stats.dailyUsage} getBarColor={getBarColor} />
+
+            {chartType === 'bar' ? (
+              <UsageChart dailyUsage={stats.dailyUsage} getBarColor={getBarColor} />
+            ) : (
+              <HeatmapChart dailyUsage={stats.dailyUsage} />
+            )}
           </>
         )}
       </div>
