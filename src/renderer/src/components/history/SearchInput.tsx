@@ -6,14 +6,16 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  style?: React.CSSProperties;
 }
 
-const SearchInput = ({ value, onChange, placeholder = 'Rechercher...' }: SearchInputProps) => {
+const SearchInput = ({ value, onChange, placeholder = 'Rechercher...', style }: SearchInputProps) => {
   return (
     <div
       style={{
         position: 'relative',
-        marginBottom: spacing.lg
+        marginBottom: spacing.lg,
+        ...style
       }}
     >
       <div

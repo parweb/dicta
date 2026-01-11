@@ -137,7 +137,7 @@ const HistorySidebar = ({
               >
                 <div
                   style={{
-                    display: 'inline-flex',
+                    display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     minWidth: '28px',
@@ -157,6 +157,7 @@ const HistorySidebar = ({
                   value={searchQuery}
                   onChange={setSearchQuery}
                   placeholder="Rechercher dans l'historique..."
+                  style={{ flex: 1, marginBottom: 0 }}
                 />
               </div>
             </div>
