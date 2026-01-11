@@ -26,6 +26,11 @@ const pixelSchema = z
   .string()
   .regex(/^\d+px$/, 'Must be a pixel value (e.g., "12px")');
 
+// Pixel value that can be negative or zero: "-1px", "0px", "12px"
+const signedPixelSchema = z
+  .string()
+  .regex(/^-?\d+px$/, 'Must be a pixel value (e.g., "12px", "-1px")');
+
 // Percentage value: "50%"
 const percentageSchema = z
   .string()
@@ -156,10 +161,10 @@ export const themeSchema = z.object({
       loose: numberStringSchema
     }),
     letterSpacing: z.object({
-      tight: pixelSchema,
-      normal: pixelSchema,
-      wide: pixelSchema,
-      wider: pixelSchema
+      tight: signedPixelSchema,
+      normal: signedPixelSchema,
+      wide: signedPixelSchema,
+      wider: signedPixelSchema
     })
   }),
   borderRadius: z.object({

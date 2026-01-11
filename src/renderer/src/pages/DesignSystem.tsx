@@ -725,113 +725,133 @@ const Section = ({
   title: string;
   description: string;
   children: React.ReactNode;
-}) => (
-  <div
-    style={{
-      marginBottom: spacing['4xl']
-    }}
-  >
+}) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography } = theme;
+
+  return (
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: spacing.md,
-        marginBottom: spacing.md
+        marginBottom: spacing['4xl']
       }}
     >
-      <div style={{ color: colors.accent.blue.primary }}>{icon}</div>
-      <h2
+      <div
         style={{
-          fontSize: typography.fontSize.xl,
-          fontWeight: typography.fontWeight.bold,
-          color: colors.text.primary
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.md,
+          marginBottom: spacing.md
+        }}
+      >
+        <div style={{ color: colors.accent.blue.primary }}>{icon}</div>
+        <h2
+          style={{
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.bold,
+            color: colors.text.primary
+          }}
+        >
+          {title}
+        </h2>
+      </div>
+      <p
+        style={{
+          fontSize: typography.fontSize.sm,
+          color: colors.text.tertiary,
+          marginBottom: spacing.xl,
+          lineHeight: typography.lineHeight.relaxed
+        }}
+      >
+        {description}
+      </p>
+      {children}
+    </div>
+  );
+};
+
+const SubSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography } = theme;
+
+  return (
+    <div
+      style={{
+        marginBottom: spacing.xl
+      }}
+    >
+      <h4
+        style={{
+          fontSize: typography.fontSize.base,
+          fontWeight: typography.fontWeight.semibold,
+          color: colors.text.secondary,
+          marginBottom: spacing.lg
         }}
       >
         {title}
-      </h2>
+      </h4>
+      {children}
     </div>
-    <p
-      style={{
-        fontSize: typography.fontSize.sm,
-        color: colors.text.tertiary,
-        marginBottom: spacing.xl,
-        lineHeight: typography.lineHeight.relaxed
-      }}
-    >
-      {description}
-    </p>
-    {children}
-  </div>
-);
+  );
+};
 
-const SubSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div
-    style={{
-      marginBottom: spacing.xl
-    }}
-  >
-    <h4
-      style={{
-        fontSize: typography.fontSize.base,
-        fontWeight: typography.fontWeight.semibold,
-        color: colors.text.secondary,
-        marginBottom: spacing.lg
-      }}
-    >
-      {title}
-    </h4>
-    {children}
-  </div>
-);
+const ColorGrid = ({ children }: { children: React.ReactNode }) => {
+  const { theme } = useTheme();
+  const { spacing } = theme;
 
-const ColorGrid = ({ children }: { children: React.ReactNode }) => (
-  <div
-    style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-      gap: spacing.lg
-    }}
-  >
-    {children}
-  </div>
-);
-
-const ColorCard = ({ name, hex }: { name: string; hex: string }) => (
-  <div
-    style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: spacing.sm
-    }}
-  >
+  return (
     <div
       style={{
-        height: '80px',
-        backgroundColor: hex,
-        borderRadius: borderRadius.md,
-        border: borders.light
-      }}
-    />
-    <div
-      style={{
-        fontSize: typography.fontSize.sm,
-        fontWeight: typography.fontWeight.medium,
-        color: colors.text.secondary
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+        gap: spacing.lg
       }}
     >
-      {name}
+      {children}
     </div>
+  );
+};
+
+const ColorCard = ({ name, hex }: { name: string; hex: string }) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius, borders } = theme;
+
+  return (
     <div
       style={{
-        fontSize: typography.fontSize.xs,
-        color: colors.text.tertiary,
-        fontFamily: 'monospace'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.sm
       }}
     >
-      {hex}
+      <div
+        style={{
+          height: '80px',
+          backgroundColor: hex,
+          borderRadius: borderRadius.md,
+          border: borders.light
+        }}
+      />
+      <div
+        style={{
+          fontSize: typography.fontSize.sm,
+          fontWeight: typography.fontWeight.medium,
+          color: colors.text.secondary
+        }}
+      >
+        {name}
+      </div>
+      <div
+        style={{
+          fontSize: typography.fontSize.xs,
+          color: colors.text.tertiary,
+          fontFamily: 'monospace'
+        }}
+      >
+        {hex}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Missing icon import
 const BarChart3Icon = ({ size }: { size: number }) => (

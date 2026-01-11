@@ -95,7 +95,7 @@ export const darkTheme: ThemeConfig = {
       loose: '1.8'
     },
     letterSpacing: {
-      tight: '-0px',
+      tight: '0px',
       normal: '0px',
       wide: '0px',
       wider: '1px'
@@ -199,7 +199,7 @@ export const lightTheme: ThemeConfig = {
       loose: '1.8'
     },
     letterSpacing: {
-      tight: '-0px',
+      tight: '0px',
       normal: '0px',
       wide: '0px',
       wider: '1px'
@@ -303,7 +303,7 @@ export const highContrastTheme: ThemeConfig = {
       loose: '2.0'
     },
     letterSpacing: {
-      tight: '-0px',
+      tight: '0px',
       normal: '0px',
       wide: '1px',
       wider: '2px'
