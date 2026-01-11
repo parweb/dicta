@@ -1,17 +1,13 @@
 import { Palette, Type, Ruler, Circle, Square, Sparkles } from 'lucide-react';
 
-import {
-  borderRadius,
-  borders,
-  charts,
-  colors,
-  components,
-  shadows,
-  spacing,
-  typography
-} from '../lib/design-system';
+import { useTheme } from '../lib/theme-context';
 
 const DesignSystem = () => {
+  // Use theme from context for live preview
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius, borders, shadows, charts, components } =
+    theme;
+
   return (
     <div
       style={{
