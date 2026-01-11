@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
+import DailyTimelineGridChart from '../components/statistics/DailyTimelineGridChart';
 import EnhancedHybridChart from '../components/statistics/EnhancedHybridChart';
 import SimpleActivityStreamChart from '../components/statistics/SimpleActivityStreamChart';
 import SimpleHourlyChart from '../components/statistics/SimpleHourlyChart';
@@ -15,7 +16,7 @@ import { borderRadius, colors, spacing, charts, components, typography } from '.
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
-type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid' | 'enhanced' | 'grid';
+type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid' | 'enhanced' | 'grid' | 'daily';
 
 const chartOptions: { value: ChartType; label: string; description: string }[] = [
   { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
@@ -24,7 +25,8 @@ const chartOptions: { value: ChartType; label: string; description: string }[] =
   { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
   { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' },
   { value: 'enhanced', label: 'Vue hybride améliorée', description: 'Design minimal avec modal et timeline' },
-  { value: 'grid', label: 'Grille de timelines', description: 'Graphiques détaillés pour chaque heure' }
+  { value: 'grid', label: 'Grille de timelines', description: 'Graphiques détaillés pour chaque heure' },
+  { value: 'daily', label: 'Grille journalière', description: 'Un graphique timeline par jour (30 jours)' }
 ];
 
 const Statistics = () => {
@@ -251,6 +253,9 @@ const Statistics = () => {
             )}
             {chartType === 'grid' && (
               <TimelineGridChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'daily' && (
+              <DailyTimelineGridChart transcriptions={transcriptions} />
             )}
           </>
         )}
