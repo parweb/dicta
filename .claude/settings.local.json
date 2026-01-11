@@ -12,7 +12,8 @@
       "Bash(cat:*)",
       "Bash(chmod:*)",
       "Bash(node migrate-duration.js:*)",
-      "Bash(git revert:*)"
+      "Bash(git revert:*)",
+      "Bash(__NEW_LINE__ ls -la src/renderer/src/components/statistics/)"
     ]
   }
 }

@@ -3,18 +3,24 @@ import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
+import SimpleActivityStreamChart from '../components/statistics/SimpleActivityStreamChart';
 import SimpleHourlyChart from '../components/statistics/SimpleHourlyChart';
+import SimpleHybridChart from '../components/statistics/SimpleHybridChart';
+import SimpleTimelineChart from '../components/statistics/SimpleTimelineChart';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
 import UsageChart from '../components/statistics/UsageChart';
 import { borderRadius, colors, spacing, charts, components, typography } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
-type ChartType = 'bar' | 'hourly';
+type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid';
 
 const chartOptions: { value: ChartType; label: string; description: string }[] = [
   { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
-  { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour (30 jours)' }
+  { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour (30 jours)' },
+  { value: 'timeline', label: 'Timeline', description: 'Événements sur axe temporel' },
+  { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
+  { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' }
 ];
 
 const Statistics = () => {
@@ -27,6 +33,20 @@ const Statistics = () => {
   useEffect(() => {
     loadStatistics();
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (isDropdownOpen) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isDropdownOpen]);
 
   const loadStatistics = async () => {
     setIsLoading(true);
@@ -138,11 +158,14 @@ const Statistics = () => {
                     zIndex: 1000,
                     overflow: 'hidden'
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   {chartOptions.map(option => (
                     <button
                       key={option.value}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setChartType(option.value);
                         setIsDropdownOpen(false);
                       }}
@@ -195,6 +218,15 @@ const Statistics = () => {
             )}
             {chartType === 'hourly' && (
               <SimpleHourlyChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'timeline' && (
+              <SimpleTimelineChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'stream' && (
+              <SimpleActivityStreamChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'hybrid' && (
+              <SimpleHybridChart transcriptions={transcriptions} />
             )}
           </>
         )}
