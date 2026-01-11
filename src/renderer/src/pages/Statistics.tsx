@@ -3,30 +3,23 @@ import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
-import ActivityStreamChart from '../components/statistics/ActivityStreamChart';
-import HeatmapChart from '../components/statistics/HeatmapChart';
-import HourlyHeatmapChart from '../components/statistics/HourlyHeatmapChart';
-import HybridHeatmapChart from '../components/statistics/HybridHeatmapChart';
+import SimpleHourlyChart from '../components/statistics/SimpleHourlyChart';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
-import TimelineChart from '../components/statistics/TimelineChart';
 import UsageChart from '../components/statistics/UsageChart';
 import { borderRadius, colors, spacing, charts, components, typography } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
-type ChartType = 'bar' | 'heatmap' | 'hourly' | 'timeline' | 'stream' | 'hybrid';
+type ChartType = 'bar' | 'hourly';
 
 const chartOptions: { value: ChartType; label: string; description: string }[] = [
   { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
-  { value: 'heatmap', label: 'Heatmap GitHub', description: 'Grille de contribution par jour' },
-  { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour' },
-  { value: 'timeline', label: 'Timeline', description: 'Événements sur axe temporel' },
-  { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
-  { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' }
+  { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour (30 jours)' }
 ];
 
 const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
+  const [transcriptions, setTranscriptions] = useState<Transcription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [chartType, setChartType] = useState<ChartType>('bar');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -40,8 +33,9 @@ const Statistics = () => {
     try {
       const result = await window.api?.history.loadAll();
       if (result?.success && result.transcriptions) {
-        const transcriptions = result.transcriptions as Transcription[];
-        const statistics = calculateStatistics(transcriptions);
+        const trans = result.transcriptions as Transcription[];
+        setTranscriptions(trans);
+        const statistics = calculateStatistics(trans);
         setStats(statistics);
       }
     } catch (error) {
@@ -199,20 +193,8 @@ const Statistics = () => {
             {chartType === 'bar' && (
               <UsageChart dailyUsage={stats.dailyUsage} getBarColor={getBarColor} />
             )}
-            {chartType === 'heatmap' && (
-              <HeatmapChart dailyUsage={stats.dailyUsage} />
-            )}
             {chartType === 'hourly' && (
-              <HourlyHeatmapChart dailyUsage={stats.dailyUsage} />
-            )}
-            {chartType === 'timeline' && (
-              <TimelineChart dailyUsage={stats.dailyUsage} />
-            )}
-            {chartType === 'stream' && (
-              <ActivityStreamChart dailyUsage={stats.dailyUsage} />
-            )}
-            {chartType === 'hybrid' && (
-              <HybridHeatmapChart dailyUsage={stats.dailyUsage} />
+              <SimpleHourlyChart transcriptions={transcriptions} />
             )}
           </>
         )}
