@@ -36,16 +36,24 @@ const Statistics = () => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (isDropdownOpen) {
+    if (!isDropdownOpen) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-dropdown]')) {
         setIsDropdownOpen(false);
       }
     };
 
-    if (isDropdownOpen) {
+    // Add listener with a small delay to avoid closing immediately
+    const timer = setTimeout(() => {
       document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
-    }
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, [isDropdownOpen]);
 
   const loadStatistics = async () => {
@@ -106,6 +114,7 @@ const Statistics = () => {
           <>
             {/* Dropdown for chart type selection */}
             <div
+              data-dropdown
               style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
@@ -115,7 +124,11 @@ const Statistics = () => {
               } as React.CSSProperties}
             >
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
                 style={{
                   ...components.button.base,
                   padding: spacing.md,
@@ -129,7 +142,8 @@ const Statistics = () => {
                   alignItems: 'center',
                   gap: spacing.md,
                   minWidth: '250px',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  WebkitAppRegion: 'no-drag'
                 }}
               >
                 <span>{chartOptions.find(o => o.value === chartType)?.label}</span>
