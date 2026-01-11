@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState, useDeferredValue, useTransition, useCallback } from 'react';
+import { useEffect, useMemo, useState, useDeferredValue, useTransition, useCallback, useRef } from 'react';
 import Fuse from 'fuse.js';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 import SearchInput from './history/SearchInput';
-import TranscriptionGroup from './history/TranscriptionGroup';
+import TranscriptionCard from './history/TranscriptionCard';
 import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
@@ -17,10 +18,9 @@ interface HistorySidebarProps {
   currentTranscript: string;
 }
 
-interface GroupedTranscriptions {
-  dayLabel: string;
-  transcriptions: Transcription[];
-}
+type VirtualItem =
+  | { type: 'header'; dayLabel: string }
+  | { type: 'transcription'; transcription: Transcription };
 
 const HistorySidebar = ({
   isOpen,
@@ -31,6 +31,7 @@ const HistorySidebar = ({
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
   const [searchQuery, setSearchQuery] = useState('');
   const [isPending, startTransition] = useTransition();
+  const parentRef = useRef<HTMLDivElement>(null);
 
   // Defer the search query to not block the UI while typing
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -73,22 +74,41 @@ const HistorySidebar = ({
     return results.map(result => result.item);
   }, [transcriptions, deferredSearchQuery, fuse]);
 
-  // Group filtered transcriptions by day (memoized)
-  const groupedTranscriptions = useMemo(() => {
-    return filteredTranscriptions.reduce(
-      (acc, transcription) => {
-        const dayLabel = getDayLabel(transcription.timestamp);
-        const existing = acc.find(g => g.dayLabel === dayLabel);
-        if (existing) {
-          existing.transcriptions.push(transcription);
-        } else {
-          acc.push({ dayLabel, transcriptions: [transcription] });
-        }
-        return acc;
-      },
-      [] as GroupedTranscriptions[]
-    );
+  // Create flat list of virtual items (headers + transcriptions)
+  const virtualItems = useMemo(() => {
+    const items: VirtualItem[] = [];
+    const groupedByDay = new Map<string, Transcription[]>();
+
+    // Group transcriptions by day
+    filteredTranscriptions.forEach(transcription => {
+      const dayLabel = getDayLabel(transcription.timestamp);
+      if (!groupedByDay.has(dayLabel)) {
+        groupedByDay.set(dayLabel, []);
+      }
+      groupedByDay.get(dayLabel)!.push(transcription);
+    });
+
+    // Flatten into virtual items list
+    groupedByDay.forEach((transcriptions, dayLabel) => {
+      items.push({ type: 'header', dayLabel });
+      transcriptions.forEach(transcription => {
+        items.push({ type: 'transcription', transcription });
+      });
+    });
+
+    return items;
   }, [filteredTranscriptions]);
+
+  // Setup virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: virtualItems.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => {
+      const item = virtualItems[index];
+      return item.type === 'header' ? 40 : 120; // Estimated sizes
+    },
+    overscan: 5
+  });
 
   const handleTranscriptionClick = useCallback((transcription: Transcription) => {
     onSelectTranscription(transcription);
@@ -170,29 +190,69 @@ const HistorySidebar = ({
               </div>
             </div>
 
-            {/* Scrollable content */}
+            {/* Scrollable content with virtualization */}
             <div
+              ref={parentRef}
               style={{
                 flex: 1,
                 overflowY: 'auto',
-                padding: spacing.lg,
-                paddingTop: spacing.md,
                 opacity: isPending ? 0.6 : 1,
                 transition: 'opacity 0.15s'
               }}
             >
-              {groupedTranscriptions.length === 0 ? (
-                <EmptyState message="Aucun résultat trouvé" />
+              {virtualItems.length === 0 ? (
+                <div style={{ padding: spacing.lg }}>
+                  <EmptyState message="Aucun résultat trouvé" />
+                </div>
               ) : (
-                groupedTranscriptions.map(group => (
-                  <TranscriptionGroup
-                    key={group.dayLabel}
-                    dayLabel={group.dayLabel}
-                    transcriptions={group.transcriptions}
-                    currentTranscript={currentTranscript}
-                    onSelectTranscription={handleTranscriptionClick}
-                  />
-                ))
+                <div
+                  style={{
+                    height: `${rowVirtualizer.getTotalSize()}px`,
+                    width: '100%',
+                    position: 'relative'
+                  }}
+                >
+                  {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                    const item = virtualItems[virtualRow.index];
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualRow.start}px)`,
+                          padding: `0 ${spacing.lg}`
+                        }}
+                      >
+                        {item.type === 'header' ? (
+                          <h3
+                            style={{
+                              fontSize: typography.fontSize.sm,
+                              fontWeight: typography.fontWeight.semibold,
+                              color: colors.text.tertiary,
+                              marginTop: spacing.md,
+                              marginBottom: spacing.sm,
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
+                            }}
+                          >
+                            {item.dayLabel}
+                          </h3>
+                        ) : (
+                          <div style={{ marginBottom: spacing.sm }}>
+                            <TranscriptionCard
+                              transcription={item.transcription}
+                              isActive={item.transcription.text === currentTranscript}
+                              onClick={handleTranscriptionClick}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </>
