@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
+import EnhancedHybridChart from '../components/statistics/EnhancedHybridChart';
 import SimpleActivityStreamChart from '../components/statistics/SimpleActivityStreamChart';
 import SimpleHourlyChart from '../components/statistics/SimpleHourlyChart';
 import SimpleHybridChart from '../components/statistics/SimpleHybridChart';
@@ -13,14 +14,15 @@ import { borderRadius, colors, spacing, charts, components, typography } from '.
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
-type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid';
+type ChartType = 'bar' | 'hourly' | 'timeline' | 'stream' | 'hybrid' | 'enhanced';
 
 const chartOptions: { value: ChartType; label: string; description: string }[] = [
   { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
   { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour (30 jours)' },
   { value: 'timeline', label: 'Timeline', description: 'Événements sur axe temporel' },
   { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
-  { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' }
+  { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' },
+  { value: 'enhanced', label: 'Vue hybride améliorée', description: 'Design minimal avec modal et timeline' }
 ];
 
 const Statistics = () => {
@@ -241,6 +243,9 @@ const Statistics = () => {
             )}
             {chartType === 'hybrid' && (
               <SimpleHybridChart transcriptions={transcriptions} />
+            )}
+            {chartType === 'enhanced' && (
+              <EnhancedHybridChart transcriptions={transcriptions} />
             )}
           </>
         )}
