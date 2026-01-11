@@ -1,5 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Fuse from 'fuse.js';
 
+import SearchInput from './history/SearchInput';
 import TranscriptionGroup from './history/TranscriptionGroup';
 import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
@@ -27,6 +29,7 @@ const HistorySidebar = ({
   currentTranscript
 }: HistorySidebarProps) => {
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -34,8 +37,40 @@ const HistorySidebar = ({
     }
   }, [isOpen, loadHistory]);
 
-  // Group transcriptions by day
-  const groupedTranscriptions: GroupedTranscriptions[] = transcriptions.reduce(
+  // Configure Fuse.js for intelligent fuzzy search
+  const fuse = useMemo(() => {
+    return new Fuse(transcriptions, {
+      keys: [
+        {
+          name: 'text',
+          weight: 0.7 // Text content is most important
+        },
+        {
+          name: 'id',
+          weight: 0.3 // Date/time can help filter
+        }
+      ],
+      threshold: 0.4, // 0 = perfect match, 1 = match anything
+      distance: 100, // Maximum distance between characters
+      minMatchCharLength: 2, // Minimum length to start matching
+      ignoreLocation: true, // Search anywhere in the text
+      useExtendedSearch: true, // Enable advanced search patterns
+      includeScore: true // Include relevance score
+    });
+  }, [transcriptions]);
+
+  // Filter transcriptions based on search query
+  const filteredTranscriptions = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return transcriptions;
+    }
+
+    const results = fuse.search(searchQuery);
+    return results.map(result => result.item);
+  }, [transcriptions, searchQuery, fuse]);
+
+  // Group filtered transcriptions by day
+  const groupedTranscriptions: GroupedTranscriptions[] = filteredTranscriptions.reduce(
     (acc, transcription) => {
       const dayLabel = getDayLabel(transcription.timestamp);
       const existing = acc.find(g => g.dayLabel === dayLabel);
@@ -88,15 +123,27 @@ const HistorySidebar = ({
           ) : transcriptions.length === 0 ? (
             <EmptyState message="Aucune transcription" />
           ) : (
-            groupedTranscriptions.map(group => (
-              <TranscriptionGroup
-                key={group.dayLabel}
-                dayLabel={group.dayLabel}
-                transcriptions={group.transcriptions}
-                currentTranscript={currentTranscript}
-                onSelectTranscription={handleTranscriptionClick}
+            <>
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Rechercher dans l'historique..."
               />
-            ))
+
+              {groupedTranscriptions.length === 0 ? (
+                <EmptyState message="Aucun résultat trouvé" />
+              ) : (
+                groupedTranscriptions.map(group => (
+                  <TranscriptionGroup
+                    key={group.dayLabel}
+                    dayLabel={group.dayLabel}
+                    transcriptions={group.transcriptions}
+                    currentTranscript={currentTranscript}
+                    onSelectTranscription={handleTranscriptionClick}
+                  />
+                ))
+              )}
+            </>
           )}
         </div>
       </div>
