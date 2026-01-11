@@ -8,12 +8,15 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '../hooks/useTranscriptionNavigation';
 import type { Transcription } from '../lib/history';
+import DesignSystem from './DesignSystem';
 import Statistics from './Statistics';
 
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
+  const [currentView, setCurrentView] = useState<
+    'home' | 'statistics' | 'design-system'
+  >('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(
     undefined
@@ -190,7 +193,9 @@ const HomePage = () => {
   return (
     <Layout
       currentView={currentView}
-      onViewChange={setCurrentView}
+      onViewChange={value =>
+        setCurrentView(value === currentView ? 'home' : value)
+      }
       onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
       onHistoryClose={() => setIsHistoryOpen(false)}
       isHistoryOpen={isHistoryOpen}
@@ -201,6 +206,8 @@ const HomePage = () => {
 
       {currentView === 'statistics' ? (
         <Statistics />
+      ) : currentView === 'design-system' ? (
+        <DesignSystem />
       ) : (
         <HomeContent
           isRecording={isRecording}

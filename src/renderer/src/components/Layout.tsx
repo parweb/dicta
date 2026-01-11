@@ -1,4 +1,4 @@
-import { BarChart3, History } from 'lucide-react';
+import { BarChart3, History, Palette } from 'lucide-react';
 import { ReactNode } from 'react';
 
 import { components, colors, spacing } from '../lib/design-system';
@@ -7,8 +7,8 @@ import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
   children: ReactNode;
-  currentView: 'home' | 'statistics';
-  onViewChange: (view: 'home' | 'statistics') => void;
+  currentView: 'home' | 'statistics' | 'design-system';
+  onViewChange: (view: 'home' | 'statistics' | 'design-system') => void;
   onHistoryToggle: () => void;
   onHistoryClose: () => void;
   isHistoryOpen: boolean;
@@ -108,9 +108,7 @@ const Layout = ({
 
           {/* Statistics button */}
           <button
-            onClick={() =>
-              onViewChange(currentView === 'home' ? 'statistics' : 'home')
-            }
+            onClick={() => onViewChange('statistics')}
             style={
               {
                 ...components.button.base,
@@ -122,12 +120,38 @@ const Layout = ({
                 })
               } as React.CSSProperties
             }
-            title={currentView === 'home' ? 'Statistiques' : 'Accueil'}
+            title="Statistiques"
           >
             <BarChart3
               size={18}
               color={
                 currentView === 'statistics'
+                  ? colors.background.primary
+                  : colors.text.primary
+              }
+            />
+          </button>
+
+          {/* Design System button */}
+          <button
+            onClick={() => onViewChange('design-system')}
+            style={
+              {
+                ...components.button.base,
+                ...components.button.icon,
+                ...(currentView === 'design-system' && {
+                  backgroundColor: colors.text.primary,
+                  borderRadius: '50%',
+                  padding: spacing.sm
+                })
+              } as React.CSSProperties
+            }
+            title="Design System"
+          >
+            <Palette
+              size={18}
+              color={
+                currentView === 'design-system'
                   ? colors.background.primary
                   : colors.text.primary
               }

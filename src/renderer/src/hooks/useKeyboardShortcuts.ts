@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 export interface UseKeyboardShortcutsParams {
   isRecording: boolean;
   isHistoryOpen: boolean;
-  currentView: 'home' | 'statistics';
+  currentView: 'home' | 'statistics' | 'design-system';
   startRecording: () => void;
   stopRecording: () => void;
   onNavigate: (direction: 'next' | 'previous') => void;
