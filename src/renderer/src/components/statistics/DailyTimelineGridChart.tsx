@@ -262,7 +262,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                       }}
                     >
                       {Array.from({ length: 24 }).map((_, hour) => {
-                        const isMajorTick = hour % 4 === 0;
+                        const isMajorTick = hour % 4 === 0 || hour === 23;
                         return (
                           <div
                             key={hour}
