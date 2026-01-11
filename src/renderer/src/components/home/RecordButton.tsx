@@ -1,6 +1,7 @@
 import { Loader2, Mic, MicOff } from 'lucide-react';
 
-import { components, getRecordButtonColor } from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
+import { getRecordButtonColor } from '../../lib/theme-utils';
 
 interface RecordButtonProps {
   isRecording: boolean;
@@ -15,6 +16,9 @@ const RecordButton = ({
   onMouseDown,
   onMouseUp
 }: RecordButtonProps) => {
+  const { theme, baseConfig } = useTheme();
+  const { components } = theme;
+
   return (
     <button
       type="button"
@@ -25,7 +29,7 @@ const RecordButton = ({
       style={
         {
           ...components.button.record,
-          backgroundColor: getRecordButtonColor(isRecording, isLoading),
+          backgroundColor: getRecordButtonColor(isRecording, isLoading, baseConfig),
           cursor: isLoading ? 'not-allowed' : 'pointer',
           opacity: isLoading ? 0.7 : 1,
           WebkitAppRegion: 'no-drag'

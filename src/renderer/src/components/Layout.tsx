@@ -1,8 +1,8 @@
 import { BarChart3, History, Palette } from 'lucide-react';
 import { ReactNode } from 'react';
 
-import { components, colors, spacing } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
+import { useTheme } from '../lib/theme-context';
 import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
@@ -26,6 +26,9 @@ const Layout = ({
   currentTranscript,
   onSelectTranscription
 }: LayoutProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, components } = theme;
+
   return (
     <>
       {/* Main layout context */}

@@ -1,13 +1,6 @@
 import type { ProxyStatus } from '../../hooks/useTranscriptionAPI';
-import {
-  components,
-  getStatusColor,
-  spacing,
-  typography,
-  colors,
-  borders,
-  shadows
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
+import { getStatusColor } from '../../lib/theme-utils';
 
 interface ProxyStatusIndicatorsProps {
   proxyStatuses: Record<string, ProxyStatus>;
@@ -16,6 +9,8 @@ interface ProxyStatusIndicatorsProps {
 const ProxyStatusIndicators = ({
   proxyStatuses
 }: ProxyStatusIndicatorsProps) => {
+  const { theme, baseConfig } = useTheme();
+  const { spacing, typography, colors, borders, shadows, components } = theme;
   const proxyStatusEntries = Object.entries(proxyStatuses);
 
   return (
@@ -54,7 +49,7 @@ const ProxyStatusIndicators = ({
           <div
             style={{
               ...components.proxyIndicator.dot,
-              backgroundColor: getStatusColor(status),
+              backgroundColor: getStatusColor(status, baseConfig),
               border: status === 'loading' ? borders.medium : 'none',
               boxShadow: status === 'loading' ? shadows.inner : 'none'
             }}
