@@ -294,8 +294,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   alignItems: 'center',
                   minWidth: '250px',
                   opacity: isHovered ? 1 : 0,
-                  transform: isHovered ? 'translateX(0)' : 'translateX(-8px)',
-                  transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                  transform: isHovered ? 'translateY(0)' : 'translateY(-8px)',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
                   pointerEvents: 'none'
                 }}
               >
