@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 
 import AudioWaveform from '../AudioWaveform';
 import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
@@ -11,7 +11,7 @@ interface TranscriptionCardProps {
   onClick: (transcription: Transcription) => void;
 }
 
-const TranscriptionCard = ({
+const TranscriptionCard = memo(({
   transcription,
   isActive,
   onClick
@@ -84,6 +84,8 @@ const TranscriptionCard = ({
       )}
     </div>
   );
-};
+});
+
+TranscriptionCard.displayName = 'TranscriptionCard';
 
 export default TranscriptionCard;

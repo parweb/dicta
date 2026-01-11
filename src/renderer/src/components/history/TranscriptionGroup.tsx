@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 import TranscriptionCard from './TranscriptionCard';
 import { colors, spacing, typography } from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
@@ -9,7 +11,7 @@ interface TranscriptionGroupProps {
   onSelectTranscription: (transcription: Transcription) => void;
 }
 
-const TranscriptionGroup = ({
+const TranscriptionGroup = memo(({
   dayLabel,
   transcriptions,
   currentTranscript,
@@ -50,6 +52,8 @@ const TranscriptionGroup = ({
       </div>
     </div>
   );
-};
+});
+
+TranscriptionGroup.displayName = 'TranscriptionGroup';
 
 export default TranscriptionGroup;

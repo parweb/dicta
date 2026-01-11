@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useDeferredValue, useTransition, useCallback } from 'react';
 import Fuse from 'fuse.js';
 
 import SearchInput from './history/SearchInput';
@@ -30,6 +30,10 @@ const HistorySidebar = ({
 }: HistorySidebarProps) => {
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isPending, startTransition] = useTransition();
+
+  // Defer the search query to not block the UI while typing
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   useEffect(() => {
     if (isOpen) {
@@ -59,35 +63,37 @@ const HistorySidebar = ({
     });
   }, [transcriptions]);
 
-  // Filter transcriptions based on search query
+  // Filter transcriptions based on deferred search query
   const filteredTranscriptions = useMemo(() => {
-    if (!searchQuery.trim()) {
+    if (!deferredSearchQuery.trim()) {
       return transcriptions;
     }
 
-    const results = fuse.search(searchQuery);
+    const results = fuse.search(deferredSearchQuery);
     return results.map(result => result.item);
-  }, [transcriptions, searchQuery, fuse]);
+  }, [transcriptions, deferredSearchQuery, fuse]);
 
-  // Group filtered transcriptions by day
-  const groupedTranscriptions: GroupedTranscriptions[] = filteredTranscriptions.reduce(
-    (acc, transcription) => {
-      const dayLabel = getDayLabel(transcription.timestamp);
-      const existing = acc.find(g => g.dayLabel === dayLabel);
-      if (existing) {
-        existing.transcriptions.push(transcription);
-      } else {
-        acc.push({ dayLabel, transcriptions: [transcription] });
-      }
-      return acc;
-    },
-    [] as GroupedTranscriptions[]
-  );
+  // Group filtered transcriptions by day (memoized)
+  const groupedTranscriptions = useMemo(() => {
+    return filteredTranscriptions.reduce(
+      (acc, transcription) => {
+        const dayLabel = getDayLabel(transcription.timestamp);
+        const existing = acc.find(g => g.dayLabel === dayLabel);
+        if (existing) {
+          existing.transcriptions.push(transcription);
+        } else {
+          acc.push({ dayLabel, transcriptions: [transcription] });
+        }
+        return acc;
+      },
+      [] as GroupedTranscriptions[]
+    );
+  }, [filteredTranscriptions]);
 
-  const handleTranscriptionClick = (transcription: Transcription) => {
+  const handleTranscriptionClick = useCallback((transcription: Transcription) => {
     onSelectTranscription(transcription);
     navigator.clipboard.writeText(transcription.text);
-  };
+  }, [onSelectTranscription]);
 
   if (!isOpen) return null;
 
@@ -148,7 +154,9 @@ const HistorySidebar = ({
                     fontSize: typography.fontSize.base,
                     color: colors.accent.blue.primary,
                     fontWeight: typography.fontWeight.semibold,
-                    flexShrink: 0
+                    flexShrink: 0,
+                    opacity: isPending ? 0.5 : 1,
+                    transition: 'opacity 0.15s'
                   }}
                 >
                   {filteredTranscriptions.length}
@@ -168,7 +176,9 @@ const HistorySidebar = ({
                 flex: 1,
                 overflowY: 'auto',
                 padding: spacing.lg,
-                paddingTop: spacing.md
+                paddingTop: spacing.md,
+                opacity: isPending ? 0.6 : 1,
+                transition: 'opacity 0.15s'
               }}
             >
               {groupedTranscriptions.length === 0 ? (
