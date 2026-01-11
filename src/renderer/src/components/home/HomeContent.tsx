@@ -1,6 +1,7 @@
 import AudioPlayerWithRetry from './AudioPlayerWithRetry';
 import RecordButton from './RecordButton';
 import TranscriptionDisplay from './TranscriptionDisplay';
+import { spacing } from '../../lib/design-system';
 
 interface HomeContentProps {
   isRecording: boolean;
@@ -47,12 +48,12 @@ const HomeContent = ({
     >
       <div
         style={{
-          padding: '20px',
+          padding: spacing.xl,
           maxWidth: '600px',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '20px'
+          gap: spacing.xl
         }}
       >
         <RecordButton
