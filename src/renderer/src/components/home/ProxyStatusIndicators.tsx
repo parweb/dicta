@@ -1,5 +1,5 @@
 import type { ProxyStatus } from '../../hooks/useTranscriptionAPI';
-import { components, getStatusColor, spacing, typography, colors } from '../../lib/design-system';
+import { components, getStatusColor, spacing, typography, colors, borders, shadows } from '../../lib/design-system';
 
 interface ProxyStatusIndicatorsProps {
   proxyStatuses: Record<string, ProxyStatus>;
@@ -15,7 +15,7 @@ const ProxyStatusIndicators = ({ proxyStatuses }: ProxyStatusIndicatorsProps) =>
         top: spacing.md,
         right: spacing.md,
         display: 'flex',
-        gap: '6px',
+        gap: spacing.sm,
         fontSize: typography.fontSize.xs,
         color: colors.text.tertiary,
         zIndex: 3
@@ -45,10 +45,8 @@ const ProxyStatusIndicators = ({ proxyStatuses }: ProxyStatusIndicatorsProps) =>
             style={{
               ...components.proxyIndicator.dot,
               backgroundColor: getStatusColor(status),
-              border:
-                status === 'loading' ? '1px solid rgba(255, 255, 255, 0.3)' : 'none',
-              boxShadow:
-                status === 'loading' ? 'inset 0 0 2px rgba(0, 0, 0, 0.3)' : 'none'
+              border: status === 'loading' ? borders.medium : 'none',
+              boxShadow: status === 'loading' ? shadows.inner : 'none'
             }}
           />
         </div>
