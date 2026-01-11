@@ -42,7 +42,7 @@ const TranscriptionCard = memo(({
         style={{
           fontSize: typography.fontSize.sm,
           color: colors.text.tertiary,
-          marginBottom: '6px',
+          marginBottom: spacing.sm,
           display: 'flex',
           gap: spacing.sm,
           alignItems: 'center'
@@ -60,7 +60,7 @@ const TranscriptionCard = memo(({
         style={{
           fontSize: typography.fontSize.base,
           color: colors.text.secondary,
-          lineHeight: '1.4',
+          lineHeight: typography.lineHeight.normal,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           display: '-webkit-box',
