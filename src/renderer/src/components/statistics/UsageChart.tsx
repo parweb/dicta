@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 
 import ChartTooltip from './ChartTooltip';
-import { colors, spacing, typography } from '../../lib/design-system';
+import { colors, spacing, typography, charts } from '../../lib/design-system';
 import type { DailyUsage } from '../../lib/statistics';
 
 interface UsageChartProps {
@@ -27,9 +27,9 @@ const UsageChart = ({ dailyUsage, getBarColor }: UsageChartProps) => {
 
     /* Magnifying glass effect on brush slide */
     .statistics-chart .recharts-brush-slide {
-      stroke: rgba(59, 130, 246, 0.6) !important;
+      stroke: ${charts.brush.stroke} !important;
       stroke-width: 2 !important;
-      fill: rgba(59, 130, 246, 0.08) !important;
+      fill: ${charts.brush.fill} !important;
       rx: 4 !important;
       ry: 2.86 !important;
       transform: translateY(-15%) scaleY(1.4);
@@ -114,7 +114,7 @@ const UsageChart = ({ dailyUsage, getBarColor }: UsageChartProps) => {
             startIndex={Math.max(0, dailyUsage.length - 30)}
           >
             <BarChart data={dailyUsage} barCategoryGap="20%">
-              <Bar dataKey="minutes" fill="#3b82f6" opacity={0.8} maxBarSize={1} />
+              <Bar dataKey="minutes" fill={charts.bar.fill} opacity={0.8} maxBarSize={1} />
             </BarChart>
           </Brush>
         </BarChart>
