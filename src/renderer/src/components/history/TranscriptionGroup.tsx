@@ -26,7 +26,7 @@ const TranscriptionGroup = memo(({
           color: colors.text.tertiary,
           marginBottom: spacing.sm,
           textTransform: 'uppercase',
-          letterSpacing: '0.5px'
+          letterSpacing: typography.letterSpacing.wide
         }}
       >
         {dayLabel}

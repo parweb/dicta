@@ -246,7 +246,7 @@ const HistorySidebar = ({
                                 marginTop: isFirstItem ? 0 : spacing['2xl'],
                                 marginBottom: spacing.sm,
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
+                                letterSpacing: typography.letterSpacing.wide
                               }}
                             >
                               {item.dayLabel}
