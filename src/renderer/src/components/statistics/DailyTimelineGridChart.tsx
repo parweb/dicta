@@ -90,6 +90,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
 
   return (
     <div
+      className="daily-timeline-container"
       style={
         {
           padding: spacing.xl,
@@ -99,6 +100,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
     >
       {/* Global stats header - minimal */}
       <div
+        className="global-stats"
         style={{
           maxWidth: '1000px',
           margin: '0 auto',
@@ -133,6 +135,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
       </div>
       {/* Vertical stack of timelines */}
       <div
+        className="timeline-stack"
         style={{
           display: 'flex',
           flexDirection: 'column',
@@ -149,6 +152,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           return (
             <div
               key={cell.dateKey}
+              className="timeline-row"
               onMouseEnter={() => setHoveredCell(cell.dateKey)}
               onMouseLeave={() => setHoveredCell(null)}
               style={{
@@ -160,6 +164,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
             >
               {/* Minimal date label */}
               <div
+                className="date-label"
                 style={{
                   fontSize: typography.fontSize.xs,
                   color: isHovered ? colors.text.secondary : colors.text.tertiary,
@@ -280,6 +285,7 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
 
               {/* Stats on hover */}
               <div
+                className="row-stats"
                 style={{
                   display: 'flex',
                   gap: spacing.md,
@@ -356,6 +362,74 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1100px) {
+          .global-stats {
+            max-width: 100% !important;
+            padding-right: 16px !important;
+            gap: 12px !important;
+          }
+          .timeline-stack {
+            max-width: 100% !important;
+            padding: 0 8px;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .daily-timeline-container {
+            padding: 16px !important;
+          }
+          .global-stats {
+            gap: 8px !important;
+            font-size: 10px !important;
+          }
+          .timeline-row {
+            gap: 8px !important;
+          }
+          .date-label {
+            min-width: 40px !important;
+            font-size: 10px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .global-stats {
+            justify-content: center !important;
+            padding-right: 0 !important;
+            margin-bottom: 12px !important;
+          }
+          .row-stats {
+            display: none !important;
+          }
+          .timeline-row {
+            gap: 6px !important;
+          }
+          .date-label {
+            min-width: 35px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .daily-timeline-container {
+            padding: 12px !important;
+          }
+          .global-stats {
+            flex-wrap: wrap;
+            gap: 6px !important;
+            font-size: 9px !important;
+          }
+          .global-stats > div {
+            gap: 4px !important;
+          }
+          .timeline-row {
+            gap: 4px !important;
+          }
+          .date-label {
+            min-width: 30px !important;
+            font-size: 9px !important;
           }
         }
       `}</style>
