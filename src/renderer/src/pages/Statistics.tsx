@@ -1,19 +1,35 @@
-import { BarChart3, Grid3x3 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 import EmptyState from '../components/shared/EmptyState';
 import LoadingState from '../components/shared/LoadingState';
+import ActivityStreamChart from '../components/statistics/ActivityStreamChart';
 import HeatmapChart from '../components/statistics/HeatmapChart';
+import HourlyHeatmapChart from '../components/statistics/HourlyHeatmapChart';
+import HybridHeatmapChart from '../components/statistics/HybridHeatmapChart';
 import StatsSummaryCards from '../components/statistics/StatsSummaryCards';
+import TimelineChart from '../components/statistics/TimelineChart';
 import UsageChart from '../components/statistics/UsageChart';
 import { borderRadius, colors, spacing, charts, components, typography } from '../lib/design-system';
 import type { Transcription } from '../lib/history';
 import { calculateStatistics, type UsageStatistics } from '../lib/statistics';
 
+type ChartType = 'bar' | 'heatmap' | 'hourly' | 'timeline' | 'stream' | 'hybrid';
+
+const chartOptions: { value: ChartType; label: string; description: string }[] = [
+  { value: 'bar', label: 'Graphique à barres', description: 'Vue classique avec barres par minute' },
+  { value: 'heatmap', label: 'Heatmap GitHub', description: 'Grille de contribution par jour' },
+  { value: 'hourly', label: 'Heatmap horaire', description: 'Activité par heure et par jour' },
+  { value: 'timeline', label: 'Timeline', description: 'Événements sur axe temporel' },
+  { value: 'stream', label: 'Flux d\'activité', description: 'Graphique en rivière' },
+  { value: 'hybrid', label: 'Vue hybride', description: 'Heatmap avec détails au clic' }
+];
+
 const Statistics = () => {
   const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [chartType, setChartType] = useState<'bar' | 'heatmap'>('bar');
+  const [chartType, setChartType] = useState<ChartType>('bar');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   useEffect(() => {
     loadStatistics();
@@ -74,56 +90,103 @@ const Statistics = () => {
           <EmptyState message="Aucune donnée disponible. Commencez par créer des transcriptions !" />
         ) : (
           <>
-            {/* Toggle button for chart type */}
+            {/* Dropdown for chart type selection */}
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
                 marginBottom: spacing.lg,
-                gap: spacing.sm,
-                WebkitAppRegion: 'no-drag'
+                WebkitAppRegion: 'no-drag',
+                position: 'relative'
               } as React.CSSProperties}
             >
               <button
-                onClick={() => setChartType('bar')}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 style={{
                   ...components.button.base,
                   padding: spacing.md,
-                  backgroundColor: chartType === 'bar' ? colors.accent.blue.background : 'transparent',
-                  border: `1px solid ${chartType === 'bar' ? colors.accent.blue.primary : colors.border.primary}`,
+                  backgroundColor: colors.background.secondary,
+                  border: `1px solid ${colors.border.primary}`,
                   borderRadius: borderRadius.md,
-                  color: chartType === 'bar' ? colors.accent.blue.primary : colors.text.secondary,
+                  color: colors.text.primary,
                   fontSize: typography.fontSize.sm,
                   fontWeight: typography.fontWeight.medium,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: spacing.xs
+                  gap: spacing.md,
+                  minWidth: '250px',
+                  justifyContent: 'space-between'
                 }}
-                title="Vue en barres"
               >
-                <BarChart3 size={16} />
-                <span>Barres</span>
+                <span>{chartOptions.find(o => o.value === chartType)?.label}</span>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s'
+                  }}
+                />
               </button>
-              <button
-                onClick={() => setChartType('heatmap')}
-                style={{
-                  ...components.button.base,
-                  padding: spacing.md,
-                  backgroundColor: chartType === 'heatmap' ? colors.accent.blue.background : 'transparent',
-                  border: `1px solid ${chartType === 'heatmap' ? colors.accent.blue.primary : colors.border.primary}`,
-                  borderRadius: borderRadius.md,
-                  color: chartType === 'heatmap' ? colors.accent.blue.primary : colors.text.secondary,
-                  fontSize: typography.fontSize.sm,
-                  fontWeight: typography.fontWeight.medium,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: spacing.xs
-                }}
-                title="Vue heatmap"
-              >
-                <Grid3x3 size={16} />
-                <span>Heatmap</span>
-              </button>
+
+              {/* Dropdown menu */}
+              {isDropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: spacing.xs,
+                    backgroundColor: colors.background.secondary,
+                    border: `1px solid ${colors.border.primary}`,
+                    borderRadius: borderRadius.md,
+                    minWidth: '300px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                    zIndex: 1000,
+                    overflow: 'hidden'
+                  }}
+                >
+                  {chartOptions.map(option => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setChartType(option.value);
+                        setIsDropdownOpen(false);
+                      }}
+                      style={{
+                        ...components.button.base,
+                        width: '100%',
+                        padding: spacing.md,
+                        backgroundColor: chartType === option.value ? colors.accent.blue.background : 'transparent',
+                        border: 'none',
+                        borderBottom: `1px solid ${colors.border.primary}`,
+                        textAlign: 'left',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: spacing.xs,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: typography.fontSize.sm,
+                          fontWeight: typography.fontWeight.medium,
+                          color: chartType === option.value ? colors.accent.blue.primary : colors.text.primary
+                        }}
+                      >
+                        {option.label}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: typography.fontSize.xs,
+                          color: colors.text.tertiary
+                        }}
+                      >
+                        {option.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <StatsSummaryCards
@@ -132,10 +195,24 @@ const Statistics = () => {
               totalCost={stats.totalCost}
             />
 
-            {chartType === 'bar' ? (
+            {/* Render selected chart */}
+            {chartType === 'bar' && (
               <UsageChart dailyUsage={stats.dailyUsage} getBarColor={getBarColor} />
-            ) : (
+            )}
+            {chartType === 'heatmap' && (
               <HeatmapChart dailyUsage={stats.dailyUsage} />
+            )}
+            {chartType === 'hourly' && (
+              <HourlyHeatmapChart dailyUsage={stats.dailyUsage} />
+            )}
+            {chartType === 'timeline' && (
+              <TimelineChart dailyUsage={stats.dailyUsage} />
+            )}
+            {chartType === 'stream' && (
+              <ActivityStreamChart dailyUsage={stats.dailyUsage} />
+            )}
+            {chartType === 'hybrid' && (
+              <HybridHeatmapChart dailyUsage={stats.dailyUsage} />
             )}
           </>
         )}
