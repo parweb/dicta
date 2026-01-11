@@ -79,8 +79,6 @@ app.whenReady().then(() => {
   // History management handlers
   const historyDir = join(app.getPath('userData'), 'history');
 
-  console.log({ historyDir });
-
   // Ensure history directory exists
   ipcMain.handle('history:ensure-dir', () => {
     try {

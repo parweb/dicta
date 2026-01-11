@@ -7,72 +7,62 @@ import VisualEditor from './VisualEditor';
 
 export default function ThemeConfigurator() {
   const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
 
   return (
     <div
       style={{
         width: '100%',
-        padding: theme.spacing['2xl'],
-        backgroundColor: theme.colors.background.secondary,
-        borderRadius: theme.borderRadius.lg,
-        border: `1px solid ${theme.colors.border.primary}`
+        marginBottom: spacing['4xl']
       }}
     >
-      {/* Header */}
+      {/* Header - Minimaliste */}
       <div
         style={{
-          marginBottom: theme.spacing.xl
+          marginBottom: spacing['3xl']
         }}
       >
-        <h2
+        <h1
           style={{
-            fontSize: theme.typography.fontSize.xl,
-            fontWeight: theme.typography.fontWeight.bold,
-            color: theme.colors.text.primary,
-            marginBottom: theme.spacing.sm
+            fontSize: typography.fontSize['2xl'],
+            fontWeight: typography.fontWeight.bold,
+            color: colors.text.primary,
+            marginBottom: spacing.sm
           }}
         >
           Configurateur de Thème
-        </h2>
+        </h1>
         <p
           style={{
-            fontSize: theme.typography.fontSize.sm,
-            color: theme.colors.text.tertiary,
-            margin: 0
+            fontSize: typography.fontSize.base,
+            color: colors.text.tertiary,
+            lineHeight: typography.lineHeight.relaxed
           }}
         >
-          Personnalisez l'apparence de Dicta avec des thèmes prédéfinis ou créez votre propre
-          thème. Les modifications sont sauvegardées automatiquement et appliquées en temps réel.
+          Personnalisez l'apparence de Dicta. Les modifications sont appliquées en temps réel et
+          sauvegardées automatiquement.
         </p>
       </div>
 
-      {/* Preset Selector */}
+      {/* Preset Selector - Plus épuré */}
       <div
         style={{
-          marginBottom: theme.spacing.xl,
-          padding: theme.spacing.lg,
-          backgroundColor: theme.colors.background.primary,
-          borderRadius: theme.borderRadius.md,
-          border: `1px solid ${theme.colors.border.primary}`
+          marginBottom: spacing['3xl']
         }}
       >
         <PresetSelector />
       </div>
 
-      {/* Export/Import Buttons */}
+      {/* Export/Import - En ligne, plus discret */}
       <div
         style={{
-          marginBottom: theme.spacing.xl,
-          padding: theme.spacing.lg,
-          backgroundColor: theme.colors.background.primary,
-          borderRadius: theme.borderRadius.md,
-          border: `1px solid ${theme.colors.border.primary}`
+          marginBottom: spacing['3xl']
         }}
       >
         <ExportImportButtons />
       </div>
 
-      {/* Tabs for Visual Editor and JSON Editor */}
+      {/* Tabs - Style épuré */}
       <Tabs defaultValue="visual" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="visual">Éditeur Visuel</TabsTrigger>
@@ -82,10 +72,7 @@ export default function ThemeConfigurator() {
         <TabsContent value="visual">
           <div
             style={{
-              padding: theme.spacing.lg,
-              backgroundColor: theme.colors.background.primary,
-              borderRadius: theme.borderRadius.md,
-              border: `1px solid ${theme.colors.border.primary}`
+              paddingTop: spacing['2xl']
             }}
           >
             <VisualEditor />
@@ -95,16 +82,23 @@ export default function ThemeConfigurator() {
         <TabsContent value="json">
           <div
             style={{
-              padding: theme.spacing.lg,
-              backgroundColor: theme.colors.background.primary,
-              borderRadius: theme.borderRadius.md,
-              border: `1px solid ${theme.colors.border.primary}`
+              paddingTop: spacing['2xl'],
+              paddingBottom: spacing['2xl']
             }}
           >
             <JsonEditor />
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Séparateur subtil */}
+      <div
+        style={{
+          marginTop: spacing['4xl'],
+          height: '1px',
+          background: `linear-gradient(to right, transparent, ${colors.border.primary}, transparent)`
+        }}
+      />
     </div>
   );
 }

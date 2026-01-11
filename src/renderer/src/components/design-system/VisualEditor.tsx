@@ -1,283 +1,353 @@
+import { Palette, Type, Ruler } from 'lucide-react';
+
 import { useTheme } from '../../lib/theme-context';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger
-} from '../ui/accordion';
 import ColorPicker from './ColorPicker';
 
-export default function VisualEditor() {
+const VisualEditor = () => {
   const { theme, setTheme } = useTheme();
+  const { colors, spacing, typography } = theme;
 
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.lg
+        gap: spacing['4xl']
       }}
     >
-      <h3
-        style={{
-          fontSize: theme.typography.fontSize.base,
-          fontWeight: theme.typography.fontWeight.semibold,
-          color: theme.colors.text.primary,
-          margin: 0
-        }}
+      {/* Colors Section */}
+      <Section
+        icon={<Palette size={20} />}
+        title="Couleurs"
+        description="Personnalisez la palette de couleurs de l'application"
       >
-        Éditeur Visuel
-      </h3>
-
-      <p
-        style={{
-          fontSize: theme.typography.fontSize.sm,
-          color: theme.colors.text.tertiary,
-          margin: 0
-        }}
-      >
-        Personnalisez les couleurs et espacements de votre thème.
-      </p>
-
-      <Accordion type="multiple" className="w-full">
         {/* Background Colors */}
-        <AccordionItem value="background">
-          <AccordionTrigger>Couleurs de Fond</AccordionTrigger>
-          <AccordionContent>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
-              }}
-            >
-              <ColorPicker
-                label="Primaire"
-                description="Couleur de fond principale de l'application"
-                value={theme.colors.background.primary}
-                onChange={(value) =>
-                  setTheme({ colors: { background: { primary: value } } })
-                }
-              />
-              <ColorPicker
-                label="Secondaire"
-                description="Cartes et surfaces"
-                value={theme.colors.background.secondary}
-                onChange={(value) =>
-                  setTheme({ colors: { background: { secondary: value } } })
-                }
-              />
-              <ColorPicker
-                label="Tertiaire"
-                description="Surfaces élevées"
-                value={theme.colors.background.tertiary}
-                onChange={(value) =>
-                  setTheme({ colors: { background: { tertiary: value } } })
-                }
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        <SubSection title="Couleurs de Fond">
+          <ColorGrid>
+            <ColorPicker
+              label="Primaire"
+              value={colors.background.primary}
+              onChange={(value) => setTheme({ colors: { background: { primary: value } } })}
+            />
+            <ColorPicker
+              label="Secondaire"
+              value={colors.background.secondary}
+              onChange={(value) => setTheme({ colors: { background: { secondary: value } } })}
+            />
+            <ColorPicker
+              label="Tertiaire"
+              value={colors.background.tertiary}
+              onChange={(value) => setTheme({ colors: { background: { tertiary: value } } })}
+            />
+          </ColorGrid>
+        </SubSection>
 
         {/* Text Colors */}
-        <AccordionItem value="text">
-          <AccordionTrigger>Couleurs de Texte</AccordionTrigger>
-          <AccordionContent>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
-              }}
-            >
-              <ColorPicker
-                label="Primaire"
-                description="Texte principal"
-                value={theme.colors.text.primary}
-                onChange={(value) =>
-                  setTheme({ colors: { text: { primary: value } } })
-                }
-              />
-              <ColorPicker
-                label="Secondaire"
-                description="Texte secondaire"
-                value={theme.colors.text.secondary}
-                onChange={(value) =>
-                  setTheme({ colors: { text: { secondary: value } } })
-                }
-              />
-              <ColorPicker
-                label="Tertiaire"
-                description="Texte atténué"
-                value={theme.colors.text.tertiary}
-                onChange={(value) =>
-                  setTheme({ colors: { text: { tertiary: value } } })
-                }
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        <SubSection title="Couleurs de Texte">
+          <ColorGrid>
+            <ColorPicker
+              label="Primaire"
+              value={colors.text.primary}
+              onChange={(value) => setTheme({ colors: { text: { primary: value } } })}
+            />
+            <ColorPicker
+              label="Secondaire"
+              value={colors.text.secondary}
+              onChange={(value) => setTheme({ colors: { text: { secondary: value } } })}
+            />
+            <ColorPicker
+              label="Tertiaire"
+              value={colors.text.tertiary}
+              onChange={(value) => setTheme({ colors: { text: { tertiary: value } } })}
+            />
+          </ColorGrid>
+        </SubSection>
 
         {/* Accent Colors */}
-        <AccordionItem value="accent">
-          <AccordionTrigger>Couleurs d'Accent</AccordionTrigger>
-          <AccordionContent>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
-              }}
-            >
-              <ColorPicker
-                label="Bleu Primaire"
-                description="Couleur principale d'accent"
-                value={theme.colors.accent.blue.primary}
-                onChange={(value) =>
-                  setTheme({ colors: { accent: { blue: { primary: value } } } })
-                }
-              />
-              <ColorPicker
-                label="Vert (Bouton Enregistrer)"
-                description="Bouton d'enregistrement"
-                value={theme.colors.accent.green.button}
-                onChange={(value) =>
-                  setTheme({ colors: { accent: { green: { button: value } } } })
-                }
-              />
-              <ColorPicker
-                label="Rouge (Bouton En cours)"
-                description="Bouton en cours d'enregistrement"
-                value={theme.colors.accent.red.button}
-                onChange={(value) =>
-                  setTheme({ colors: { accent: { red: { button: value } } } })
-                }
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        <SubSection title="Couleurs d'Accent">
+          <ColorGrid>
+            <ColorPicker
+              label="Bleu"
+              value={colors.accent.blue.primary}
+              onChange={(value) =>
+                setTheme({ colors: { accent: { blue: { primary: value } } } })
+              }
+            />
+            <ColorPicker
+              label="Vert (Enregistrer)"
+              value={colors.accent.green.button}
+              onChange={(value) =>
+                setTheme({ colors: { accent: { green: { button: value } } } })
+              }
+            />
+            <ColorPicker
+              label="Rouge (En cours)"
+              value={colors.accent.red.button}
+              onChange={(value) =>
+                setTheme({ colors: { accent: { red: { button: value } } } })
+              }
+            />
+          </ColorGrid>
+        </SubSection>
 
         {/* Border Colors */}
-        <AccordionItem value="border">
-          <AccordionTrigger>Couleurs de Bordure</AccordionTrigger>
-          <AccordionContent>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
-              }}
-            >
-              <ColorPicker
-                label="Primaire"
-                description="Bordures principales"
-                value={theme.colors.border.primary}
-                onChange={(value) =>
-                  setTheme({ colors: { border: { primary: value } } })
-                }
-              />
-              <ColorPicker
-                label="Accent"
-                description="Bordures mises en évidence"
-                value={theme.colors.border.accent}
-                onChange={(value) =>
-                  setTheme({ colors: { border: { accent: value } } })
-                }
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+        <SubSection title="Couleurs de Bordure">
+          <ColorGrid>
+            <ColorPicker
+              label="Primaire"
+              value={colors.border.primary}
+              onChange={(value) => setTheme({ colors: { border: { primary: value } } })}
+            />
+            <ColorPicker
+              label="Accent"
+              value={colors.border.accent}
+              onChange={(value) => setTheme({ colors: { border: { accent: value } } })}
+            />
+          </ColorGrid>
+        </SubSection>
+      </Section>
 
-        {/* Spacing */}
-        <AccordionItem value="spacing">
-          <AccordionTrigger>Espacement</AccordionTrigger>
-          <AccordionContent>
+      {/* Spacing Section */}
+      <Section
+        icon={<Ruler size={20} />}
+        title="Espacement"
+        description="Ajustez les espacements pour modifier la densité de l'interface"
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: spacing.lg
+          }}
+        >
+          {(['xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const).map((size) => (
             <div
+              key={size}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
+                alignItems: 'center',
+                gap: spacing.xl
               }}
             >
-              {(['xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const).map((size) => (
-                <div key={size} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-                  <label
-                    style={{
-                      fontSize: theme.typography.fontSize.sm,
-                      fontWeight: theme.typography.fontWeight.medium,
-                      color: theme.colors.text.secondary
-                    }}
-                  >
-                    {size.toUpperCase()} - {theme.spacing[size]}
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="60"
-                    value={parseInt(theme.spacing[size])}
-                    onChange={(e) => {
-                      const value = `${e.target.value}px`;
-                      setTheme({ spacing: { [size]: value } });
-                    }}
-                    style={{
-                      width: '100%',
-                      accentColor: theme.colors.accent.blue.primary
-                    }}
-                  />
-                </div>
-              ))}
+              <div
+                style={{
+                  width: '80px',
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  color: colors.text.secondary
+                }}
+              >
+                {size.toUpperCase()}
+              </div>
+              <div
+                style={{
+                  height: '24px',
+                  width: spacing[size],
+                  backgroundColor: colors.accent.blue.primary,
+                  borderRadius: theme.borderRadius.sm,
+                  transition: 'width 0.2s'
+                }}
+              />
+              <input
+                type="range"
+                min="0"
+                max="60"
+                value={parseInt(spacing[size])}
+                onChange={(e) => {
+                  const value = `${e.target.value}px`;
+                  setTheme({ spacing: { [size]: value } });
+                }}
+                style={{
+                  flex: 1,
+                  accentColor: colors.accent.blue.primary
+                }}
+              />
+              <div
+                style={{
+                  width: '60px',
+                  fontSize: typography.fontSize.xs,
+                  color: colors.text.tertiary,
+                  fontFamily: 'monospace',
+                  textAlign: 'right'
+                }}
+              >
+                {spacing[size]}
+              </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          ))}
+        </div>
+      </Section>
 
-        {/* Typography */}
-        <AccordionItem value="typography">
-          <AccordionTrigger>Typographie</AccordionTrigger>
-          <AccordionContent>
+      {/* Typography Section */}
+      <Section
+        icon={<Type size={20} />}
+        title="Typographie"
+        description="Modifiez les tailles de police pour ajuster la hiérarchie du texte"
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: spacing.lg
+          }}
+        >
+          {(['xs', 'sm', 'base', 'lg', 'xl'] as const).map((size) => (
             <div
+              key={size}
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.lg,
-                padding: theme.spacing.md
+                alignItems: 'center',
+                gap: spacing.xl
               }}
             >
-              {(['xs', 'sm', 'base', 'lg', 'xl'] as const).map((size) => (
-                <div key={size} style={{ display: 'flex', flexDirection: 'column', gap: theme.spacing.sm }}>
-                  <label
-                    style={{
-                      fontSize: theme.typography.fontSize.sm,
-                      fontWeight: theme.typography.fontWeight.medium,
-                      color: theme.colors.text.secondary
-                    }}
-                  >
-                    {size.toUpperCase()} - {theme.typography.fontSize[size]}
-                  </label>
-                  <input
-                    type="range"
-                    min="8"
-                    max="48"
-                    value={parseInt(theme.typography.fontSize[size])}
-                    onChange={(e) => {
-                      const value = `${e.target.value}px`;
-                      setTheme({ typography: { fontSize: { [size]: value } } });
-                    }}
-                    style={{
-                      width: '100%',
-                      accentColor: theme.colors.accent.blue.primary
-                    }}
-                  />
-                </div>
-              ))}
+              <div
+                style={{
+                  width: '80px',
+                  fontSize: typography.fontSize.sm,
+                  fontWeight: typography.fontWeight.medium,
+                  color: colors.text.secondary
+                }}
+              >
+                {size.toUpperCase()}
+              </div>
+              <div
+                style={{
+                  flex: 1,
+                  fontSize: typography.fontSize[size],
+                  color: colors.text.primary,
+                  transition: 'font-size 0.2s'
+                }}
+              >
+                The quick brown fox
+              </div>
+              <input
+                type="range"
+                min="8"
+                max="48"
+                value={parseInt(typography.fontSize[size])}
+                onChange={(e) => {
+                  const value = `${e.target.value}px`;
+                  setTheme({ typography: { fontSize: { [size]: value } } });
+                }}
+                style={{
+                  width: '200px',
+                  accentColor: colors.accent.blue.primary
+                }}
+              />
+              <div
+                style={{
+                  width: '60px',
+                  fontSize: typography.fontSize.xs,
+                  color: colors.text.tertiary,
+                  fontFamily: 'monospace',
+                  textAlign: 'right'
+                }}
+              >
+                {typography.fontSize[size]}
+              </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          ))}
+        </div>
+      </Section>
     </div>
   );
-}
+};
+
+// Helper Components - Same style as demo
+const Section = ({
+  icon,
+  title,
+  description,
+  children
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography } = theme;
+
+  return (
+    <div
+      style={{
+        marginBottom: spacing['4xl']
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.md,
+          marginBottom: spacing.md
+        }}
+      >
+        <div style={{ color: colors.accent.blue.primary }}>{icon}</div>
+        <h2
+          style={{
+            fontSize: typography.fontSize.xl,
+            fontWeight: typography.fontWeight.bold,
+            color: colors.text.primary
+          }}
+        >
+          {title}
+        </h2>
+      </div>
+      <p
+        style={{
+          fontSize: typography.fontSize.sm,
+          color: colors.text.tertiary,
+          marginBottom: spacing.xl,
+          lineHeight: typography.lineHeight.relaxed
+        }}
+      >
+        {description}
+      </p>
+      {children}
+    </div>
+  );
+};
+
+const SubSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography } = theme;
+
+  return (
+    <div
+      style={{
+        marginBottom: spacing.xl
+      }}
+    >
+      <h4
+        style={{
+          fontSize: typography.fontSize.base,
+          fontWeight: typography.fontWeight.semibold,
+          color: colors.text.secondary,
+          marginBottom: spacing.lg
+        }}
+      >
+        {title}
+      </h4>
+      {children}
+    </div>
+  );
+};
+
+const ColorGrid = ({ children }: { children: React.ReactNode }) => {
+  const { theme } = useTheme();
+  const { spacing } = theme;
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: spacing.lg
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+export default VisualEditor;
