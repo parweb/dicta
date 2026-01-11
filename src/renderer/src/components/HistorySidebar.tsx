@@ -110,26 +110,40 @@ const HistorySidebar = ({
           WebkitAppRegion: 'no-drag'
         }}
       >
-        {/* Content */}
-        <div
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: spacing.lg
-          }}
-        >
-          {isLoading ? (
+        {isLoading ? (
+          <div style={{ padding: spacing.lg }}>
             <LoadingState message="Chargement..." />
-          ) : transcriptions.length === 0 ? (
+          </div>
+        ) : transcriptions.length === 0 ? (
+          <div style={{ padding: spacing.lg }}>
             <EmptyState message="Aucune transcription" />
-          ) : (
-            <>
+          </div>
+        ) : (
+          <>
+            {/* Fixed search header */}
+            <div
+              style={{
+                padding: spacing.lg,
+                paddingBottom: 0,
+                flexShrink: 0
+              }}
+            >
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
                 placeholder="Rechercher dans l'historique..."
               />
+            </div>
 
+            {/* Scrollable content */}
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: spacing.lg,
+                paddingTop: spacing.md
+              }}
+            >
               {groupedTranscriptions.length === 0 ? (
                 <EmptyState message="Aucun résultat trouvé" />
               ) : (
@@ -143,9 +157,9 @@ const HistorySidebar = ({
                   />
                 ))
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );
