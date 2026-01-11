@@ -1,4 +1,3 @@
-import { X } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
@@ -75,8 +74,8 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
     return `rgba(14, 165, 233, ${isHovered ? Math.min(baseIntensity + 0.1, 1) : baseIntensity})`;
   };
 
-  const cellSize = 16;
-  const cellGap = 3;
+  const cellSize = 14;
+  const cellGap = 2;
 
   // Group by day
   const cellsByDay: HourlyCell[][] = [];
@@ -88,35 +87,15 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
     <div
       style={
         {
-          padding: spacing['2xl'],
+          padding: spacing.xl,
           WebkitAppRegion: 'no-drag',
           position: 'relative'
         } as React.CSSProperties
       }
     >
-      <h3
-        style={{
-          fontSize: typography.fontSize.lg,
-          color: colors.text.primary,
-          marginBottom: spacing.md,
-          fontWeight: typography.fontWeight.semibold
-        }}
-      >
-        Activité horaire interactive
-      </h3>
-      <p
-        style={{
-          fontSize: typography.fontSize.sm,
-          color: colors.text.tertiary,
-          marginBottom: spacing['2xl']
-        }}
-      >
-        Cliquez sur une cellule pour voir les détails
-      </p>
-
-      <div style={{ display: 'flex', gap: spacing.lg, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: spacing.md, justifyContent: 'center' }}>
         {/* Hour labels */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px`, paddingTop: '20px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px`, paddingTop: '16px', flexShrink: 0 }}>
           {Array.from({ length: 24 }).map((_, h) => (
             <div
               key={h}
@@ -126,12 +105,12 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                 color: colors.text.tertiary,
                 display: 'flex',
                 alignItems: 'center',
-                paddingRight: spacing.md,
-                minWidth: '35px',
+                paddingRight: spacing.sm,
+                minWidth: '30px',
                 justifyContent: 'flex-end'
               }}
             >
-              {h % 3 === 0 ? `${String(h).padStart(2, '0')}h` : ''}
+              {h % 6 === 0 ? `${h}h` : ''}
             </div>
           ))}
         </div>
@@ -143,16 +122,15 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
               {/* Day label */}
               <div
                 style={{
-                  height: '18px',
+                  height: '14px',
                   fontSize: typography.fontSize.xs,
                   color: colors.text.tertiary,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: typography.fontWeight.medium
+                  justifyContent: 'center'
                 }}
               >
-                {dayIdx % 4 === 0 ? dayCells[0].dayLabel : ''}
+                {dayIdx % 5 === 0 ? dayCells[0].dayLabel : ''}
               </div>
               {/* Hours */}
               {dayCells.map((cell, hourIdx) => {
@@ -173,12 +151,12 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                       width: `${cellSize}px`,
                       height: `${cellSize}px`,
                       backgroundColor: getCellColor(cell.count, isHovered),
-                      borderRadius: borderRadius.sm,
+                      borderRadius: borderRadius.xs,
                       cursor: cell.count > 0 ? 'pointer' : 'default',
-                      border: `1px solid ${cell.count > 0 ? colors.border.secondary : colors.border.primary}`,
-                      transform: isHovered ? 'scale(1.2)' : 'scale(1)',
-                      transition: 'all 0.15s ease-out',
-                      boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.3)' : 'none'
+                      border: cell.count > 0 ? `1px solid ${colors.border.primary}` : 'none',
+                      transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'all 0.1s ease-out',
+                      boxShadow: isHovered ? '0 1px 4px rgba(14, 165, 233, 0.2)' : 'none'
                     }}
                   />
                 );
@@ -188,59 +166,25 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
         </div>
       </div>
 
-      {/* Legend */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: spacing.md,
-          marginTop: spacing['2xl'],
-          fontSize: typography.fontSize.xs,
-          color: colors.text.tertiary,
-          justifyContent: 'center'
-        }}
-      >
-        <span>Moins d'activité</span>
-        {[0, 0.25, 0.5, 0.75, 1].map((intensity, idx) => (
-          <div
-            key={idx}
-            style={{
-              width: `${cellSize}px`,
-              height: `${cellSize}px`,
-              backgroundColor: intensity === 0 ? colors.background.tertiary : `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`,
-              borderRadius: borderRadius.sm,
-              border: `1px solid ${colors.border.primary}`
-            }}
-          />
-        ))}
-        <span>Plus d'activité</span>
-      </div>
 
-      {/* Hover tooltip */}
+      {/* Hover tooltip - ultra minimal */}
       {hoveredCell && !selectedCell && hoveredCell.count > 0 && (
         <div
           style={{
             position: 'fixed',
-            left: `${mousePosition.x + 10}px`,
-            top: `${mousePosition.y + 10}px`,
+            left: `${mousePosition.x + 8}px`,
+            top: `${mousePosition.y + 8}px`,
             backgroundColor: colors.background.primary,
-            border: `1px solid ${colors.border.secondary}`,
-            borderRadius: borderRadius.md,
-            padding: spacing.md,
+            borderRadius: borderRadius.xs,
+            padding: `${spacing.xs} ${spacing.sm}`,
             zIndex: 1000,
             pointerEvents: 'none',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)'
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)',
+            fontSize: typography.fontSize.xs,
+            color: colors.text.secondary
           }}
         >
-          <div style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary, marginBottom: spacing.xs }}>
-            {hoveredCell.dayLabel} • {String(hoveredCell.hour).padStart(2, '0')}h
-          </div>
-          <div style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
-            {hoveredCell.count} {hoveredCell.count === 1 ? 'transcription' : 'transcriptions'}
-          </div>
-          <div style={{ fontSize: typography.fontSize.xs, color: colors.accent.blue.primary, marginTop: spacing.xs }}>
-            Cliquer pour détails
-          </div>
+          {hoveredCell.count}
         </div>
       )}
 
@@ -271,27 +215,22 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               backgroundColor: colors.background.secondary,
-              borderRadius: borderRadius.lg,
-              padding: spacing['2xl'],
-              border: `1px solid ${colors.border.secondary}`,
-              maxWidth: '600px',
+              borderRadius: borderRadius.md,
+              padding: spacing.xl,
+              border: 'none',
+              maxWidth: '500px',
               width: '90%',
-              maxHeight: '80vh',
+              maxHeight: '70vh',
               overflowY: 'auto',
               zIndex: 2001,
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
               animation: 'scaleIn 0.2s ease-out'
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.lg }}>
-              <div>
-                <h4 style={{ fontSize: typography.fontSize.xl, color: colors.text.primary, fontWeight: typography.fontWeight.bold, margin: 0, marginBottom: spacing.xs }}>
-                  {selectedCell.dayLabel} à {String(selectedCell.hour).padStart(2, '0')}h
-                </h4>
-                <p style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, margin: 0 }}>
-                  {selectedCell.count} {selectedCell.count === 1 ? 'transcription' : 'transcriptions'}
-                </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
+              <div style={{ fontSize: typography.fontSize.base, color: colors.text.secondary }}>
+                {selectedCell.dayLabel} · {String(selectedCell.hour).padStart(2, '0')}h · {selectedCell.count}
               </div>
               <button
                 onClick={() => setSelectedCell(null)}
@@ -300,23 +239,11 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                   border: 'none',
                   color: colors.text.tertiary,
                   cursor: 'pointer',
-                  padding: spacing.xs,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: borderRadius.sm,
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.background.tertiary;
-                  e.currentTarget.style.color = colors.text.primary;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = colors.text.tertiary;
+                  padding: 0,
+                  fontSize: typography.fontSize.xl
                 }}
               >
-                <X size={20} />
+                ×
               </button>
             </div>
 
@@ -324,16 +251,12 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
             <div
               style={{
                 marginBottom: spacing.lg,
-                padding: spacing.lg,
+                padding: spacing.md,
                 backgroundColor: colors.background.primary,
-                borderRadius: borderRadius.md,
-                border: `1px solid ${colors.border.primary}`
+                borderRadius: borderRadius.sm
               }}
             >
-              <div style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary, marginBottom: spacing.md, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Timeline de l'heure
-              </div>
-              <div style={{ position: 'relative', height: '60px', display: 'flex', alignItems: 'center' }}>
+              <div style={{ position: 'relative', height: '50px', display: 'flex', alignItems: 'center' }}>
                 {/* Timeline axis */}
                 <div
                   style={{
@@ -368,13 +291,13 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                         height: `${size}px`,
                         backgroundColor: colors.accent.blue.primary,
                         borderRadius: '50%',
-                        border: `2px solid ${colors.background.primary}`,
+                        border: `1px solid ${colors.background.primary}`,
                         cursor: 'pointer',
-                        transition: 'all 0.2s',
+                        transition: 'all 0.15s',
                         zIndex: selectedCell.transcriptions.length - idx
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.3)';
+                        e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.2)';
                         e.currentTarget.style.zIndex = '1000';
                       }}
                       onMouseLeave={(e) => {
@@ -386,61 +309,41 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                 })}
 
                 {/* Time labels */}
-                <div style={{ position: 'absolute', bottom: '-20px', left: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                  00
+                <div style={{ position: 'absolute', bottom: '-18px', left: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                  0
                 </div>
-                <div style={{ position: 'absolute', bottom: '-20px', left: '25%', fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                  15
-                </div>
-                <div style={{ position: 'absolute', bottom: '-20px', left: '50%', transform: 'translateX(-50%)', fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                  30
-                </div>
-                <div style={{ position: 'absolute', bottom: '-20px', left: '75%', fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                  45
-                </div>
-                <div style={{ position: 'absolute', bottom: '-20px', right: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                <div style={{ position: 'absolute', bottom: '-18px', right: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
                   60
                 </div>
               </div>
             </div>
 
             {/* Transcriptions list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
               {selectedCell.transcriptions
                 .sort((a, b) => a.timestamp - b.timestamp)
                 .map((t) => {
                   const date = new Date(t.timestamp);
-                  const preview = t.text.slice(0, 80) + (t.text.length > 80 ? '...' : '');
+                  const preview = t.text.slice(0, 60) + (t.text.length > 60 ? '...' : '');
 
                   return (
                     <div
                       key={t.id}
                       style={{
-                        padding: spacing.md,
+                        padding: spacing.sm,
                         backgroundColor: colors.background.primary,
-                        borderRadius: borderRadius.md,
-                        border: `1px solid ${colors.border.primary}`,
-                        transition: 'all 0.2s',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = colors.border.secondary;
-                        e.currentTarget.style.backgroundColor = colors.background.tertiary;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = colors.border.primary;
-                        e.currentTarget.style.backgroundColor = colors.background.primary;
+                        borderRadius: borderRadius.sm
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
-                        <span style={{ fontSize: typography.fontSize.xs, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.medium }}>
-                          {String(date.getHours()).padStart(2, '0')}:{String(date.getMinutes()).padStart(2, '0')}:{String(date.getSeconds()).padStart(2, '0')}
+                        <span style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                          {String(date.getHours()).padStart(2, '0')}:{String(date.getMinutes()).padStart(2, '0')}
                         </span>
                         <span style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                          {t.durationMs ? `${(t.durationMs / 1000).toFixed(1)}s` : 'N/A'}
+                          {t.durationMs ? `${(t.durationMs / 1000).toFixed(0)}s` : '—'}
                         </span>
                       </div>
-                      <div style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary, lineHeight: typography.lineHeight.relaxed }}>
+                      <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, lineHeight: typography.lineHeight.normal }}>
                         {preview}
                       </div>
                     </div>
