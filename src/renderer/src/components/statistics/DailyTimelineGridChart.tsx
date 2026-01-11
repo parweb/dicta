@@ -301,8 +301,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   paddingLeft: '64px',
                   paddingTop: spacing.xs,
                   opacity: isHovered ? 1 : 0,
-                  transform: isHovered ? 'translateY(0)' : 'translateY(-8px)',
-                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  transform: isHovered ? 'translateY(0)' : 'translateY(-4px)',
+                  transition: 'opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1), transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
                   pointerEvents: 'none',
                   height: isHovered ? 'auto' : '0',
                   overflow: 'hidden'
