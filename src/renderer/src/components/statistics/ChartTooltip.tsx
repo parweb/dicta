@@ -24,7 +24,7 @@ const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
         style={{
           fontSize: typography.fontSize.sm,
           color: colors.text.tertiary,
-          marginBottom: '4px'
+          marginBottom: spacing.xs
         }}
       >
         {data.date}
@@ -43,7 +43,7 @@ const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
           fontSize: typography.fontSize.lg,
           color: colors.accent.blue.primary,
           fontWeight: typography.fontWeight.bold,
-          marginTop: '4px'
+          marginTop: spacing.xs
         }}
       >
         {formatCost(data.cost)}
