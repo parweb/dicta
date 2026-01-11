@@ -17,6 +17,7 @@ interface DailyCell {
 
 const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps) => {
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+  const [hoveredMarker, setHoveredMarker] = useState<string | null>(null);
 
   // Aggregate by day with transcriptions
   const dailyData = useMemo(() => {
@@ -175,28 +176,62 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                     const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
                     const baseSize = 6;
                     const size = Math.max(baseSize, (duration / maxDuration) * 10 + baseSize);
+                    const isMarkerHovered = hoveredMarker === t.id;
+                    const timeLabel = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
                     return (
                       <div
                         key={t.id}
-                        title={`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} - ${(duration / 1000).toFixed(1)}s`}
                         style={{
                           position: 'absolute',
                           left: `${position}%`,
                           top: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          width: `${size}px`,
-                          height: `${size}px`,
-                          backgroundColor: colors.accent.blue.primary,
-                          borderRadius: '50%',
-                          border: 'none',
-                          boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
-                          zIndex: cell.transcriptions.length - idx,
-                          opacity: isHovered ? 1 : 0.8,
-                          transition: 'all 0.15s ease-out',
-                          animation: `markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.03}s both`
+                          transform: 'translate(-50%, -50%)'
                         }}
-                      />
+                      >
+                        <div
+                          onMouseEnter={() => setHoveredMarker(t.id)}
+                          onMouseLeave={() => setHoveredMarker(null)}
+                          style={{
+                            width: `${size}px`,
+                            height: `${size}px`,
+                            backgroundColor: colors.accent.blue.primary,
+                            borderRadius: '50%',
+                            border: 'none',
+                            boxShadow: isMarkerHovered ? '0 2px 12px rgba(14, 165, 233, 0.6)' : isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
+                            zIndex: cell.transcriptions.length - idx,
+                            opacity: isMarkerHovered ? 1 : isHovered ? 1 : 0.8,
+                            transition: 'all 0.15s ease-out',
+                            animation: `markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.03}s both`,
+                            cursor: 'default',
+                            transform: isMarkerHovered ? 'scale(1.15)' : 'scale(1)'
+                          }}
+                        />
+                        {/* Time label on hover */}
+                        {isMarkerHovered && (
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '-24px',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              fontSize: typography.fontSize.xs,
+                              color: colors.text.primary,
+                              fontWeight: typography.fontWeight.medium,
+                              backgroundColor: colors.background.secondary,
+                              padding: `${spacing.xs} ${spacing.sm}`,
+                              borderRadius: borderRadius.xs,
+                              whiteSpace: 'nowrap',
+                              pointerEvents: 'none',
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                              animation: 'timeLabelIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                              zIndex: 1000
+                            }}
+                          >
+                            {timeLabel}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -232,6 +267,16 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           to {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1) rotate(0deg);
+          }
+        }
+        @keyframes timeLabelIn {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-4px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
           }
         }
       `}</style>
