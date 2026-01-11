@@ -1,5 +1,6 @@
 import { Palette, Type, Ruler, Circle, Square, Sparkles } from 'lucide-react';
 
+import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
 import { useTheme } from '../lib/theme-context';
 
 const DesignSystem = () => {
@@ -29,6 +30,11 @@ const DesignSystem = () => {
           paddingBottom: spacing['4xl']
         }}
       >
+        {/* Theme Configurator */}
+        <div style={{ marginBottom: spacing['4xl'] }}>
+          <ThemeConfigurator />
+        </div>
+
         {/* Header */}
         <div
           style={{
@@ -43,7 +49,7 @@ const DesignSystem = () => {
               marginBottom: spacing.sm
             }}
           >
-            Design System - Dicta
+            Aperçu en Direct - Design System
           </h1>
           <p
             style={{
@@ -52,7 +58,7 @@ const DesignSystem = () => {
               lineHeight: typography.lineHeight.relaxed
             }}
           >
-            Système de design centralisé pour une cohérence visuelle à travers l'application
+            Les changements de thème sont appliqués immédiatement ci-dessous
           </p>
         </div>
 
