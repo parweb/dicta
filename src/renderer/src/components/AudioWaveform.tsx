@@ -1,9 +1,4 @@
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../lib/design-system';
+import { useTheme } from '../lib/theme-context';
 import { formatDuration } from '../lib/statistics';
 
 interface AudioWaveformProps {
@@ -21,6 +16,9 @@ const AudioWaveform = ({
   height = 60,
   maxBars
 }: AudioWaveformProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
+
   if (amplitudes.length === 0) return null;
 
   // Downsample amplitudes if maxBars is specified and we have more bars

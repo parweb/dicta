@@ -1,9 +1,4 @@
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import { formatCost, formatDuration } from '../../lib/statistics';
 
 interface ChartTooltipProps {
@@ -12,6 +7,9 @@ interface ChartTooltipProps {
 }
 
 const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
+
   if (!active || !payload?.[0]) return null;
 
   const data = payload[0].payload;

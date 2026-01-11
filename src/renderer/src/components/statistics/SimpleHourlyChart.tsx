@@ -1,11 +1,6 @@
 import { useState, useMemo } from 'react';
 
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleHourlyChartProps {
@@ -20,6 +15,8 @@ interface HourlyCell {
 }
 
 const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
   const [hoveredCell, setHoveredCell] = useState<HourlyCell | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 

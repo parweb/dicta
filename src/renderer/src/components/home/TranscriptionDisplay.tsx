@@ -1,11 +1,5 @@
 import AudioWaveform from '../AudioWaveform';
-import {
-  borderRadius,
-  colors,
-  components,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 
 interface TranscriptionDisplayProps {
   transcript: string;
@@ -24,6 +18,9 @@ const TranscriptionDisplay = ({
   audioDuration,
   onCopyTranscript
 }: TranscriptionDisplayProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius, components } = theme;
+
   return (
     <div
       style={

@@ -1,11 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import type { Transcription } from '../../lib/history';
 
 interface TimelineGridChartProps {
@@ -21,6 +16,8 @@ interface HourlyCell {
 }
 
 const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   // Aggregate by hour with transcriptions

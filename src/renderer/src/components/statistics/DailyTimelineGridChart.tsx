@@ -1,11 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import type { Transcription } from '../../lib/history';
 
 interface DailyTimelineGridChartProps {
@@ -23,6 +18,8 @@ interface DailyCell {
 const DailyTimelineGridChart = ({
   transcriptions
 }: DailyTimelineGridChartProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   // Aggregate by day with transcriptions

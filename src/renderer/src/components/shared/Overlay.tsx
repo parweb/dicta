@@ -1,10 +1,13 @@
-import { colors } from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 
 interface OverlayProps {
   onClose: () => void;
 }
 
 const Overlay = ({ onClose }: OverlayProps) => {
+  const { theme } = useTheme();
+  const { colors } = theme;
+
   return (
     <div
       onClick={onClose}

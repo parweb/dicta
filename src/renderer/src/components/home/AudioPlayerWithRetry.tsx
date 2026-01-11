@@ -1,12 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { RefreshCcw } from 'lucide-react';
 
-import {
-  colors,
-  spacing,
-  typography,
-  borderRadius
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 
 interface AudioPlayerWithRetryProps {
   audioBlob: Blob;
@@ -21,6 +16,8 @@ const AudioPlayerWithRetry = ({
   onRetry,
   isLoading
 }: AudioPlayerWithRetryProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
   const [audioUrl, setAudioUrl] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement>(null);
 

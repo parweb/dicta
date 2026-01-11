@@ -1,4 +1,4 @@
-import { colors, spacing, typography } from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import { formatCost, formatDuration } from '../../lib/statistics';
 
 interface StatsSummaryCardsProps {
@@ -12,6 +12,9 @@ const StatsSummaryCards = ({
   totalMinutes,
   totalCost
 }: StatsSummaryCardsProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography } = theme;
+
   return (
     <div
       style={{

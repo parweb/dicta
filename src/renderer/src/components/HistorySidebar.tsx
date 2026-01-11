@@ -16,13 +16,7 @@ import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
 import { useHistoryData } from '../hooks/useHistoryData';
-import {
-  components,
-  spacing,
-  colors,
-  typography,
-  borderRadius
-} from '../lib/design-system';
+import { useTheme } from '../lib/theme-context';
 import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
@@ -42,6 +36,8 @@ const HistorySidebar = ({
   onSelectTranscription,
   currentTranscript
 }: HistorySidebarProps) => {
+  const { theme } = useTheme();
+  const { components, spacing, colors, typography, borderRadius } = theme;
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
   const [searchQuery, setSearchQuery] = useState('');
   const [isPending, startTransition] = useTransition();

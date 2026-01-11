@@ -8,12 +8,7 @@ import {
   YAxis
 } from 'recharts';
 
-import {
-  borderRadius,
-  colors,
-  spacing,
-  typography
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleActivityStreamChartProps {
@@ -23,6 +18,8 @@ interface SimpleActivityStreamChartProps {
 const SimpleActivityStreamChart = ({
   transcriptions
 }: SimpleActivityStreamChartProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
   // Aggregate by hour
   const hourlyData = useMemo(() => {
     const dataMap = new Map<

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import TranscriptionCard from './TranscriptionCard';
-import { colors, spacing, typography } from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 import type { Transcription } from '../../lib/history';
 
 interface TranscriptionGroupProps {
@@ -18,6 +18,9 @@ const TranscriptionGroup = memo(
     currentTranscript,
     onSelectTranscription
   }: TranscriptionGroupProps) => {
+    const { theme } = useTheme();
+    const { colors, spacing, typography } = theme;
+
     return (
       <div style={{ marginBottom: spacing['2xl'] }}>
         <h3

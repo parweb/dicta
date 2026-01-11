@@ -1,11 +1,6 @@
 import { Search, X } from 'lucide-react';
 
-import {
-  colors,
-  spacing,
-  typography,
-  borderRadius
-} from '../../lib/design-system';
+import { useTheme } from '../../lib/theme-context';
 
 interface SearchInputProps {
   value: string;
@@ -20,6 +15,9 @@ const SearchInput = ({
   placeholder = 'Rechercher...',
   style
 }: SearchInputProps) => {
+  const { theme } = useTheme();
+  const { colors, spacing, typography, borderRadius } = theme;
+
   return (
     <div
       style={{
