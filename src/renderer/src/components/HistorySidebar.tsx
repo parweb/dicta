@@ -7,7 +7,7 @@ import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
 import { useHistoryData } from '../hooks/useHistoryData';
-import { components, spacing, colors, typography } from '../lib/design-system';
+import { components, spacing, colors, typography, borderRadius } from '../lib/design-system';
 import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
@@ -135,15 +135,24 @@ const HistorySidebar = ({
                   gap: spacing.sm
                 }}
               >
-                <span
+                <div
                   style={{
-                    fontSize: typography.fontSize.xs,
-                    color: colors.text.tertiary,
-                    whiteSpace: 'nowrap'
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: '28px',
+                    height: '28px',
+                    padding: `0 ${spacing.sm}`,
+                    backgroundColor: colors.background.tertiary,
+                    borderRadius: borderRadius.sm,
+                    fontSize: typography.fontSize.sm,
+                    color: colors.text.secondary,
+                    fontWeight: typography.fontWeight.medium,
+                    flexShrink: 0
                   }}
                 >
                   {filteredTranscriptions.length}
-                </span>
+                </div>
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
