@@ -91,20 +91,18 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
         } as React.CSSProperties
       }
     >
-      {/* Grid of daily timeline cards */}
+      {/* Vertical stack of timelines */}
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-          gap: spacing.lg,
-          maxWidth: '1400px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: spacing.xs,
+          maxWidth: '1000px',
           margin: '0 auto'
         }}
       >
         {cells.map((cell) => {
           const isHovered = hoveredCell === cell.dateKey;
-          const avgDuration = cell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / cell.count / 1000;
-          const totalDuration = cell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / 1000;
 
           return (
             <div
@@ -112,58 +110,42 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
               onMouseEnter={() => setHoveredCell(cell.dateKey)}
               onMouseLeave={() => setHoveredCell(null)}
               style={{
-                backgroundColor: isHovered ? colors.background.tertiary : colors.background.secondary,
-                borderRadius: borderRadius.md,
-                padding: spacing.md,
-                border: `1px solid ${isHovered ? colors.border.secondary : colors.border.primary}`,
-                transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-                boxShadow: isHovered ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)'
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.md,
+                transition: 'all 0.15s ease-out'
               }}
             >
-              {/* Header */}
+              {/* Minimal date label */}
               <div
                 style={{
-                  marginBottom: spacing.md,
-                  paddingBottom: spacing.sm,
-                  borderBottom: `1px solid ${colors.border.primary}`
+                  fontSize: typography.fontSize.xs,
+                  color: isHovered ? colors.text.secondary : colors.text.tertiary,
+                  minWidth: '50px',
+                  textAlign: 'right',
+                  transition: 'color 0.15s ease-out',
+                  fontWeight: typography.fontWeight.medium
                 }}
               >
-                <div style={{
-                  fontSize: typography.fontSize.sm,
-                  color: colors.text.primary,
-                  fontWeight: typography.fontWeight.semibold,
-                  marginBottom: spacing.xs,
-                  textTransform: 'capitalize'
-                }}>
-                  {cell.fullDate}
-                </div>
-                <div style={{
-                  fontSize: typography.fontSize.xs,
-                  color: colors.text.tertiary
-                }}>
-                  {cell.count} {cell.count === 1 ? 'transcription' : 'transcriptions'}
-                </div>
+                {cell.dayLabel}
               </div>
 
               {/* Timeline graph - 24 hours */}
               <div
                 style={{
                   position: 'relative',
-                  height: '60px',
-                  backgroundColor: colors.background.primary,
-                  borderRadius: borderRadius.sm,
-                  marginBottom: spacing.sm,
-                  overflow: 'hidden'
+                  height: '32px',
+                  flex: 1,
+                  overflow: 'visible'
                 }}
               >
-                {/* Timeline container with padding */}
+                {/* Timeline container */}
                 <div
                   style={{
                     position: 'absolute',
                     top: 0,
-                    left: '12px',
-                    right: '12px',
+                    left: 0,
+                    right: 0,
                     bottom: 0
                   }}
                 >
@@ -174,9 +156,10 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                       top: '50%',
                       left: 0,
                       right: 0,
-                      height: '2px',
-                      backgroundColor: colors.border.secondary,
-                      borderRadius: '1px'
+                      height: '1px',
+                      backgroundColor: colors.border.primary,
+                      opacity: isHovered ? 0.6 : 0.3,
+                      transition: 'opacity 0.15s ease-out'
                     }}
                   />
 
@@ -190,7 +173,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                     const position = (totalSeconds / 86400) * 100; // 86400 seconds in a day
                     const duration = t.durationMs || 0;
                     const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
-                    const size = Math.max(7, (duration / maxDuration) * 14 + 7);
+                    const baseSize = 6;
+                    const size = Math.max(baseSize, (duration / maxDuration) * 10 + baseSize);
 
                     return (
                       <div
@@ -205,104 +189,31 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                           height: `${size}px`,
                           backgroundColor: colors.accent.blue.primary,
                           borderRadius: '50%',
-                          border: `2px solid ${colors.background.primary}`,
-                          boxShadow: '0 2px 8px rgba(14, 165, 233, 0.4)',
+                          border: 'none',
+                          boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
                           zIndex: cell.transcriptions.length - idx,
+                          opacity: isHovered ? 1 : 0.8,
+                          transition: 'all 0.15s ease-out',
                           animation: `markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.03}s both`
                         }}
                       />
                     );
                   })}
                 </div>
-
-                {/* Time markers - 24h format */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    left: '12px',
-                    fontSize: '9px',
-                    color: colors.text.tertiary,
-                    fontWeight: typography.fontWeight.medium
-                  }}
-                >
-                  00h
-                </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    left: '25%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '9px',
-                    color: colors.text.tertiary,
-                    fontWeight: typography.fontWeight.medium
-                  }}
-                >
-                  06h
-                </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '9px',
-                    color: colors.text.tertiary,
-                    fontWeight: typography.fontWeight.medium
-                  }}
-                >
-                  12h
-                </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    left: '75%',
-                    transform: 'translateX(-50%)',
-                    fontSize: '9px',
-                    color: colors.text.tertiary,
-                    fontWeight: typography.fontWeight.medium
-                  }}
-                >
-                  18h
-                </div>
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: '4px',
-                    right: '12px',
-                    fontSize: '9px',
-                    color: colors.text.tertiary,
-                    fontWeight: typography.fontWeight.medium
-                  }}
-                >
-                  24h
-                </div>
               </div>
 
-              {/* Stats footer */}
+              {/* Count indicator */}
               <div
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: spacing.sm,
-                  fontSize: '10px',
-                  color: colors.text.tertiary
+                  fontSize: typography.fontSize.xs,
+                  color: colors.text.tertiary,
+                  minWidth: '30px',
+                  opacity: isHovered ? 1 : 0,
+                  transition: 'opacity 0.15s ease-out',
+                  fontWeight: typography.fontWeight.medium
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Durée moy.</span>
-                  <span style={{ color: colors.accent.blue.primary, fontWeight: typography.fontWeight.medium }}>
-                    {avgDuration.toFixed(1)}s
-                  </span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Total</span>
-                  <span style={{ color: colors.accent.blue.primary, fontWeight: typography.fontWeight.medium }}>
-                    {totalDuration.toFixed(0)}s
-                  </span>
-                </div>
+                {cell.count}
               </div>
             </div>
           );
