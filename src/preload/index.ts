@@ -31,6 +31,17 @@ const api = {
       transcriptions: unknown[];
       error?: string;
     }> => ipcRenderer.invoke('history:load-all')
+  },
+  // Theme configuration management
+  theme: {
+    load: (): Promise<{ success: boolean; theme: unknown | null; error?: string }> =>
+      ipcRenderer.invoke('theme:load'),
+    save: (
+      theme: unknown
+    ): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('theme:save', theme),
+    reset: (): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('theme:reset')
   }
 };
 

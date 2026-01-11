@@ -130,6 +130,53 @@ app.whenReady().then(() => {
     }
   });
 
+  // Theme configuration handlers
+  const configDir = join(app.getPath('userData'), 'config');
+  const themeConfigPath = join(configDir, 'design-system.json');
+
+  // Load theme configuration
+  ipcMain.handle('theme:load', () => {
+    try {
+      if (!existsSync(themeConfigPath)) {
+        return { success: true, theme: null };
+      }
+      const content = readFileSync(themeConfigPath, 'utf-8');
+      const theme = JSON.parse(content);
+      return { success: true, theme };
+    } catch (error) {
+      console.error('Error loading theme:', error);
+      return { success: false, error: String(error), theme: null };
+    }
+  });
+
+  // Save theme configuration
+  ipcMain.handle('theme:save', (_event, theme) => {
+    try {
+      if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+      }
+      writeFileSync(themeConfigPath, JSON.stringify(theme, null, 2));
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving theme:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  // Reset theme configuration (delete config file)
+  ipcMain.handle('theme:reset', () => {
+    try {
+      if (existsSync(themeConfigPath)) {
+        const fs = require('fs');
+        fs.unlinkSync(themeConfigPath);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error resetting theme:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
   createWindow();
 
   // Enregistrement du raccourci global pour amener l'app au premier plan.
