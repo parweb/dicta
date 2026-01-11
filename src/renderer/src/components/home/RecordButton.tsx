@@ -32,7 +32,13 @@ const RecordButton = ({
         } as React.CSSProperties
       }
     >
-      {isRecording ? <Mic /> : isLoading ? <Loader2 className="animate-spin" /> : <MicOff />}
+      {isRecording ? (
+        <Mic />
+      ) : isLoading ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <MicOff />
+      )}
     </button>
   );
 };

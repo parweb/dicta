@@ -22,10 +22,15 @@ const api = {
   history: {
     ensureDir: (): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('history:ensure-dir'),
-    save: (transcription: unknown): Promise<{ success: boolean; filename?: string; error?: string }> =>
+    save: (
+      transcription: unknown
+    ): Promise<{ success: boolean; filename?: string; error?: string }> =>
       ipcRenderer.invoke('history:save', transcription),
-    loadAll: (): Promise<{ success: boolean; transcriptions: unknown[]; error?: string }> =>
-      ipcRenderer.invoke('history:load-all')
+    loadAll: (): Promise<{
+      success: boolean;
+      transcriptions: unknown[];
+      error?: string;
+    }> => ipcRenderer.invoke('history:load-all')
   }
 };
 

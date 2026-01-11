@@ -1,4 +1,9 @@
-import { borderRadius, colors, spacing, typography } from '../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../lib/design-system';
 import { formatDuration } from '../lib/statistics';
 
 interface AudioWaveformProps {

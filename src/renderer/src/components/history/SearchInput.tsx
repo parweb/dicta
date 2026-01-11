@@ -1,6 +1,11 @@
 import { Search, X } from 'lucide-react';
 
-import { colors, spacing, typography, borderRadius } from '../../lib/design-system';
+import {
+  colors,
+  spacing,
+  typography,
+  borderRadius
+} from '../../lib/design-system';
 
 interface SearchInputProps {
   value: string;
@@ -9,7 +14,12 @@ interface SearchInputProps {
   style?: React.CSSProperties;
 }
 
-const SearchInput = ({ value, onChange, placeholder = 'Rechercher...', style }: SearchInputProps) => {
+const SearchInput = ({
+  value,
+  onChange,
+  placeholder = 'Rechercher...',
+  style
+}: SearchInputProps) => {
   return (
     <div
       style={{

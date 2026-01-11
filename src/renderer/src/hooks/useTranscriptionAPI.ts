@@ -2,7 +2,12 @@ import { useState, useCallback } from 'react';
 
 import type { Transcription } from '../lib/history';
 
-export type ProxyStatus = 'idle' | 'loading' | 'success' | 'error' | 'cancelled';
+export type ProxyStatus =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'error'
+  | 'cancelled';
 
 export interface ProxyConfig {
   name: string;
@@ -24,10 +29,11 @@ const PROXY_CONFIGS: ProxyConfig[] = [
   }
 ];
 
-const INITIAL_PROXY_STATUSES: Record<string, ProxyStatus> = PROXY_CONFIGS.reduce(
-  (acc, proxy) => ({ ...acc, [proxy.name]: 'idle' as ProxyStatus }),
-  {}
-);
+const INITIAL_PROXY_STATUSES: Record<string, ProxyStatus> =
+  PROXY_CONFIGS.reduce(
+    (acc, proxy) => ({ ...acc, [proxy.name]: 'idle' as ProxyStatus }),
+    {}
+  );
 
 // SECURITY: Move API key to environment variables
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
@@ -50,19 +56,24 @@ export interface UseTranscriptionAPIReturn {
     durationMs?: number,
     audioAmplitudes?: number[]
   ) => Promise<Transcription | undefined>;
-  analyzeAudio: (blob: Blob) => Promise<{ durationMs?: number; amplitudes: number[] }>;
+  analyzeAudio: (
+    blob: Blob
+  ) => Promise<{ durationMs?: number; amplitudes: number[] }>;
 }
 
 export function useTranscriptionAPI(
   onHistoryUpdate?: () => Promise<void>
 ): UseTranscriptionAPIReturn {
-  const [proxyStatuses, setProxyStatuses] =
-    useState<Record<string, ProxyStatus>>(INITIAL_PROXY_STATUSES);
+  const [proxyStatuses, setProxyStatuses] = useState<
+    Record<string, ProxyStatus>
+  >(INITIAL_PROXY_STATUSES);
   const [isLoading, setIsLoading] = useState(false);
 
   // Extract audio duration and amplitude data from blob using Web Audio API
   const analyzeAudio = useCallback(
-    async (blob: Blob): Promise<{ durationMs?: number; amplitudes: number[] }> => {
+    async (
+      blob: Blob
+    ): Promise<{ durationMs?: number; amplitudes: number[] }> => {
       try {
         const arrayBuffer = await blob.arrayBuffer();
         const audioContext = new AudioContext();
@@ -159,7 +170,9 @@ export function useTranscriptionAPI(
       );
 
       // Fetch with specific proxy
-      const fetchWithProxy = async (proxy: ProxyConfig): Promise<TranscriptionResponse> => {
+      const fetchWithProxy = async (
+        proxy: ProxyConfig
+      ): Promise<TranscriptionResponse> => {
         try {
           const response = await fetch(proxy.url, {
             method: 'POST',
@@ -172,7 +185,9 @@ export function useTranscriptionAPI(
           if (!response.ok) {
             const data = await response.json().catch(() => ({}));
             setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
-            throw new Error(data.error?.message || `Proxy error: ${proxy.name}`);
+            throw new Error(
+              data.error?.message || `Proxy error: ${proxy.name}`
+            );
           }
 
           const data: TranscriptionResponse = await response.json();
@@ -186,7 +201,9 @@ export function useTranscriptionAPI(
 
       try {
         // Promise.any() returns the first successful promise
-        const data = await Promise.any(PROXY_CONFIGS.map(proxy => fetchWithProxy(proxy)));
+        const data = await Promise.any(
+          PROXY_CONFIGS.map(proxy => fetchWithProxy(proxy))
+        );
 
         // Mark remaining proxies as cancelled
         setProxyStatuses(prev => {

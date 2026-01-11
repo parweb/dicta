@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleHybridChartProps {
@@ -109,7 +114,15 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
 
         <div style={{ display: 'flex', gap: spacing.md, overflowX: 'auto' }}>
           {/* Hour labels */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px`, paddingTop: '20px', flexShrink: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: `${cellGap}px`,
+              paddingTop: '20px',
+              flexShrink: 0
+            }}
+          >
             {Array.from({ length: 24 }).map((_, h) => (
               <div
                 key={h}
@@ -131,7 +144,14 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
           {/* Grid */}
           <div style={{ display: 'flex', gap: `${cellGap}px` }}>
             {cellsByDay.map((dayCells, dayIdx) => (
-              <div key={dayIdx} style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px` }}>
+              <div
+                key={dayIdx}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: `${cellGap}px`
+                }}
+              >
                 {/* Day label */}
                 <div
                   style={{
@@ -152,11 +172,13 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
                     <div
                       key={hourIdx}
                       onClick={() => cell.count > 0 && setSelectedCell(cell)}
-                      onMouseEnter={(e) => {
+                      onMouseEnter={e => {
                         setHoveredCell(cell);
                         setMousePosition({ x: e.clientX, y: e.clientY });
                       }}
-                      onMouseMove={(e) => setMousePosition({ x: e.clientX, y: e.clientY })}
+                      onMouseMove={e =>
+                        setMousePosition({ x: e.clientX, y: e.clientY })
+                      }
                       onMouseLeave={() => setHoveredCell(null)}
                       style={{
                         width: `${cellSize}px`,
@@ -164,7 +186,9 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
                         backgroundColor: getCellColor(cell.count, isSelected),
                         borderRadius: borderRadius.xs,
                         cursor: cell.count > 0 ? 'pointer' : 'default',
-                        border: isSelected ? `2px solid ${colors.accent.blue.light}` : `1px solid ${colors.border.primary}`,
+                        border: isSelected
+                          ? `2px solid ${colors.accent.blue.light}`
+                          : `1px solid ${colors.border.primary}`,
                         transform: isSelected ? 'scale(1.1)' : 'scale(1)',
                         transition: 'all 0.2s'
                       }}
@@ -194,7 +218,10 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
               style={{
                 width: `${cellSize}px`,
                 height: `${cellSize}px`,
-                backgroundColor: intensity === 0 ? colors.background.tertiary : `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`,
+                backgroundColor:
+                  intensity === 0
+                    ? colors.background.tertiary
+                    : `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`,
                 borderRadius: borderRadius.xs,
                 border: `1px solid ${colors.border.primary}`
               }}
@@ -218,8 +245,22 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
             flexShrink: 0
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
-            <h4 style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold, margin: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: spacing.lg
+            }}
+          >
+            <h4
+              style={{
+                fontSize: typography.fontSize.base,
+                color: colors.text.primary,
+                fontWeight: typography.fontWeight.semibold,
+                margin: 0
+              }}
+            >
               Détails
             </h4>
             <button
@@ -237,22 +278,55 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
             </button>
           </div>
 
-          <div style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, marginBottom: spacing.md }}>
-            {selectedCell.dayLabel} à {String(selectedCell.hour).padStart(2, '0')}h
+          <div
+            style={{
+              fontSize: typography.fontSize.sm,
+              color: colors.text.tertiary,
+              marginBottom: spacing.md
+            }}
+          >
+            {selectedCell.dayLabel} à{' '}
+            {String(selectedCell.hour).padStart(2, '0')}h
           </div>
 
-          <div style={{ marginBottom: spacing.lg, padding: spacing.md, backgroundColor: colors.background.primary, borderRadius: borderRadius.md }}>
-            <div style={{ fontSize: typography.fontSize.lg, color: colors.accent.blue.primary, fontWeight: typography.fontWeight.bold }}>
+          <div
+            style={{
+              marginBottom: spacing.lg,
+              padding: spacing.md,
+              backgroundColor: colors.background.primary,
+              borderRadius: borderRadius.md
+            }}
+          >
+            <div
+              style={{
+                fontSize: typography.fontSize.lg,
+                color: colors.accent.blue.primary,
+                fontWeight: typography.fontWeight.bold
+              }}
+            >
               {selectedCell.count} transcriptions
             </div>
           </div>
 
-          <div style={{ fontSize: typography.fontSize.sm, color: colors.text.secondary, marginBottom: spacing.sm, fontWeight: typography.fontWeight.medium }}>
+          <div
+            style={{
+              fontSize: typography.fontSize.sm,
+              color: colors.text.secondary,
+              marginBottom: spacing.sm,
+              fontWeight: typography.fontWeight.medium
+            }}
+          >
             Liste ({selectedCell.transcriptions.length})
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
-            {selectedCell.transcriptions.map((t) => {
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.xs
+            }}
+          >
+            {selectedCell.transcriptions.map(t => {
               const date = new Date(t.timestamp);
               return (
                 <div
@@ -264,11 +338,24 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
                     fontSize: typography.fontSize.xs
                   }}
                 >
-                  <div style={{ color: colors.text.secondary, marginBottom: spacing.xs }}>
-                    {date.getHours()}:{String(date.getMinutes()).padStart(2, '0')}
+                  <div
+                    style={{
+                      color: colors.text.secondary,
+                      marginBottom: spacing.xs
+                    }}
+                  >
+                    {date.getHours()}:
+                    {String(date.getMinutes()).padStart(2, '0')}
                   </div>
-                  <div style={{ color: colors.text.tertiary, fontSize: typography.fontSize.xs }}>
-                    {t.durationMs ? `${(t.durationMs / 1000).toFixed(1)}s` : 'N/A'}
+                  <div
+                    style={{
+                      color: colors.text.tertiary,
+                      fontSize: typography.fontSize.xs
+                    }}
+                  >
+                    {t.durationMs
+                      ? `${(t.durationMs / 1000).toFixed(1)}s`
+                      : 'N/A'}
                   </div>
                 </div>
               );
@@ -293,14 +380,33 @@ const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
           }}
         >
-          <div style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, marginBottom: spacing.xs }}>
-            {hoveredCell.dayLabel} à {String(hoveredCell.hour).padStart(2, '0')}h
+          <div
+            style={{
+              fontSize: typography.fontSize.sm,
+              color: colors.text.tertiary,
+              marginBottom: spacing.xs
+            }}
+          >
+            {hoveredCell.dayLabel} à {String(hoveredCell.hour).padStart(2, '0')}
+            h
           </div>
-          <div style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+          <div
+            style={{
+              fontSize: typography.fontSize.base,
+              color: colors.text.primary,
+              fontWeight: typography.fontWeight.semibold
+            }}
+          >
             {hoveredCell.count} transcriptions
           </div>
           {hoveredCell.count > 0 && (
-            <div style={{ fontSize: typography.fontSize.xs, color: colors.accent.blue.primary, marginTop: spacing.xs }}>
+            <div
+              style={{
+                fontSize: typography.fontSize.xs,
+                color: colors.accent.blue.primary,
+                marginTop: spacing.xs
+              }}
+            >
               Cliquez pour voir les détails
             </div>
           )}

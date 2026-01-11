@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface EnhancedHybridChartProps {
@@ -96,9 +101,19 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
         } as React.CSSProperties
       }
     >
-      <div style={{ display: 'flex', gap: spacing.md, justifyContent: 'center' }}>
+      <div
+        style={{ display: 'flex', gap: spacing.md, justifyContent: 'center' }}
+      >
         {/* Hour labels */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px`, paddingTop: '16px', flexShrink: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${cellGap}px`,
+            paddingTop: '16px',
+            flexShrink: 0
+          }}
+        >
           {Array.from({ length: 24 }).map((_, h) => (
             <div
               key={h}
@@ -121,7 +136,14 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
         {/* Grid */}
         <div style={{ display: 'flex', gap: `${cellGap}px` }}>
           {cellsByDay.map((dayCells, dayIdx) => (
-            <div key={dayIdx} style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px` }}>
+            <div
+              key={dayIdx}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: `${cellGap}px`
+              }}
+            >
               {/* Day label */}
               <div
                 style={{
@@ -142,13 +164,15 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                   <div
                     key={hourIdx}
                     onClick={() => cell.count > 0 && setSelectedCell(cell)}
-                    onMouseEnter={(e) => {
+                    onMouseEnter={e => {
                       if (cell.count > 0) {
                         setHoveredCell(cell);
                         setMousePosition({ x: e.clientX, y: e.clientY });
                       }
                     }}
-                    onMouseMove={(e) => setMousePosition({ x: e.clientX, y: e.clientY })}
+                    onMouseMove={e =>
+                      setMousePosition({ x: e.clientX, y: e.clientY })
+                    }
                     onMouseLeave={() => setHoveredCell(null)}
                     style={{
                       width: `${cellSize}px`,
@@ -156,10 +180,15 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                       backgroundColor: getCellColor(cell.count, isHovered),
                       borderRadius: borderRadius.xs,
                       cursor: cell.count > 0 ? 'pointer' : 'default',
-                      border: cell.count > 0 ? `1px solid ${isHovered ? 'rgba(14, 165, 233, 0.3)' : colors.border.primary}` : 'none',
+                      border:
+                        cell.count > 0
+                          ? `1px solid ${isHovered ? 'rgba(14, 165, 233, 0.3)' : colors.border.primary}`
+                          : 'none',
                       transform: isHovered ? 'scale(1.2)' : 'scale(1)',
                       transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      boxShadow: isHovered ? '0 2px 12px rgba(14, 165, 233, 0.4), 0 0 0 2px rgba(14, 165, 233, 0.2)' : 'none',
+                      boxShadow: isHovered
+                        ? '0 2px 12px rgba(14, 165, 233, 0.4), 0 0 0 2px rgba(14, 165, 233, 0.2)'
+                        : 'none',
                       zIndex: isHovered ? 100 : 1
                     }}
                   />
@@ -170,157 +199,200 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
         </div>
       </div>
 
-
       {/* Hover tooltip with detailed graph */}
-      {hoveredCell && !selectedCell && hoveredCell.count > 0 && (() => {
-        const avgDuration = hoveredCell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / hoveredCell.count / 1000;
-        return (
-          <div
-            style={{
-              position: 'fixed',
-              left: `${mousePosition.x + 16}px`,
-              top: `${mousePosition.y + 16}px`,
-              backgroundColor: 'rgba(30, 41, 59, 0.95)',
-              borderRadius: borderRadius.md,
-              padding: spacing.md,
-              zIndex: 1000,
-              pointerEvents: 'none',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-              width: '260px',
-              animation: 'tooltipIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
-              backdropFilter: 'blur(12px)'
-            }}
-          >
-            {/* Header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'baseline',
-              marginBottom: spacing.md,
-              paddingBottom: spacing.sm,
-              borderBottom: `1px solid ${colors.border.primary}`
-            }}>
-              <div style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                {hoveredCell.dayLabel} · {String(hoveredCell.hour).padStart(2, '0')}h
+      {hoveredCell &&
+        !selectedCell &&
+        hoveredCell.count > 0 &&
+        (() => {
+          const avgDuration =
+            hoveredCell.transcriptions.reduce(
+              (sum, t) => sum + (t.durationMs || 0),
+              0
+            ) /
+            hoveredCell.count /
+            1000;
+          return (
+            <div
+              style={{
+                position: 'fixed',
+                left: `${mousePosition.x + 16}px`,
+                top: `${mousePosition.y + 16}px`,
+                backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                borderRadius: borderRadius.md,
+                padding: spacing.md,
+                zIndex: 1000,
+                pointerEvents: 'none',
+                boxShadow:
+                  '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                width: '260px',
+                animation: 'tooltipIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                backdropFilter: 'blur(12px)'
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'baseline',
+                  marginBottom: spacing.md,
+                  paddingBottom: spacing.sm,
+                  borderBottom: `1px solid ${colors.border.primary}`
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary
+                  }}
+                >
+                  {hoveredCell.dayLabel} ·{' '}
+                  {String(hoveredCell.hour).padStart(2, '0')}h
+                </div>
+                <div
+                  style={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.text.primary,
+                    fontWeight: typography.fontWeight.semibold
+                  }}
+                >
+                  {hoveredCell.count}
+                </div>
               </div>
-              <div style={{ fontSize: typography.fontSize.sm, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
-                {hoveredCell.count}
-              </div>
-            </div>
 
-            {/* Mini timeline graph */}
-            <div style={{
-              position: 'relative',
-              height: '50px',
-              backgroundColor: colors.background.primary,
-              borderRadius: borderRadius.sm,
-              marginBottom: spacing.sm,
-              overflow: 'hidden'
-            }}>
-              {/* Timeline container with padding */}
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: '12px',
-                right: '12px',
-                bottom: 0
-              }}>
-                {/* Timeline axis */}
+              {/* Mini timeline graph */}
+              <div
+                style={{
+                  position: 'relative',
+                  height: '50px',
+                  backgroundColor: colors.background.primary,
+                  borderRadius: borderRadius.sm,
+                  marginBottom: spacing.sm,
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Timeline container with padding */}
                 <div
                   style={{
                     position: 'absolute',
-                    top: '50%',
-                    left: 0,
-                    right: 0,
-                    height: '2px',
-                    backgroundColor: colors.border.secondary,
-                    borderRadius: '1px'
+                    top: 0,
+                    left: '12px',
+                    right: '12px',
+                    bottom: 0
                   }}
-                />
+                >
+                  {/* Timeline axis */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: 0,
+                      right: 0,
+                      height: '2px',
+                      backgroundColor: colors.border.secondary,
+                      borderRadius: '1px'
+                    }}
+                  />
 
-                {/* Transcription markers */}
-                {hoveredCell.transcriptions.map((t, idx) => {
-                  const date = new Date(t.timestamp);
-                  const minute = date.getMinutes();
-                  const seconds = date.getSeconds();
-                  const totalSeconds = minute * 60 + seconds;
-                  const position = (totalSeconds / 3600) * 100;
-                  const duration = t.durationMs || 0;
-                  const maxDuration = Math.max(...hoveredCell.transcriptions.map(t => t.durationMs || 0), 1);
-                  const size = Math.max(7, (duration / maxDuration) * 14 + 7);
+                  {/* Transcription markers */}
+                  {hoveredCell.transcriptions.map((t, idx) => {
+                    const date = new Date(t.timestamp);
+                    const minute = date.getMinutes();
+                    const seconds = date.getSeconds();
+                    const totalSeconds = minute * 60 + seconds;
+                    const position = (totalSeconds / 3600) * 100;
+                    const duration = t.durationMs || 0;
+                    const maxDuration = Math.max(
+                      ...hoveredCell.transcriptions.map(t => t.durationMs || 0),
+                      1
+                    );
+                    const size = Math.max(7, (duration / maxDuration) * 14 + 7);
 
-                  return (
-                    <div
-                      key={t.id}
-                      title={`${minute}:${String(seconds).padStart(2, '0')}`}
-                      style={{
-                        position: 'absolute',
-                        left: `${position}%`,
-                        top: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        backgroundColor: colors.accent.blue.primary,
-                        borderRadius: '50%',
-                        border: `2px solid ${colors.background.primary}`,
-                        boxShadow: '0 2px 8px rgba(14, 165, 233, 0.4)',
-                        zIndex: hoveredCell.transcriptions.length - idx,
-                        animation: `markerIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.04}s both`
-                      }}
-                    />
-                  );
-                })}
+                    return (
+                      <div
+                        key={t.id}
+                        title={`${minute}:${String(seconds).padStart(2, '0')}`}
+                        style={{
+                          position: 'absolute',
+                          left: `${position}%`,
+                          top: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          width: `${size}px`,
+                          height: `${size}px`,
+                          backgroundColor: colors.accent.blue.primary,
+                          borderRadius: '50%',
+                          border: `2px solid ${colors.background.primary}`,
+                          boxShadow: '0 2px 8px rgba(14, 165, 233, 0.4)',
+                          zIndex: hoveredCell.transcriptions.length - idx,
+                          animation: `markerIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.04}s both`
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Time markers */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '4px',
+                    left: '12px',
+                    fontSize: '9px',
+                    color: colors.text.tertiary,
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
+                  00
+                </div>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '4px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    fontSize: '9px',
+                    color: colors.text.tertiary,
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
+                  30
+                </div>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '4px',
+                    right: '12px',
+                    fontSize: '9px',
+                    color: colors.text.tertiary,
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
+                  60
+                </div>
               </div>
 
-              {/* Time markers */}
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                left: '12px',
-                fontSize: '9px',
-                color: colors.text.tertiary,
-                fontWeight: typography.fontWeight.medium
-              }}>
-                00
-              </div>
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                fontSize: '9px',
-                color: colors.text.tertiary,
-                fontWeight: typography.fontWeight.medium
-              }}>
-                30
-              </div>
-              <div style={{
-                position: 'absolute',
-                bottom: '4px',
-                right: '12px',
-                fontSize: '9px',
-                color: colors.text.tertiary,
-                fontWeight: typography.fontWeight.medium
-              }}>
-                60
+              {/* Stats footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '10px',
+                  color: colors.text.tertiary
+                }}
+              >
+                <span>Durée moy.</span>
+                <span
+                  style={{
+                    color: colors.accent.blue.primary,
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
+                  {avgDuration.toFixed(1)}s
+                </span>
               </div>
             </div>
-
-            {/* Stats footer */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              fontSize: '10px',
-              color: colors.text.tertiary
-            }}>
-              <span>Durée moy.</span>
-              <span style={{ color: colors.accent.blue.primary, fontWeight: typography.fontWeight.medium }}>
-                {avgDuration.toFixed(1)}s
-              </span>
-            </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
 
       {/* Modal for details */}
       {selectedCell && selectedCell.count > 0 && (
@@ -362,9 +434,23 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg }}>
-              <div style={{ fontSize: typography.fontSize.base, color: colors.text.secondary }}>
-                {selectedCell.dayLabel} · {String(selectedCell.hour).padStart(2, '0')}h · {selectedCell.count}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: spacing.lg
+              }}
+            >
+              <div
+                style={{
+                  fontSize: typography.fontSize.base,
+                  color: colors.text.secondary
+                }}
+              >
+                {selectedCell.dayLabel} ·{' '}
+                {String(selectedCell.hour).padStart(2, '0')}h ·{' '}
+                {selectedCell.count}
               </div>
               <button
                 onClick={() => setSelectedCell(null)}
@@ -390,7 +476,14 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                 borderRadius: borderRadius.sm
               }}
             >
-              <div style={{ position: 'relative', height: '50px', display: 'flex', alignItems: 'center' }}>
+              <div
+                style={{
+                  position: 'relative',
+                  height: '50px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
                 {/* Timeline axis */}
                 <div
                   style={{
@@ -409,13 +502,16 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                   const minute = date.getMinutes();
                   const position = (minute / 60) * 100;
                   const duration = t.durationMs || 0;
-                  const maxDuration = Math.max(...selectedCell.transcriptions.map(t => t.durationMs || 0), 1);
+                  const maxDuration = Math.max(
+                    ...selectedCell.transcriptions.map(t => t.durationMs || 0),
+                    1
+                  );
                   const size = Math.max(8, (duration / maxDuration) * 20 + 8);
 
                   return (
                     <div
                       key={t.id}
-                      title={`${minute}min ${(date.getSeconds())}s`}
+                      title={`${minute}min ${date.getSeconds()}s`}
                       style={{
                         position: 'absolute',
                         left: `${position}%`,
@@ -430,35 +526,62 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                         transition: 'all 0.15s',
                         zIndex: selectedCell.transcriptions.length - idx
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                      onMouseEnter={e => {
+                        e.currentTarget.style.transform =
+                          'translate(-50%, -50%) scale(1.2)';
                         e.currentTarget.style.zIndex = '1000';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
-                        e.currentTarget.style.zIndex = String(selectedCell.transcriptions.length - idx);
+                      onMouseLeave={e => {
+                        e.currentTarget.style.transform =
+                          'translate(-50%, -50%) scale(1)';
+                        e.currentTarget.style.zIndex = String(
+                          selectedCell.transcriptions.length - idx
+                        );
                       }}
                     />
                   );
                 })}
 
                 {/* Time labels */}
-                <div style={{ position: 'absolute', bottom: '-18px', left: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '-18px',
+                    left: 0,
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary
+                  }}
+                >
                   0
                 </div>
-                <div style={{ position: 'absolute', bottom: '-18px', right: 0, fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: '-18px',
+                    right: 0,
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary
+                  }}
+                >
                   60
                 </div>
               </div>
             </div>
 
             {/* Transcriptions list */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.xs }}>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.xs
+              }}
+            >
               {selectedCell.transcriptions
                 .sort((a, b) => a.timestamp - b.timestamp)
-                .map((t) => {
+                .map(t => {
                   const date = new Date(t.timestamp);
-                  const preview = t.text.slice(0, 60) + (t.text.length > 60 ? '...' : '');
+                  const preview =
+                    t.text.slice(0, 60) + (t.text.length > 60 ? '...' : '');
 
                   return (
                     <div
@@ -469,15 +592,41 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
                         borderRadius: borderRadius.sm
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
-                        <span style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                          {String(date.getHours()).padStart(2, '0')}:{String(date.getMinutes()).padStart(2, '0')}
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: spacing.xs
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: typography.fontSize.xs,
+                            color: colors.text.tertiary
+                          }}
+                        >
+                          {String(date.getHours()).padStart(2, '0')}:
+                          {String(date.getMinutes()).padStart(2, '0')}
                         </span>
-                        <span style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
-                          {t.durationMs ? `${(t.durationMs / 1000).toFixed(0)}s` : '—'}
+                        <span
+                          style={{
+                            fontSize: typography.fontSize.xs,
+                            color: colors.text.tertiary
+                          }}
+                        >
+                          {t.durationMs
+                            ? `${(t.durationMs / 1000).toFixed(0)}s`
+                            : '—'}
                         </span>
                       </div>
-                      <div style={{ fontSize: typography.fontSize.xs, color: colors.text.secondary, lineHeight: typography.lineHeight.normal }}>
+                      <div
+                        style={{
+                          fontSize: typography.fontSize.xs,
+                          color: colors.text.secondary,
+                          lineHeight: typography.lineHeight.normal
+                        }}
+                      >
                         {preview}
                       </div>
                     </div>

@@ -75,8 +75,15 @@ const UsageChart = ({ dailyUsage, getBarColor }: UsageChartProps) => {
       }
     >
       <style>{brushStyles}</style>
-      <ResponsiveContainer width="100%" height={400} className="statistics-chart">
-        <BarChart data={dailyUsage} margin={{ top: 30, right: 0, left: 0, bottom: 20 }}>
+      <ResponsiveContainer
+        width="100%"
+        height={400}
+        className="statistics-chart"
+      >
+        <BarChart
+          data={dailyUsage}
+          margin={{ top: 30, right: 0, left: 0, bottom: 20 }}
+        >
           <XAxis
             dataKey="date"
             stroke={colors.text.tertiary}
@@ -114,7 +121,12 @@ const UsageChart = ({ dailyUsage, getBarColor }: UsageChartProps) => {
             startIndex={Math.max(0, dailyUsage.length - 30)}
           >
             <BarChart data={dailyUsage} barCategoryGap="20%">
-              <Bar dataKey="minutes" fill={charts.bar.fill} opacity={0.8} maxBarSize={1} />
+              <Bar
+                dataKey="minutes"
+                fill={charts.bar.fill}
+                opacity={0.8}
+                maxBarSize={1}
+              />
             </BarChart>
           </Brush>
         </BarChart>

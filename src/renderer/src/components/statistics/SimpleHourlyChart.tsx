@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleHourlyChartProps {
@@ -94,7 +99,15 @@ const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
 
       <div style={{ display: 'flex', gap: spacing.md, overflowX: 'auto' }}>
         {/* Hour labels */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px`, paddingTop: '20px', flexShrink: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${cellGap}px`,
+            paddingTop: '20px',
+            flexShrink: 0
+          }}
+        >
           {Array.from({ length: 24 }).map((_, h) => (
             <div
               key={h}
@@ -116,7 +129,14 @@ const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
         {/* Grid */}
         <div style={{ display: 'flex', gap: `${cellGap}px` }}>
           {cellsByDay.map((dayCells, dayIdx) => (
-            <div key={dayIdx} style={{ display: 'flex', flexDirection: 'column', gap: `${cellGap}px` }}>
+            <div
+              key={dayIdx}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: `${cellGap}px`
+              }}
+            >
               {/* Day label */}
               <div
                 style={{
@@ -134,11 +154,13 @@ const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
               {dayCells.map((cell, hourIdx) => (
                 <div
                   key={hourIdx}
-                  onMouseEnter={(e) => {
+                  onMouseEnter={e => {
                     setHoveredCell(cell);
                     setMousePosition({ x: e.clientX, y: e.clientY });
                   }}
-                  onMouseMove={(e) => setMousePosition({ x: e.clientX, y: e.clientY })}
+                  onMouseMove={e =>
+                    setMousePosition({ x: e.clientX, y: e.clientY })
+                  }
                   onMouseLeave={() => setHoveredCell(null)}
                   style={{
                     width: `${cellSize}px`,
@@ -171,10 +193,23 @@ const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
           }}
         >
-          <div style={{ fontSize: typography.fontSize.sm, color: colors.text.tertiary, marginBottom: spacing.xs }}>
-            {hoveredCell.dayLabel} à {String(hoveredCell.hour).padStart(2, '0')}h
+          <div
+            style={{
+              fontSize: typography.fontSize.sm,
+              color: colors.text.tertiary,
+              marginBottom: spacing.xs
+            }}
+          >
+            {hoveredCell.dayLabel} à {String(hoveredCell.hour).padStart(2, '0')}
+            h
           </div>
-          <div style={{ fontSize: typography.fontSize.base, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+          <div
+            style={{
+              fontSize: typography.fontSize.base,
+              color: colors.text.primary,
+              fontWeight: typography.fontWeight.semibold
+            }}
+          >
             {hoveredCell.count} transcriptions
           </div>
         </div>
@@ -198,7 +233,10 @@ const SimpleHourlyChart = ({ transcriptions }: SimpleHourlyChartProps) => {
             style={{
               width: `${cellSize}px`,
               height: `${cellSize}px`,
-              backgroundColor: intensity === 0 ? colors.background.tertiary : `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`,
+              backgroundColor:
+                intensity === 0
+                  ? colors.background.tertiary
+                  : `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`,
               borderRadius: borderRadius.xs,
               border: `1px solid ${colors.border.primary}`
             }}

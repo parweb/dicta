@@ -1,4 +1,9 @@
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import { formatCost, formatDuration } from '../../lib/statistics';
 
 interface ChartTooltipProps {

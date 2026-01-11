@@ -92,42 +92,48 @@ const Layout = ({
             WebkitAppRegion: 'no-drag'
           }}
         >
-        {/* History toggle button */}
-        <button
-          onClick={onHistoryToggle}
-          style={
-            {
-              ...components.button.base,
-              ...components.button.icon
-            } as React.CSSProperties
-          }
-          title="Historique"
-        >
-          <History size={18} color={colors.text.primary} />
-        </button>
+          {/* History toggle button */}
+          <button
+            onClick={onHistoryToggle}
+            style={
+              {
+                ...components.button.base,
+                ...components.button.icon
+              } as React.CSSProperties
+            }
+            title="Historique"
+          >
+            <History size={18} color={colors.text.primary} />
+          </button>
 
-        {/* Statistics button */}
-        <button
-          onClick={() => onViewChange(currentView === 'home' ? 'statistics' : 'home')}
-          style={
-            {
-              ...components.button.base,
-              ...components.button.icon,
-              ...(currentView === 'statistics' && {
-                backgroundColor: colors.text.primary,
-                borderRadius: '50%',
-                padding: spacing.sm
-              })
-            } as React.CSSProperties
-          }
-          title={currentView === 'home' ? 'Statistiques' : 'Accueil'}
-        >
-          <BarChart3
-            size={18}
-            color={currentView === 'statistics' ? colors.background.primary : colors.text.primary}
-          />
-        </button>
-      </div>
+          {/* Statistics button */}
+          <button
+            onClick={() =>
+              onViewChange(currentView === 'home' ? 'statistics' : 'home')
+            }
+            style={
+              {
+                ...components.button.base,
+                ...components.button.icon,
+                ...(currentView === 'statistics' && {
+                  backgroundColor: colors.text.primary,
+                  borderRadius: '50%',
+                  padding: spacing.sm
+                })
+              } as React.CSSProperties
+            }
+            title={currentView === 'home' ? 'Statistiques' : 'Accueil'}
+          >
+            <BarChart3
+              size={18}
+              color={
+                currentView === 'statistics'
+                  ? colors.background.primary
+                  : colors.text.primary
+              }
+            />
+          </button>
+        </div>
       </div>
 
       {/* Sidebar context - isolated and above main layout */}

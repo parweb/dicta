@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface TimelineGridChartProps {
@@ -102,9 +107,15 @@ const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
           margin: '0 auto'
         }}
       >
-        {cells.map((cell) => {
+        {cells.map(cell => {
           const isHovered = hoveredCell === cell.dateKey;
-          const avgDuration = cell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / cell.count / 1000;
+          const avgDuration =
+            cell.transcriptions.reduce(
+              (sum, t) => sum + (t.durationMs || 0),
+              0
+            ) /
+            cell.count /
+            1000;
 
           return (
             <div
@@ -112,13 +123,17 @@ const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
               onMouseEnter={() => setHoveredCell(cell.dateKey)}
               onMouseLeave={() => setHoveredCell(null)}
               style={{
-                backgroundColor: isHovered ? colors.background.tertiary : colors.background.secondary,
+                backgroundColor: isHovered
+                  ? colors.background.tertiary
+                  : colors.background.secondary,
                 borderRadius: borderRadius.md,
                 padding: spacing.md,
                 border: `1px solid ${isHovered ? colors.border.secondary : colors.border.primary}`,
                 transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-                boxShadow: isHovered ? '0 4px 20px rgba(0, 0, 0, 0.3)' : '0 2px 8px rgba(0, 0, 0, 0.1)'
+                boxShadow: isHovered
+                  ? '0 4px 20px rgba(0, 0, 0, 0.3)'
+                  : '0 2px 8px rgba(0, 0, 0, 0.1)'
               }}
             >
               {/* Header */}
@@ -132,10 +147,21 @@ const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
                   borderBottom: `1px solid ${colors.border.primary}`
                 }}
               >
-                <div style={{ fontSize: typography.fontSize.xs, color: colors.text.tertiary }}>
+                <div
+                  style={{
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary
+                  }}
+                >
                   {cell.dayLabel} · {String(cell.hour).padStart(2, '0')}h
                 </div>
-                <div style={{ fontSize: typography.fontSize.sm, color: colors.text.primary, fontWeight: typography.fontWeight.semibold }}>
+                <div
+                  style={{
+                    fontSize: typography.fontSize.sm,
+                    color: colors.text.primary,
+                    fontWeight: typography.fontWeight.semibold
+                  }}
+                >
                   {cell.count}
                 </div>
               </div>
@@ -182,7 +208,10 @@ const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
                     const totalSeconds = minute * 60 + seconds;
                     const position = (totalSeconds / 3600) * 100;
                     const duration = t.durationMs || 0;
-                    const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
+                    const maxDuration = Math.max(
+                      ...cell.transcriptions.map(t => t.durationMs || 0),
+                      1
+                    );
                     const size = Math.max(7, (duration / maxDuration) * 14 + 7);
 
                     return (
@@ -258,7 +287,12 @@ const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
                 }}
               >
                 <span>Durée moy.</span>
-                <span style={{ color: colors.accent.blue.primary, fontWeight: typography.fontWeight.medium }}>
+                <span
+                  style={{
+                    color: colors.accent.blue.primary,
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
                   {avgDuration.toFixed(1)}s
                 </span>
               </div>

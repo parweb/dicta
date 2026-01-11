@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface DailyTimelineGridChartProps {
@@ -15,7 +20,9 @@ interface DailyCell {
   transcriptions: Transcription[];
 }
 
-const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps) => {
+const DailyTimelineGridChart = ({
+  transcriptions
+}: DailyTimelineGridChartProps) => {
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   // Aggregate by day with transcriptions
@@ -47,7 +54,11 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
 
       const dateKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
       const dayLabel = `${String(currentDate.getDate()).padStart(2, '0')}/${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-      const fullDate = currentDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      const fullDate = currentDate.toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long'
+      });
       const cellTranscriptions = dailyData.get(dateKey) || [];
 
       if (cellTranscriptions.length > 0) {
@@ -70,7 +81,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
 
   // Calculate global stats
   const totalCount = cells.reduce((sum, c) => sum + c.count, 0);
-  const totalDuration = transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / 1000;
+  const totalDuration =
+    transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / 1000;
   const avgDuration = totalCount > 0 ? totalDuration / totalCount : 0;
 
   if (cells.length === 0) {
@@ -113,21 +125,42 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           animation: 'statsIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both'
         }}
       >
-        <div style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}>
+        <div
+          style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}
+        >
           <span style={{ opacity: 0.6 }}>Total</span>
-          <span style={{ color: colors.text.secondary, fontWeight: typography.fontWeight.medium }}>
+          <span
+            style={{
+              color: colors.text.secondary,
+              fontWeight: typography.fontWeight.medium
+            }}
+          >
             {totalCount}
           </span>
         </div>
-        <div style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}>
+        <div
+          style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}
+        >
           <span style={{ opacity: 0.6 }}>Durée</span>
-          <span style={{ color: colors.text.secondary, fontWeight: typography.fontWeight.medium }}>
+          <span
+            style={{
+              color: colors.text.secondary,
+              fontWeight: typography.fontWeight.medium
+            }}
+          >
             {(totalDuration / 60).toFixed(0)}m
           </span>
         </div>
-        <div style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}>
+        <div
+          style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}
+        >
           <span style={{ opacity: 0.6 }}>Moy.</span>
-          <span style={{ color: colors.text.secondary, fontWeight: typography.fontWeight.medium }}>
+          <span
+            style={{
+              color: colors.text.secondary,
+              fontWeight: typography.fontWeight.medium
+            }}
+          >
             {avgDuration.toFixed(1)}s
           </span>
         </div>
@@ -143,10 +176,20 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           margin: '0 auto'
         }}
       >
-        {cells.map((cell) => {
+        {cells.map(cell => {
           const isHovered = hoveredCell === cell.dateKey;
-          const cellAvgDuration = cell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / cell.count / 1000;
-          const cellTotalDuration = cell.transcriptions.reduce((sum, t) => sum + (t.durationMs || 0), 0) / 1000;
+          const cellAvgDuration =
+            cell.transcriptions.reduce(
+              (sum, t) => sum + (t.durationMs || 0),
+              0
+            ) /
+            cell.count /
+            1000;
+          const cellTotalDuration =
+            cell.transcriptions.reduce(
+              (sum, t) => sum + (t.durationMs || 0),
+              0
+            ) / 1000;
 
           return (
             <div
@@ -171,7 +214,9 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   className="date-label"
                   style={{
                     fontSize: typography.fontSize.xs,
-                    color: isHovered ? colors.text.secondary : colors.text.tertiary,
+                    color: isHovered
+                      ? colors.text.secondary
+                      : colors.text.tertiary,
                     minWidth: '50px',
                     textAlign: 'right',
                     transition: 'color 0.15s ease-out',
@@ -217,12 +262,19 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                       const hours = date.getHours();
                       const minutes = date.getMinutes();
                       const seconds = date.getSeconds();
-                      const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                      const totalSeconds =
+                        hours * 3600 + minutes * 60 + seconds;
                       const position = (totalSeconds / 86400) * 100; // 86400 seconds in a day
                       const duration = t.durationMs || 0;
-                      const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
+                      const maxDuration = Math.max(
+                        ...cell.transcriptions.map(t => t.durationMs || 0),
+                        1
+                      );
                       const baseSize = 6;
-                      const size = Math.max(baseSize, (duration / maxDuration) * 10 + baseSize);
+                      const size = Math.max(
+                        baseSize,
+                        (duration / maxDuration) * 10 + baseSize
+                      );
 
                       return (
                         <div
@@ -237,7 +289,9 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                             backgroundColor: colors.accent.blue.primary,
                             borderRadius: '50%',
                             border: 'none',
-                            boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
+                            boxShadow: isHovered
+                              ? '0 2px 8px rgba(14, 165, 233, 0.5)'
+                              : '0 1px 4px rgba(14, 165, 233, 0.3)',
                             zIndex: cell.transcriptions.length - idx,
                             opacity: isHovered ? 1 : 0.8,
                             transition: 'all 0.15s ease-out',
@@ -257,7 +311,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
                         marginTop: spacing.xs,
-                        animation: 'rulerIn 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
+                        animation:
+                          'rulerIn 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
                         pointerEvents: 'none'
                       }}
                     >
@@ -294,35 +349,64 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   paddingTop: isHovered ? spacing.xs : '0',
                   opacity: isHovered ? 1 : 0,
                   transform: isHovered ? 'translateY(0)' : 'translateY(-4px)',
-                  transition: 'max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding-top 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s',
+                  transition:
+                    'max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1), padding-top 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s, transform 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.15s',
                   pointerEvents: 'none',
                   maxHeight: isHovered ? '50px' : '0',
                   overflow: 'hidden'
                 }}
               >
-                <div style={{
-                  fontWeight: typography.fontWeight.semibold,
-                  color: colors.text.secondary,
-                  minWidth: '20px'
-                }}>
+                <div
+                  style={{
+                    fontWeight: typography.fontWeight.semibold,
+                    color: colors.text.secondary,
+                    minWidth: '20px'
+                  }}
+                >
                   {cell.count}
                 </div>
-                <div style={{
-                  width: '1px',
-                  height: '12px',
-                  backgroundColor: colors.border.primary,
-                  opacity: 0.5
-                }} />
-                <div style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}>
+                <div
+                  style={{
+                    width: '1px',
+                    height: '12px',
+                    backgroundColor: colors.border.primary,
+                    opacity: 0.5
+                  }}
+                />
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: spacing.xs,
+                    alignItems: 'baseline'
+                  }}
+                >
                   <span style={{ opacity: 0.6, fontSize: '10px' }}>moy</span>
-                  <span style={{ color: colors.text.secondary, fontWeight: typography.fontWeight.medium }}>
+                  <span
+                    style={{
+                      color: colors.text.secondary,
+                      fontWeight: typography.fontWeight.medium
+                    }}
+                  >
                     {cellAvgDuration.toFixed(1)}s
                   </span>
                 </div>
-                <div style={{ display: 'flex', gap: spacing.xs, alignItems: 'baseline' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: spacing.xs,
+                    alignItems: 'baseline'
+                  }}
+                >
                   <span style={{ opacity: 0.6, fontSize: '10px' }}>total</span>
-                  <span style={{ color: colors.text.secondary, fontWeight: typography.fontWeight.medium }}>
-                    {cellTotalDuration >= 60 ? `${(cellTotalDuration / 60).toFixed(1)}m` : `${cellTotalDuration.toFixed(0)}s`}
+                  <span
+                    style={{
+                      color: colors.text.secondary,
+                      fontWeight: typography.fontWeight.medium
+                    }}
+                  >
+                    {cellTotalDuration >= 60
+                      ? `${(cellTotalDuration / 60).toFixed(1)}m`
+                      : `${cellTotalDuration.toFixed(0)}s`}
                   </span>
                 </div>
               </div>

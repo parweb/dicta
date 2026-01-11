@@ -28,7 +28,10 @@ const WORDS_PER_MINUTE = 150;
  */
 function estimateAudioDuration(text: string): number {
   if (!text || typeof text !== 'string') return 0;
-  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const words = text
+    .trim()
+    .split(/\s+/)
+    .filter(w => w.length > 0).length;
   return words / WORDS_PER_MINUTE;
 }
 

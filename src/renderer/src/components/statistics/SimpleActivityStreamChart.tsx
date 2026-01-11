@@ -1,30 +1,53 @@
 import { useMemo } from 'react';
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleActivityStreamChartProps {
   transcriptions: Transcription[];
 }
 
-const SimpleActivityStreamChart = ({ transcriptions }: SimpleActivityStreamChartProps) => {
+const SimpleActivityStreamChart = ({
+  transcriptions
+}: SimpleActivityStreamChartProps) => {
   // Aggregate by hour
   const hourlyData = useMemo(() => {
-    const dataMap = new Map<string, { time: string; count: number; totalDuration: number }>();
+    const dataMap = new Map<
+      string,
+      { time: string; count: number; totalDuration: number }
+    >();
 
     transcriptions.forEach(t => {
       const date = new Date(t.timestamp);
       const hourKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}-${String(date.getHours()).padStart(2, '0')}`;
       const timeLabel = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}h`;
 
-      const existing = dataMap.get(hourKey) || { time: timeLabel, count: 0, totalDuration: 0 };
+      const existing = dataMap.get(hourKey) || {
+        time: timeLabel,
+        count: 0,
+        totalDuration: 0
+      };
       existing.count += 1;
       existing.totalDuration += t.durationMs || 0;
       dataMap.set(hourKey, existing);
     });
 
-    return Array.from(dataMap.values()).sort((a, b) => a.time.localeCompare(b.time));
+    return Array.from(dataMap.values()).sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
   }, [transcriptions]);
 
   if (hourlyData.length === 0) return null;
@@ -99,11 +122,22 @@ const SimpleActivityStreamChart = ({ transcriptions }: SimpleActivityStreamChart
       </h3>
 
       <ResponsiveContainer width="100%" height={400}>
-        <AreaChart data={hourlyData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        <AreaChart
+          data={hourlyData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        >
           <defs>
             <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={colors.accent.blue.primary} stopOpacity={0.8} />
-              <stop offset="95%" stopColor={colors.accent.blue.primary} stopOpacity={0.1} />
+              <stop
+                offset="5%"
+                stopColor={colors.accent.blue.primary}
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor={colors.accent.blue.primary}
+                stopOpacity={0.1}
+              />
             </linearGradient>
           </defs>
           <XAxis
@@ -120,7 +154,10 @@ const SimpleActivityStreamChart = ({ transcriptions }: SimpleActivityStreamChart
             axisLine={false}
             tickLine={false}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: colors.accent.blue.primary, strokeWidth: 1 }} />
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{ stroke: colors.accent.blue.primary, strokeWidth: 1 }}
+          />
           <Area
             type="monotone"
             dataKey="count"
@@ -144,7 +181,12 @@ const SimpleActivityStreamChart = ({ transcriptions }: SimpleActivityStreamChart
       >
         <div>
           <span style={{ color: colors.text.tertiary }}>Pic: </span>
-          <span style={{ color: colors.accent.blue.primary, fontWeight: typography.fontWeight.semibold }}>
+          <span
+            style={{
+              color: colors.accent.blue.primary,
+              fontWeight: typography.fontWeight.semibold
+            }}
+          >
             {maxCount} transcriptions/heure
           </span>
         </div>

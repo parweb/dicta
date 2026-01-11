@@ -1,5 +1,11 @@
 import AudioWaveform from '../AudioWaveform';
-import { borderRadius, colors, components, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  components,
+  spacing,
+  typography
+} from '../../lib/design-system';
 
 interface TranscriptionDisplayProps {
   transcript: string;

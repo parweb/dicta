@@ -1,6 +1,11 @@
 import { useState, useMemo } from 'react';
 
-import { borderRadius, colors, spacing, typography } from '../../lib/design-system';
+import {
+  borderRadius,
+  colors,
+  spacing,
+  typography
+} from '../../lib/design-system';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleTimelineChartProps {
@@ -19,7 +24,8 @@ const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
   if (sortedTranscriptions.length === 0) return null;
 
   const minTime = sortedTranscriptions[0].timestamp;
-  const maxTime = sortedTranscriptions[sortedTranscriptions.length - 1].timestamp;
+  const maxTime =
+    sortedTranscriptions[sortedTranscriptions.length - 1].timestamp;
   const timeRange = maxTime - minTime || 1;
 
   const chartWidth = Math.max(1200, sortedTranscriptions.length * 4);
@@ -78,11 +84,13 @@ const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
             return (
               <div
                 key={t.id}
-                onMouseEnter={(e) => {
+                onMouseEnter={e => {
                   setHoveredIndex(index);
                   setMousePosition({ x: e.clientX, y: e.clientY });
                 }}
-                onMouseMove={(e) => setMousePosition({ x: e.clientX, y: e.clientY })}
+                onMouseMove={e =>
+                  setMousePosition({ x: e.clientX, y: e.clientY })
+                }
                 onMouseLeave={() => setHoveredIndex(null)}
                 style={{
                   position: 'absolute',
@@ -123,8 +131,22 @@ const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
             color: colors.text.tertiary
           }}
         >
-          <span>{new Date(minTime).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-          <span>{new Date(maxTime).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+          <span>
+            {new Date(minTime).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
+          <span>
+            {new Date(maxTime).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </span>
         </div>
       </div>
 
@@ -152,7 +174,9 @@ const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
               marginBottom: spacing.xs
             }}
           >
-            {new Date(sortedTranscriptions[hoveredIndex].timestamp).toLocaleString('fr-FR')}
+            {new Date(
+              sortedTranscriptions[hoveredIndex].timestamp
+            ).toLocaleString('fr-FR')}
           </div>
           <div
             style={{
@@ -164,7 +188,10 @@ const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
               textOverflow: 'ellipsis'
             }}
           >
-            Durée: {sortedTranscriptions[hoveredIndex].durationMs ? `${(sortedTranscriptions[hoveredIndex].durationMs! / 1000).toFixed(1)}s` : 'N/A'}
+            Durée:{' '}
+            {sortedTranscriptions[hoveredIndex].durationMs
+              ? `${(sortedTranscriptions[hoveredIndex].durationMs! / 1000).toFixed(1)}s`
+              : 'N/A'}
           </div>
         </div>
       )}

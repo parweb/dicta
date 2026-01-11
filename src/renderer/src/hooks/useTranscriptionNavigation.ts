@@ -12,9 +12,15 @@ export interface UseTranscriptionNavigationReturn {
 }
 
 export function useTranscriptionNavigation(): UseTranscriptionNavigationReturn {
-  const [allTranscriptions, setAllTranscriptions] = useState<Transcription[]>([]);
-  const [currentTranscriptionId, setCurrentTranscriptionId] = useState<string | null>(null);
-  const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(null);
+  const [allTranscriptions, setAllTranscriptions] = useState<Transcription[]>(
+    []
+  );
+  const [currentTranscriptionId, setCurrentTranscriptionId] = useState<
+    string | null
+  >(null);
+  const [slideDirection, setSlideDirection] = useState<'up' | 'down' | null>(
+    null
+  );
 
   // Load all transcriptions for navigation
   const reloadTranscriptions = useCallback(async () => {
@@ -51,7 +57,10 @@ export function useTranscriptionNavigation(): UseTranscriptionNavigationReturn {
             targetIndex = Math.max(0, currentIndex - 1);
           } else {
             // Previous = older (higher index)
-            targetIndex = Math.min(allTranscriptions.length - 1, currentIndex + 1);
+            targetIndex = Math.min(
+              allTranscriptions.length - 1,
+              currentIndex + 1
+            );
           }
         }
       }

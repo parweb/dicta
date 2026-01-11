@@ -15,14 +15,24 @@ const HomePage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'statistics'>('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
-  const [audioDuration, setAudioDuration] = useState<number | undefined>(undefined);
-  const [transcriptionError, setTranscriptionError] = useState<string | undefined>(undefined);
-  const [failedAudioBlob, setFailedAudioBlob] = useState<Blob | undefined>(undefined);
+  const [audioDuration, setAudioDuration] = useState<number | undefined>(
+    undefined
+  );
+  const [transcriptionError, setTranscriptionError] = useState<
+    string | undefined
+  >(undefined);
+  const [failedAudioBlob, setFailedAudioBlob] = useState<Blob | undefined>(
+    undefined
+  );
 
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
 
   // Use custom hooks
-  const { isRecording, startRecording: startAudioRecording, stopRecording: stopAudioRecording } = useAudioRecorder();
+  const {
+    isRecording,
+    startRecording: startAudioRecording,
+    stopRecording: stopAudioRecording
+  } = useAudioRecorder();
 
   const {
     allTranscriptions,
@@ -33,12 +43,8 @@ const HomePage = () => {
     reloadTranscriptions
   } = useTranscriptionNavigation();
 
-  const {
-    transcribeAudio,
-    proxyStatuses,
-    isLoading,
-    analyzeAudio
-  } = useTranscriptionAPI(reloadTranscriptions);
+  const { transcribeAudio, proxyStatuses, isLoading, analyzeAudio } =
+    useTranscriptionAPI(reloadTranscriptions);
 
   // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
@@ -49,7 +55,7 @@ const HomePage = () => {
     setTranscriptionError(undefined);
     setFailedAudioBlob(undefined);
 
-    await startAudioRecording(async (audioBlob) => {
+    await startAudioRecording(async audioBlob => {
       // Analyze audio
       const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
       setAudioDuration(durationMs);
@@ -65,7 +71,8 @@ const HomePage = () => {
         // We need to manually set it after save
         const historyResult = await window.api?.history.loadAll();
         if (historyResult?.success && historyResult.transcriptions) {
-          const transcriptions = historyResult.transcriptions as Transcription[];
+          const transcriptions =
+            historyResult.transcriptions as Transcription[];
           transcriptions.sort((a, b) => b.timestamp - a.timestamp);
           if (transcriptions.length > 0) {
             setCurrentTranscriptionId(transcriptions[0].id);
@@ -77,7 +84,12 @@ const HomePage = () => {
         setFailedAudioBlob(audioBlob);
       }
     });
-  }, [startAudioRecording, analyzeAudio, transcribeAudio, setCurrentTranscriptionId]);
+  }, [
+    startAudioRecording,
+    analyzeAudio,
+    transcribeAudio,
+    setCurrentTranscriptionId
+  ]);
 
   const stopRecording = useCallback(() => {
     stopAudioRecording();
@@ -90,7 +102,11 @@ const HomePage = () => {
     setTranscriptionError(undefined);
 
     // Retry the transcription with the stored audio blob
-    const result = await transcribeAudio(failedAudioBlob, audioDuration, audioAmplitudes);
+    const result = await transcribeAudio(
+      failedAudioBlob,
+      audioDuration,
+      audioAmplitudes
+    );
     if (result.text) {
       setTranscript(result.text);
       setTranscriptionError(undefined);
@@ -108,7 +124,13 @@ const HomePage = () => {
       // Set the error again if retry failed
       setTranscriptionError(result.error);
     }
-  }, [failedAudioBlob, audioDuration, audioAmplitudes, transcribeAudio, setCurrentTranscriptionId]);
+  }, [
+    failedAudioBlob,
+    audioDuration,
+    audioAmplitudes,
+    transcribeAudio,
+    setCurrentTranscriptionId
+  ]);
 
   // Use keyboard shortcuts hook
   useKeyboardShortcuts({
@@ -139,19 +161,24 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  const handleSelectTranscription = useCallback((transcription: Transcription) => {
-    setTranscript(transcription.text);
-    setAudioAmplitudes(transcription.audioAmplitudes || []);
-    setAudioDuration(transcription.durationMs);
-    setCurrentTranscriptionId(transcription.id);
-    setIsHistoryOpen(false);
-    setCurrentView('home');
-  }, [setCurrentTranscriptionId]);
+  const handleSelectTranscription = useCallback(
+    (transcription: Transcription) => {
+      setTranscript(transcription.text);
+      setAudioAmplitudes(transcription.audioAmplitudes || []);
+      setAudioDuration(transcription.durationMs);
+      setCurrentTranscriptionId(transcription.id);
+      setIsHistoryOpen(false);
+      setCurrentView('home');
+    },
+    [setCurrentTranscriptionId]
+  );
 
   // Update transcript when navigation changes currentTranscriptionId
   useEffect(() => {
     if (currentTranscriptionId && allTranscriptions.length > 0) {
-      const transcription = allTranscriptions.find(t => t.id === currentTranscriptionId);
+      const transcription = allTranscriptions.find(
+        t => t.id === currentTranscriptionId
+      );
       if (transcription) {
         setTranscript(transcription.text);
         setAudioAmplitudes(transcription.audioAmplitudes || []);

@@ -1,11 +1,21 @@
 import type { ProxyStatus } from '../../hooks/useTranscriptionAPI';
-import { components, getStatusColor, spacing, typography, colors, borders, shadows } from '../../lib/design-system';
+import {
+  components,
+  getStatusColor,
+  spacing,
+  typography,
+  colors,
+  borders,
+  shadows
+} from '../../lib/design-system';
 
 interface ProxyStatusIndicatorsProps {
   proxyStatuses: Record<string, ProxyStatus>;
 }
 
-const ProxyStatusIndicators = ({ proxyStatuses }: ProxyStatusIndicatorsProps) => {
+const ProxyStatusIndicators = ({
+  proxyStatuses
+}: ProxyStatusIndicatorsProps) => {
   const proxyStatusEntries = Object.entries(proxyStatuses);
 
   return (

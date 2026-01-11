@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useState, useDeferredValue, useTransition, useCallback, useRef } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useDeferredValue,
+  useTransition,
+  useCallback,
+  useRef
+} from 'react';
 import Fuse from 'fuse.js';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -8,7 +16,13 @@ import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
 import { useHistoryData } from '../hooks/useHistoryData';
-import { components, spacing, colors, typography, borderRadius } from '../lib/design-system';
+import {
+  components,
+  spacing,
+  colors,
+  typography,
+  borderRadius
+} from '../lib/design-system';
 import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
@@ -106,15 +120,19 @@ const HistorySidebar = ({
     estimateSize: () => 100, // Default estimate
     overscan: 5,
     measureElement:
-      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+      typeof window !== 'undefined' &&
+      navigator.userAgent.indexOf('Firefox') === -1
         ? element => element?.getBoundingClientRect().height
         : undefined
   });
 
-  const handleTranscriptionClick = useCallback((transcription: Transcription) => {
-    onSelectTranscription(transcription);
-    navigator.clipboard.writeText(transcription.text);
-  }, [onSelectTranscription]);
+  const handleTranscriptionClick = useCallback(
+    (transcription: Transcription) => {
+      onSelectTranscription(transcription);
+      navigator.clipboard.writeText(transcription.text);
+    },
+    [onSelectTranscription]
+  );
 
   if (!isOpen) return null;
 
@@ -217,51 +235,61 @@ const HistorySidebar = ({
                   }}
                 >
                   {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                      const item = virtualItems[virtualRow.index];
-                      const isFirstItem = virtualRow.index === 0;
-                      const nextItem = virtualItems[virtualRow.index + 1];
-                      const isLastCardBeforeHeader = item.type === 'transcription' && nextItem?.type === 'header';
+                    const item = virtualItems[virtualRow.index];
+                    const isFirstItem = virtualRow.index === 0;
+                    const nextItem = virtualItems[virtualRow.index + 1];
+                    const isLastCardBeforeHeader =
+                      item.type === 'transcription' &&
+                      nextItem?.type === 'header';
 
-                      return (
-                        <div
-                          key={virtualRow.key}
-                          data-index={virtualRow.index}
-                          ref={rowVirtualizer.measureElement}
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            transform: `translateY(${virtualRow.start}px)`,
-                            paddingLeft: spacing.lg,
-                            paddingRight: spacing.lg
-                          }}
-                        >
-                          {item.type === 'header' ? (
-                            <h3
-                              style={{
-                                fontSize: typography.fontSize.sm,
-                                fontWeight: typography.fontWeight.semibold,
-                                color: colors.text.tertiary,
-                                marginTop: isFirstItem ? 0 : spacing['2xl'],
-                                marginBottom: spacing.sm,
-                                textTransform: 'uppercase',
-                                letterSpacing: typography.letterSpacing.wide
-                              }}
-                            >
-                              {item.dayLabel}
-                            </h3>
-                          ) : (
-                            <div style={{ marginBottom: isLastCardBeforeHeader ? 0 : spacing.sm }}>
-                              <TranscriptionCard
-                                transcription={item.transcription}
-                                isActive={item.transcription.text === currentTranscript}
-                                onClick={handleTranscriptionClick}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      );
+                    return (
+                      <div
+                        key={virtualRow.key}
+                        data-index={virtualRow.index}
+                        ref={rowVirtualizer.measureElement}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          transform: `translateY(${virtualRow.start}px)`,
+                          paddingLeft: spacing.lg,
+                          paddingRight: spacing.lg
+                        }}
+                      >
+                        {item.type === 'header' ? (
+                          <h3
+                            style={{
+                              fontSize: typography.fontSize.sm,
+                              fontWeight: typography.fontWeight.semibold,
+                              color: colors.text.tertiary,
+                              marginTop: isFirstItem ? 0 : spacing['2xl'],
+                              marginBottom: spacing.sm,
+                              textTransform: 'uppercase',
+                              letterSpacing: typography.letterSpacing.wide
+                            }}
+                          >
+                            {item.dayLabel}
+                          </h3>
+                        ) : (
+                          <div
+                            style={{
+                              marginBottom: isLastCardBeforeHeader
+                                ? 0
+                                : spacing.sm
+                            }}
+                          >
+                            <TranscriptionCard
+                              transcription={item.transcription}
+                              isActive={
+                                item.transcription.text === currentTranscript
+                              }
+                              onClick={handleTranscriptionClick}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
                   })}
                 </div>
               )}

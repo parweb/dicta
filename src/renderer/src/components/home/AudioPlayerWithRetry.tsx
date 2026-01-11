@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { RefreshCcw } from 'lucide-react';
 
-import { colors, spacing, typography, borderRadius } from '../../lib/design-system';
+import {
+  colors,
+  spacing,
+  typography,
+  borderRadius
+} from '../../lib/design-system';
 
 interface AudioPlayerWithRetryProps {
   audioBlob: Blob;
@@ -104,12 +109,12 @@ const AudioPlayerWithRetry = ({
                 }
               })
         }}
-        onMouseEnter={(e) => {
+        onMouseEnter={e => {
           if (!isLoading) {
             e.currentTarget.style.backgroundColor = colors.accent.blue.light;
           }
         }}
-        onMouseLeave={(e) => {
+        onMouseLeave={e => {
           if (!isLoading) {
             e.currentTarget.style.backgroundColor = colors.accent.blue.primary;
           }
