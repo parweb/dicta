@@ -7,8 +7,8 @@ import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
   children: ReactNode;
-  currentView: 'home' | 'statistics' | 'design-system';
-  onViewChange: (view: 'home' | 'statistics' | 'design-system') => void;
+  currentView: 'home' | 'statistics' | 'settings';
+  onViewChange: (view: 'home' | 'statistics' | 'settings') => void;
   onHistoryToggle: () => void;
   onHistoryClose: () => void;
   isHistoryOpen: boolean;
@@ -135,26 +135,26 @@ const Layout = ({
             />
           </button>
 
-          {/* Design System button */}
+          {/* Settings button */}
           <button
-            onClick={() => onViewChange('design-system')}
+            onClick={() => onViewChange('settings')}
             style={
               {
                 ...components.button.base,
                 ...components.button.icon,
-                ...(currentView === 'design-system' && {
+                ...(currentView === 'settings' && {
                   backgroundColor: colors.text.primary,
                   borderRadius: '50%',
                   padding: spacing.sm
                 })
               } as React.CSSProperties
             }
-            title="Design System"
+            title="Paramètres"
           >
             <Palette
               size={18}
               color={
-                currentView === 'design-system'
+                currentView === 'settings'
                   ? colors.background.primary
                   : colors.text.primary
               }

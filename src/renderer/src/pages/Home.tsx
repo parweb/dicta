@@ -8,14 +8,14 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '../hooks/useTranscriptionNavigation';
 import type { Transcription } from '../lib/history';
-import DesignSystem from './DesignSystem';
+import Settings from './Settings';
 import Statistics from './Statistics';
 
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [currentView, setCurrentView] = useState<
-    'home' | 'statistics' | 'design-system'
+    'home' | 'statistics' | 'settings'
   >('home');
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(
@@ -206,8 +206,8 @@ const HomePage = () => {
 
       {currentView === 'statistics' ? (
         <Statistics />
-      ) : currentView === 'design-system' ? (
-        <DesignSystem />
+      ) : currentView === 'settings' ? (
+        <Settings />
       ) : (
         <HomeContent
           isRecording={isRecording}

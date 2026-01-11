@@ -1,6 +1,5 @@
 import { Palette, Type, Ruler, Circle, Square, Sparkles } from 'lucide-react';
 
-import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
 import { useTheme } from '../lib/theme-context';
 
 const DesignSystem = () => {
@@ -12,55 +11,11 @@ const DesignSystem = () => {
   return (
     <div
       style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        WebkitAppRegion: 'no-drag'
-      } as React.CSSProperties}
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing['4xl']
+      }}
     >
-      <div
-        style={{
-          padding: spacing['2xl'],
-          maxWidth: '1200px',
-          margin: '0 auto',
-          paddingBottom: spacing['4xl']
-        }}
-      >
-        {/* Theme Configurator */}
-        <div style={{ marginBottom: spacing['4xl'] }}>
-          <ThemeConfigurator />
-        </div>
-
-        {/* Header */}
-        <div
-          style={{
-            marginBottom: spacing['4xl']
-          }}
-        >
-          <h1
-            style={{
-              fontSize: typography.fontSize['2xl'],
-              fontWeight: typography.fontWeight.bold,
-              color: colors.text.primary,
-              marginBottom: spacing.sm
-            }}
-          >
-            Aperçu en Direct - Design System
-          </h1>
-          <p
-            style={{
-              fontSize: typography.fontSize.base,
-              color: colors.text.tertiary,
-              lineHeight: typography.lineHeight.relaxed
-            }}
-          >
-            Les changements de thème sont appliqués immédiatement ci-dessous
-          </p>
-        </div>
 
         {/* Colors Section */}
         <Section
@@ -709,7 +664,6 @@ const DesignSystem = () => {
             </div>
           </div>
         </Section>
-      </div>
     </div>
   );
 };
