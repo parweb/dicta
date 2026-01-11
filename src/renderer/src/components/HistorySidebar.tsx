@@ -7,7 +7,7 @@ import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
 import { useHistoryData } from '../hooks/useHistoryData';
-import { components, spacing } from '../lib/design-system';
+import { components, spacing, colors, typography } from '../lib/design-system';
 import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
@@ -128,11 +128,28 @@ const HistorySidebar = ({
                 flexShrink: 0
               }}
             >
-              <SearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Rechercher dans l'historique..."
-              />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.sm
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: typography.fontSize.xs,
+                    color: colors.text.tertiary,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {filteredTranscriptions.length}
+                </span>
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Rechercher dans l'historique..."
+                />
+              </div>
             </div>
 
             {/* Scrollable content */}
