@@ -156,36 +156,41 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
               onMouseEnter={() => setHoveredCell(cell.dateKey)}
               onMouseLeave={() => setHoveredCell(null)}
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing.md,
                 transition: 'all 0.15s ease-out'
               }}
             >
-              {/* Minimal date label */}
+              {/* Main timeline row */}
               <div
-                className="date-label"
                 style={{
-                  fontSize: typography.fontSize.xs,
-                  color: isHovered ? colors.text.secondary : colors.text.tertiary,
-                  minWidth: '50px',
-                  textAlign: 'right',
-                  transition: 'color 0.15s ease-out',
-                  fontWeight: typography.fontWeight.medium
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.md
                 }}
               >
-                {cell.dayLabel}
-              </div>
+                {/* Minimal date label */}
+                <div
+                  className="date-label"
+                  style={{
+                    fontSize: typography.fontSize.xs,
+                    color: isHovered ? colors.text.secondary : colors.text.tertiary,
+                    minWidth: '50px',
+                    textAlign: 'right',
+                    transition: 'color 0.15s ease-out',
+                    fontWeight: typography.fontWeight.medium
+                  }}
+                >
+                  {cell.dayLabel}
+                </div>
 
-              {/* Timeline graph - 24 hours */}
-              <div
-                style={{
-                  position: 'relative',
-                  height: '32px',
-                  flex: 1,
-                  overflow: 'visible'
-                }}
-              >
+                {/* Timeline graph - 24 hours */}
+                <div
+                  style={{
+                    position: 'relative',
+                    height: '32px',
+                    flex: 1,
+                    overflow: 'visible'
+                  }}
+                >
                 {/* Timeline container */}
                 <div
                   style={{
@@ -281,9 +286,10 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                     );
                   })}
                 </div>
+                </div>
               </div>
 
-              {/* Stats on hover */}
+              {/* Stats below - appears on hover */}
               <div
                 className="row-stats"
                 style={{
@@ -292,11 +298,14 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                   fontSize: typography.fontSize.xs,
                   color: colors.text.tertiary,
                   alignItems: 'center',
-                  minWidth: '250px',
+                  paddingLeft: '64px',
+                  paddingTop: spacing.xs,
                   opacity: isHovered ? 1 : 0,
                   transform: isHovered ? 'translateY(0)' : 'translateY(-8px)',
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  pointerEvents: 'none'
+                  pointerEvents: 'none',
+                  height: isHovered ? 'auto' : '0',
+                  overflow: 'hidden'
                 }}
               >
                 <div style={{
@@ -402,7 +411,8 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
             margin-bottom: 12px !important;
           }
           .row-stats {
-            display: none !important;
+            padding-left: 44px !important;
+            font-size: 10px !important;
           }
           .timeline-row {
             gap: 6px !important;
@@ -423,6 +433,11 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
           }
           .global-stats > div {
             gap: 4px !important;
+          }
+          .row-stats {
+            padding-left: 36px !important;
+            font-size: 9px !important;
+            gap: 8px !important;
           }
           .timeline-row {
             gap: 4px !important;
