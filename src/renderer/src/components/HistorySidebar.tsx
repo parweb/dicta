@@ -140,14 +140,14 @@ const HistorySidebar = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minWidth: '28px',
-                    height: '28px',
+                    minWidth: '32px',
+                    height: '32px',
                     padding: `0 ${spacing.sm}`,
-                    backgroundColor: colors.background.tertiary,
+                    backgroundColor: colors.accent.blue.background,
                     borderRadius: borderRadius.sm,
-                    fontSize: typography.fontSize.sm,
-                    color: colors.text.secondary,
-                    fontWeight: typography.fontWeight.medium,
+                    fontSize: typography.fontSize.base,
+                    color: colors.accent.blue.primary,
+                    fontWeight: typography.fontWeight.semibold,
                     flexShrink: 0
                   }}
                 >
