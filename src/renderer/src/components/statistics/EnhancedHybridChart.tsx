@@ -167,24 +167,107 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
       </div>
 
 
-      {/* Hover tooltip - ultra minimal */}
+      {/* Hover tooltip with detailed graph */}
       {hoveredCell && !selectedCell && hoveredCell.count > 0 && (
         <div
           style={{
             position: 'fixed',
-            left: `${mousePosition.x + 8}px`,
-            top: `${mousePosition.y + 8}px`,
-            backgroundColor: colors.background.primary,
-            borderRadius: borderRadius.xs,
-            padding: `${spacing.xs} ${spacing.sm}`,
+            left: `${mousePosition.x + 16}px`,
+            top: `${mousePosition.y + 16}px`,
+            backgroundColor: colors.background.secondary,
+            borderRadius: borderRadius.sm,
+            padding: spacing.md,
             zIndex: 1000,
             pointerEvents: 'none',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.25)',
-            fontSize: typography.fontSize.xs,
-            color: colors.text.secondary
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+            width: '240px',
+            animation: 'tooltipIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+            opacity: 1,
+            transform: 'translateY(0px) scale(1)',
+            backdropFilter: 'blur(8px)'
           }}
         >
-          {hoveredCell.count}
+          {/* Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: spacing.sm,
+            fontSize: typography.fontSize.xs,
+            color: colors.text.tertiary
+          }}>
+            <span>{hoveredCell.dayLabel} · {String(hoveredCell.hour).padStart(2, '0')}h</span>
+            <span>{hoveredCell.count}</span>
+          </div>
+
+          {/* Mini timeline graph */}
+          <div style={{
+            position: 'relative',
+            height: '40px',
+            backgroundColor: colors.background.primary,
+            borderRadius: borderRadius.xs,
+            padding: `${spacing.xs} 0`
+          }}>
+            {/* Timeline axis */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: spacing.xs,
+                right: spacing.xs,
+                height: '1px',
+                backgroundColor: colors.border.primary
+              }}
+            />
+
+            {/* Transcription markers */}
+            {hoveredCell.transcriptions.map((t, idx) => {
+              const date = new Date(t.timestamp);
+              const minute = date.getMinutes();
+              const position = (minute / 60) * 100;
+              const duration = t.durationMs || 0;
+              const maxDuration = Math.max(...hoveredCell.transcriptions.map(t => t.durationMs || 0), 1);
+              const size = Math.max(6, (duration / maxDuration) * 12 + 6);
+
+              return (
+                <div
+                  key={t.id}
+                  style={{
+                    position: 'absolute',
+                    left: `calc(${spacing.xs} + ${position}% * (100% - ${spacing.xs} * 2) / 100%)`,
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    backgroundColor: colors.accent.blue.primary,
+                    borderRadius: '50%',
+                    border: `1px solid ${colors.background.secondary}`,
+                    zIndex: hoveredCell.transcriptions.length - idx,
+                    animation: `markerIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) ${idx * 0.03}s both`
+                  }}
+                />
+              );
+            })}
+
+            {/* Time markers */}
+            <div style={{
+              position: 'absolute',
+              bottom: '-14px',
+              left: spacing.xs,
+              fontSize: '9px',
+              color: colors.text.tertiary
+            }}>
+              :00
+            </div>
+            <div style={{
+              position: 'absolute',
+              bottom: '-14px',
+              right: spacing.xs,
+              fontSize: '9px',
+              color: colors.text.tertiary
+            }}>
+              :60
+            </div>
+          </div>
         </div>
       )}
 
@@ -361,6 +444,28 @@ const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
               from {
                 opacity: 0;
                 transform: translate(-50%, -50%) scale(0.95);
+              }
+              to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+              }
+            }
+            @keyframes tooltipIn {
+              from {
+                opacity: 0;
+                transform: translateY(-8px) scale(0.96);
+                filter: blur(4px);
+              }
+              to {
+                opacity: 1;
+                transform: translateY(0px) scale(1);
+                filter: blur(0px);
+              }
+            }
+            @keyframes markerIn {
+              from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
               }
               to {
                 opacity: 1;
