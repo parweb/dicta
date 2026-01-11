@@ -104,7 +104,7 @@ const AudioWaveform = ({
                 height: `${Math.max(2, normalizedHeight)}%`,
                 backgroundColor: colors.accent.blue.primary,
                 opacity,
-                borderRadius: '1px',
+                borderRadius: borderRadius.xs,
                 minWidth: '1px'
               }}
               title={`Segment ${index + 1}: ${(amplitude * 100).toFixed(1)}%`}
