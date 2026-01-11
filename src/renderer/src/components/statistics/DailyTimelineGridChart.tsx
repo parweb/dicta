@@ -184,84 +184,79 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                 {/* Timeline graph - 24 hours */}
                 <div
                   style={{
-                    position: 'relative',
-                    height: '32px',
                     flex: 1,
-                    overflow: 'visible'
+                    display: 'flex',
+                    flexDirection: 'column'
                   }}
                 >
-                {/* Timeline container */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0
-                  }}
-                >
-                  {/* Timeline axis */}
+                  {/* Timeline with markers */}
                   <div
                     style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: 0,
-                      right: 0,
-                      height: '1px',
-                      backgroundColor: colors.border.primary,
-                      opacity: isHovered ? 0.6 : 0.3,
-                      transition: 'opacity 0.15s ease-out'
+                      position: 'relative',
+                      height: '32px',
+                      width: '100%'
                     }}
-                  />
+                  >
+                    {/* Timeline axis */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: 0,
+                        right: 0,
+                        height: '1px',
+                        backgroundColor: colors.border.primary,
+                        opacity: isHovered ? 0.6 : 0.3,
+                        transition: 'opacity 0.15s ease-out'
+                      }}
+                    />
 
-                  {/* Transcription markers */}
-                  {cell.transcriptions.map((t, idx) => {
-                    const date = new Date(t.timestamp);
-                    const hours = date.getHours();
-                    const minutes = date.getMinutes();
-                    const seconds = date.getSeconds();
-                    const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                    const position = (totalSeconds / 86400) * 100; // 86400 seconds in a day
-                    const duration = t.durationMs || 0;
-                    const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
-                    const baseSize = 6;
-                    const size = Math.max(baseSize, (duration / maxDuration) * 10 + baseSize);
+                    {/* Transcription markers */}
+                    {cell.transcriptions.map((t, idx) => {
+                      const date = new Date(t.timestamp);
+                      const hours = date.getHours();
+                      const minutes = date.getMinutes();
+                      const seconds = date.getSeconds();
+                      const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                      const position = (totalSeconds / 86400) * 100; // 86400 seconds in a day
+                      const duration = t.durationMs || 0;
+                      const maxDuration = Math.max(...cell.transcriptions.map(t => t.durationMs || 0), 1);
+                      const baseSize = 6;
+                      const size = Math.max(baseSize, (duration / maxDuration) * 10 + baseSize);
 
-                    return (
-                      <div
-                        key={t.id}
-                        style={{
-                          position: 'absolute',
-                          left: `${position}%`,
-                          top: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          width: `${size}px`,
-                          height: `${size}px`,
-                          backgroundColor: colors.accent.blue.primary,
-                          borderRadius: '50%',
-                          border: 'none',
-                          boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
-                          zIndex: cell.transcriptions.length - idx,
-                          opacity: isHovered ? 1 : 0.8,
-                          transition: 'all 0.15s ease-out',
-                          animation: `markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.03}s both`
-                        }}
-                      />
-                    );
-                  })}
+                      return (
+                        <div
+                          key={t.id}
+                          style={{
+                            position: 'absolute',
+                            left: `${position}%`,
+                            top: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: `${size}px`,
+                            height: `${size}px`,
+                            backgroundColor: colors.accent.blue.primary,
+                            borderRadius: '50%',
+                            border: 'none',
+                            boxShadow: isHovered ? '0 2px 8px rgba(14, 165, 233, 0.5)' : '0 1px 4px rgba(14, 165, 233, 0.3)',
+                            zIndex: cell.transcriptions.length - idx,
+                            opacity: isHovered ? 1 : 0.8,
+                            transition: 'all 0.15s ease-out',
+                            animation: `markerFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.03}s both`
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
 
                   {/* Hour ruler - appears on hover */}
                   {isHovered && (
                     <div
                       style={{
-                        position: 'absolute',
-                        bottom: '-12px',
-                        left: 0,
-                        right: 0,
-                        height: '8px',
+                        height: '10px',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
+                        marginTop: spacing.xs,
                         animation: 'rulerIn 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
                         pointerEvents: 'none'
                       }}
@@ -273,9 +268,9 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                             key={hour}
                             style={{
                               width: '1px',
-                              height: isMajorTick ? '6px' : '3px',
-                              backgroundColor: colors.border.primary,
-                              opacity: isMajorTick ? 0.5 : 0.3,
+                              height: isMajorTick ? '8px' : '4px',
+                              backgroundColor: colors.text.tertiary,
+                              opacity: isMajorTick ? 0.6 : 0.4,
                               transition: 'all 0.2s ease-out'
                             }}
                           />
@@ -283,7 +278,6 @@ const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps)
                       })}
                     </div>
                   )}
-                </div>
                 </div>
               </div>
 
