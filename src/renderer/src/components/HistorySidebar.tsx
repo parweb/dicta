@@ -99,15 +99,16 @@ const HistorySidebar = ({
     return items;
   }, [filteredTranscriptions]);
 
-  // Setup virtualizer
+  // Setup virtualizer with dynamic sizing
   const rowVirtualizer = useVirtualizer({
     count: virtualItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => {
-      const item = virtualItems[index];
-      return item.type === 'header' ? 40 : 120; // Estimated sizes
-    },
-    overscan: 5
+    estimateSize: () => 100, // Default estimate
+    overscan: 5,
+    measureElement:
+      typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
+        ? element => element?.getBoundingClientRect().height
+        : undefined
   });
 
   const handleTranscriptionClick = useCallback((transcription: Transcription) => {
@@ -133,6 +134,7 @@ const HistorySidebar = ({
           zIndex: 1,
           display: 'flex',
           flexDirection: 'column',
+          gap: spacing.md,
           WebkitAppRegion: 'no-drag'
         }}
       >
@@ -209,48 +211,57 @@ const HistorySidebar = ({
                   style={{
                     height: `${rowVirtualizer.getTotalSize()}px`,
                     width: '100%',
-                    position: 'relative'
+                    position: 'relative',
+                    paddingTop: spacing.md,
+                    paddingBottom: spacing['2xl']
                   }}
                 >
                   {rowVirtualizer.getVirtualItems().map(virtualRow => {
-                    const item = virtualItems[virtualRow.index];
-                    return (
-                      <div
-                        key={virtualRow.key}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          transform: `translateY(${virtualRow.start}px)`,
-                          padding: `0 ${spacing.lg}`
-                        }}
-                      >
-                        {item.type === 'header' ? (
-                          <h3
-                            style={{
-                              fontSize: typography.fontSize.sm,
-                              fontWeight: typography.fontWeight.semibold,
-                              color: colors.text.tertiary,
-                              marginTop: spacing.md,
-                              marginBottom: spacing.sm,
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
-                            }}
-                          >
-                            {item.dayLabel}
-                          </h3>
-                        ) : (
-                          <div style={{ marginBottom: spacing.sm }}>
-                            <TranscriptionCard
-                              transcription={item.transcription}
-                              isActive={item.transcription.text === currentTranscript}
-                              onClick={handleTranscriptionClick}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
+                      const item = virtualItems[virtualRow.index];
+                      const isFirstItem = virtualRow.index === 0;
+                      const nextItem = virtualItems[virtualRow.index + 1];
+                      const isLastCardBeforeHeader = item.type === 'transcription' && nextItem?.type === 'header';
+
+                      return (
+                        <div
+                          key={virtualRow.key}
+                          data-index={virtualRow.index}
+                          ref={rowVirtualizer.measureElement}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            transform: `translateY(${virtualRow.start}px)`,
+                            paddingLeft: spacing.lg,
+                            paddingRight: spacing.lg
+                          }}
+                        >
+                          {item.type === 'header' ? (
+                            <h3
+                              style={{
+                                fontSize: typography.fontSize.sm,
+                                fontWeight: typography.fontWeight.semibold,
+                                color: colors.text.tertiary,
+                                marginTop: isFirstItem ? 0 : spacing['2xl'],
+                                marginBottom: spacing.sm,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}
+                            >
+                              {item.dayLabel}
+                            </h3>
+                          ) : (
+                            <div style={{ marginBottom: isLastCardBeforeHeader ? 0 : spacing.sm }}>
+                              <TranscriptionCard
+                                transcription={item.transcription}
+                                isActive={item.transcription.text === currentTranscript}
+                                onClick={handleTranscriptionClick}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
                   })}
                 </div>
               )}
