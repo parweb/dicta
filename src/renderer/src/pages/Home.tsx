@@ -1,4 +1,11 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  lazy,
+  Suspense
+} from 'react';
 import { AlertCircle } from 'lucide-react';
 
 import HomeContent from '../components/home/HomeContent';
@@ -225,7 +232,13 @@ const HomePage = () => {
     >
       <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
 
-      <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="text-muted-foreground flex h-full items-center justify-center">
+            Loading...
+          </div>
+        }
+      >
         {currentView === 'statistics' ? (
           <Statistics />
         ) : currentView === 'settings' ? (
@@ -233,56 +246,62 @@ const HomePage = () => {
         ) : showApiKeyBanner ? (
           <div
             style={{
-              position: 'absolute',
-              top: theme.spacing['4xl'],
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 10,
-              ...theme.components.card.base,
-              padding: theme.spacing.md,
-              backgroundColor: '#ffffff',
-              borderLeft: `4px solid ${theme.colors.accent.yellow}`,
-              maxWidth: '500px',
-              width: 'calc(100% - 32px)'
+              width: '100%',
+              height: '100vh',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              position: 'relative'
             }}
           >
             <div
               style={{
-                display: 'flex',
-                alignItems: 'start',
-                gap: theme.spacing.sm
+                ...theme.components.card.base,
+                padding: theme.spacing.md,
+                backgroundColor: '#ffffff',
+                borderLeft: `4px solid ${theme.colors.accent.yellow}`,
+                maxWidth: '500px'
               }}
             >
-              <AlertCircle size={18} color={theme.colors.accent.yellow} />
-              <div style={{ flex: 1 }}>
-                <p
-                  style={{
-                    fontSize: theme.typography.fontSize.sm,
-                    color: '#000000',
-                    marginBottom: theme.spacing.xs
-                  }}
-                >
-                  Clé API non configurée
-                </p>
-                <p
-                  style={{
-                    fontSize: theme.typography.fontSize.xs,
-                    color: '#666666',
-                    marginBottom: theme.spacing.sm
-                  }}
-                >
-                  Ajoutez votre clé OpenAI pour utiliser la transcription vocale
-                </p>
-                <Button
-                  onClick={() => {
-                    setCurrentView('settings');
-                    setSettingsTab('model');
-                    setShowApiKeyBanner(false);
-                  }}
-                  size="sm"
-                >
-                  Configurer maintenant
-                </Button>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'start',
+                  gap: theme.spacing.sm
+                }}
+              >
+                <AlertCircle size={18} />
+                <div style={{ flex: 1 }}>
+                  <p
+                    style={{
+                      fontSize: theme.typography.fontSize.sm,
+                      color: '#000000',
+                      marginBottom: theme.spacing.xs
+                    }}
+                  >
+                    Clé API non configurée
+                  </p>
+                  <p
+                    style={{
+                      fontSize: theme.typography.fontSize.xs,
+                      color: '#666666',
+                      marginBottom: theme.spacing.sm
+                    }}
+                  >
+                    Ajoutez votre clé OpenAI pour utiliser la transcription
+                    vocale
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setCurrentView('settings');
+                      setSettingsTab('model');
+                      setShowApiKeyBanner(false);
+                    }}
+                    size="sm"
+                  >
+                    Configurer maintenant
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
