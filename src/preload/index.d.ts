@@ -19,7 +19,11 @@ interface CustomAPI {
     }>;
   };
   theme: {
-    load: () => Promise<{ success: boolean; theme: unknown | null; error?: string }>;
+    load: () => Promise<{
+      success: boolean;
+      theme: unknown | null;
+      error?: string;
+    }>;
     save: (theme: unknown) => Promise<{ success: boolean; error?: string }>;
     reset: () => Promise<{ success: boolean; error?: string }>;
   };

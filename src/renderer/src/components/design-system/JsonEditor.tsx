@@ -91,11 +91,13 @@ export default function JsonEditor() {
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.secondary;
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.secondary;
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.tertiary;
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.tertiary;
           }}
         >
           Formater
@@ -109,8 +111,8 @@ export default function JsonEditor() {
           margin: 0
         }}
       >
-        Modifiez directement la configuration JSON du thème. Les changements sont appliqués en temps
-        réel.
+        Modifiez directement la configuration JSON du thème. Les changements
+        sont appliqués en temps réel.
       </p>
 
       {/* Status indicator */}
@@ -166,12 +168,12 @@ export default function JsonEditor() {
           whiteSpace: 'pre',
           overflowX: 'auto'
         }}
-        onFocus={(e) => {
+        onFocus={e => {
           if (!error) {
             e.currentTarget.style.borderColor = theme.colors.border.accent;
           }
         }}
-        onBlur={(e) => {
+        onBlur={e => {
           if (!error) {
             e.currentTarget.style.borderColor = theme.colors.border.primary;
           }
@@ -208,9 +210,11 @@ export default function JsonEditor() {
           color: theme.colors.text.secondary
         }}
       >
-        <strong style={{ color: theme.colors.accent.blue.primary }}>Astuce:</strong> Utilisez
-        Ctrl+Z pour annuler les modifications. Le thème est automatiquement sauvegardé après chaque
-        modification valide.
+        <strong style={{ color: theme.colors.accent.blue.primary }}>
+          Astuce:
+        </strong>{' '}
+        Utilisez Ctrl+Z pour annuler les modifications. Le thème est
+        automatiquement sauvegardé après chaque modification valide.
       </div>
     </div>
   );

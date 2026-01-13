@@ -1,4 +1,8 @@
-import { PRESET_METADATA, PRESET_THEMES, type PresetName } from '../../lib/theme-presets';
+import {
+  PRESET_METADATA,
+  PRESET_THEMES,
+  type PresetName
+} from '../../lib/theme-presets';
 import { useTheme } from '../../lib/theme-context';
 
 export default function PresetSelector() {
@@ -35,7 +39,7 @@ export default function PresetSelector() {
           gap: theme.spacing.md
         }}
       >
-        {(Object.keys(PRESET_THEMES) as PresetName[]).map((presetName) => {
+        {(Object.keys(PRESET_THEMES) as PresetName[]).map(presetName => {
           const metadata = PRESET_METADATA[presetName];
           const isActive = activePreset === presetName;
 
@@ -58,16 +62,20 @@ export default function PresetSelector() {
                 transition: 'all 0.2s',
                 outline: 'none'
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (!isActive) {
-                  e.currentTarget.style.backgroundColor = theme.colors.background.tertiary;
-                  e.currentTarget.style.borderColor = theme.colors.border.secondary;
+                  e.currentTarget.style.backgroundColor =
+                    theme.colors.background.tertiary;
+                  e.currentTarget.style.borderColor =
+                    theme.colors.border.secondary;
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (!isActive) {
-                  e.currentTarget.style.backgroundColor = theme.colors.background.secondary;
-                  e.currentTarget.style.borderColor = theme.colors.border.primary;
+                  e.currentTarget.style.backgroundColor =
+                    theme.colors.background.secondary;
+                  e.currentTarget.style.borderColor =
+                    theme.colors.border.primary;
                 }
               }}
             >
@@ -89,7 +97,9 @@ export default function PresetSelector() {
                   style={{
                     fontSize: theme.typography.fontSize.sm,
                     fontWeight: theme.typography.fontWeight.semibold,
-                    color: isActive ? theme.colors.accent.blue.primary : theme.colors.text.primary,
+                    color: isActive
+                      ? theme.colors.accent.blue.primary
+                      : theme.colors.text.primary,
                     marginBottom: theme.spacing.xs
                   }}
                 >
@@ -122,8 +132,10 @@ export default function PresetSelector() {
             color: theme.colors.text.secondary
           }}
         >
-          <strong style={{ color: theme.colors.accent.yellow.primary }}>Thème personnalisé actif</strong> - Les
-          modifications que vous apportez créent un thème personnalisé.
+          <strong style={{ color: theme.colors.accent.yellow.primary }}>
+            Thème personnalisé actif
+          </strong>{' '}
+          - Les modifications que vous apportez créent un thème personnalisé.
         </div>
       )}
     </div>

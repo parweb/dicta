@@ -1,7 +1,12 @@
 import { Palette } from 'lucide-react';
 
 import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '../components/ui/tabs';
 import { useTheme } from '../lib/theme-context';
 import DesignSystem from './DesignSystem';
 
@@ -11,16 +16,18 @@ const Settings = () => {
 
   return (
     <div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        WebkitAppRegion: 'no-drag'
-      } as React.CSSProperties}
+      style={
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          WebkitAppRegion: 'no-drag'
+        } as React.CSSProperties
+      }
     >
       <div
         style={{

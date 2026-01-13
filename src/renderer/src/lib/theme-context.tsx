@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 
 import { darkTheme, type PresetName } from './theme-presets';
 import type { PartialThemeConfig, ThemeConfig } from './theme-schema';
@@ -52,7 +59,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [baseConfig, setBaseConfig] = useState<ThemeConfig>(darkTheme);
 
   // Active preset name
-  const [activePreset, setActivePresetState] = useState<PresetName | 'custom'>('dark');
+  const [activePreset, setActivePresetState] = useState<PresetName | 'custom'>(
+    'dark'
+  );
 
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -156,7 +165,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
    * Update theme with partial changes (deep merge)
    */
   const setTheme = (updates: PartialThemeConfig) => {
-    setBaseConfig((prev) => mergeTheme(prev, updates));
+    setBaseConfig(prev => mergeTheme(prev, updates));
     setActivePresetState('custom');
   };
 
@@ -200,5 +209,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setActivePreset
   };
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }

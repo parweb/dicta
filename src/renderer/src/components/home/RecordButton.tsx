@@ -29,7 +29,11 @@ const RecordButton = ({
       style={
         {
           ...components.button.record,
-          backgroundColor: getRecordButtonColor(isRecording, isLoading, baseConfig),
+          backgroundColor: getRecordButtonColor(
+            isRecording,
+            isLoading,
+            baseConfig
+          ),
           cursor: isLoading ? 'not-allowed' : 'pointer',
           opacity: isLoading ? 0.7 : 1,
           WebkitAppRegion: 'no-drag'

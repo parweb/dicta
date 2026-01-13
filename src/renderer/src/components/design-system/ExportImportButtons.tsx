@@ -5,16 +5,20 @@ import { useTheme } from '../../lib/theme-context';
 import { downloadThemeFile, readThemeFile } from '../../lib/theme-utils';
 
 export default function ExportImportButtons() {
-  const { theme, baseConfig, replaceTheme, resetTheme, setActivePreset } = useTheme();
+  const { theme, baseConfig, replaceTheme, resetTheme, setActivePreset } =
+    useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [message, setMessage] = useState<{
+    text: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   const handleExport = () => {
     try {
       downloadThemeFile(baseConfig, `dicta-theme-${Date.now()}.json`);
       showMessage('Thème exporté avec succès', 'success');
     } catch (error) {
-      showMessage('Erreur lors de l\'export', 'error');
+      showMessage("Erreur lors de l'export", 'error');
     }
   };
 
@@ -43,7 +47,11 @@ export default function ExportImportButtons() {
   };
 
   const handleReset = () => {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser le thème aux valeurs par défaut ?')) {
+    if (
+      confirm(
+        'Êtes-vous sûr de vouloir réinitialiser le thème aux valeurs par défaut ?'
+      )
+    ) {
       resetTheme();
       showMessage('Thème réinitialisé', 'success');
     }
@@ -97,11 +105,13 @@ export default function ExportImportButtons() {
             cursor: 'pointer',
             transition: 'background-color 0.2s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.accent.blue.light;
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.accent.blue.light;
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.accent.blue.primary;
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.accent.blue.primary;
           }}
         >
           <Download size={16} />
@@ -125,12 +135,14 @@ export default function ExportImportButtons() {
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.secondary;
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.secondary;
             e.currentTarget.style.borderColor = theme.colors.border.secondary;
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.tertiary;
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.tertiary;
             e.currentTarget.style.borderColor = theme.colors.border.primary;
           }}
         >
@@ -155,12 +167,14 @@ export default function ExportImportButtons() {
             cursor: 'pointer',
             transition: 'all 0.2s'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.secondary;
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.secondary;
             e.currentTarget.style.borderColor = theme.colors.accent.red.primary;
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = theme.colors.background.tertiary;
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor =
+              theme.colors.background.tertiary;
             e.currentTarget.style.borderColor = theme.colors.border.primary;
           }}
         >

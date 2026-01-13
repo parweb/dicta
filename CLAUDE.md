@@ -21,7 +21,6 @@ Dicta is an Electron-based voice transcription application that uses OpenAI's tr
 The application follows standard Electron architecture with three distinct processes:
 
 1. **Main Process** (`src/main/index.ts`):
-
    - Window management and lifecycle
    - Global shortcut registration (Cmd/Ctrl+Shift+X)
    - IPC communication handlers:
@@ -32,7 +31,6 @@ The application follows standard Electron architecture with three distinct proce
    - Security note: Uses `contextIsolation: false` and `sandbox: false` for IPC communication
 
 2. **Preload Process** (`src/preload/index.ts`):
-
    - Exposes `window.api` and `window.electron` APIs to renderer
    - Provides IPC bridge methods: `send()`, `on()`, `removeListener()`
    - Exposes `window.api.history` methods for transcription persistence

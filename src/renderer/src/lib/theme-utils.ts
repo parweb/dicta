@@ -18,7 +18,11 @@ export function mergeTheme(
     const output = { ...target };
 
     for (const key in source) {
-      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      if (
+        source[key] &&
+        typeof source[key] === 'object' &&
+        !Array.isArray(source[key])
+      ) {
         output[key] = deepMerge(target[key] || {}, source[key]);
       } else if (source[key] !== undefined) {
         output[key] = source[key];
@@ -53,7 +57,8 @@ export function importTheme(
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error parsing JSON'
+      error:
+        error instanceof Error ? error.message : 'Unknown error parsing JSON'
     };
   }
 }
@@ -61,7 +66,10 @@ export function importTheme(
 /**
  * Download theme as JSON file
  */
-export function downloadThemeFile(theme: ThemeConfig, filename = 'dicta-theme.json'): void {
+export function downloadThemeFile(
+  theme: ThemeConfig,
+  filename = 'dicta-theme.json'
+): void {
   const json = exportTheme(theme);
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -82,11 +90,13 @@ export function downloadThemeFile(theme: ThemeConfig, filename = 'dicta-theme.js
  */
 export function readThemeFile(
   file: File
-): Promise<{ success: true; theme: ThemeConfig } | { success: false; error: string }> {
-  return new Promise((resolve) => {
+): Promise<
+  { success: true; theme: ThemeConfig } | { success: false; error: string }
+> {
+  return new Promise(resolve => {
     const reader = new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
         const content = e.target?.result as string;
         const result = importTheme(content);

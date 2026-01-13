@@ -9,7 +9,12 @@ interface ColorPickerProps {
   description?: string;
 }
 
-export default function ColorPicker({ label, value, onChange, description }: ColorPickerProps) {
+export default function ColorPicker({
+  label,
+  value,
+  onChange,
+  description
+}: ColorPickerProps) {
   const { theme } = useTheme();
   const [inputValue, setInputValue] = useState(value);
 
@@ -46,7 +51,10 @@ export default function ColorPicker({ label, value, onChange, description }: Col
 
   const handleTextInputBlur = () => {
     // Revert to original value if invalid
-    if (!inputValue.match(/^#[0-9A-Fa-f]{6}$/) && !inputValue.match(/^rgba?\(/)) {
+    if (
+      !inputValue.match(/^#[0-9A-Fa-f]{6}$/) &&
+      !inputValue.match(/^rgba?\(/)
+    ) {
       setInputValue(value);
     }
   };
@@ -122,10 +130,10 @@ export default function ColorPicker({ label, value, onChange, description }: Col
             fontFamily: 'monospace',
             outline: 'none'
           }}
-          onFocus={(e) => {
+          onFocus={e => {
             e.target.style.borderColor = theme.colors.border.accent;
           }}
-          onBlurCapture={(e) => {
+          onBlurCapture={e => {
             e.currentTarget.style.borderColor = theme.colors.border.primary;
           }}
         />

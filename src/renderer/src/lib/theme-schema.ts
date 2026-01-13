@@ -55,7 +55,7 @@ const spacingSchema = z
   .string()
   .regex(/^\d+px$/)
   .refine(
-    (val) => {
+    val => {
       const num = parseInt(val);
       return num >= 0 && num <= 60;
     },
@@ -67,7 +67,7 @@ const fontSizeSchema = z
   .string()
   .regex(/^\d+px$/)
   .refine(
-    (val) => {
+    val => {
       const num = parseInt(val);
       return num >= 8 && num <= 48;
     },
@@ -208,7 +208,7 @@ export function validateTheme(
     } else {
       // Format Zod errors into readable message
       const errors = result.error.issues
-        .map((err) => `${err.path.join('.')}: ${err.message}`)
+        .map(err => `${err.path.join('.')}: ${err.message}`)
         .join('; ');
       return { success: false, error: errors };
     }
@@ -225,7 +225,9 @@ export function validateTheme(
  */
 export function validatePartialTheme(
   theme: unknown
-): { success: true; data: PartialThemeConfig } | { success: false; error: string } {
+):
+  | { success: true; data: PartialThemeConfig }
+  | { success: false; error: string } {
   try {
     // For partial updates, just validate that it's an object
     // Actual validation will happen when merged with full theme

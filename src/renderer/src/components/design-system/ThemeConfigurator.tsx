@@ -39,8 +39,8 @@ export default function ThemeConfigurator() {
             lineHeight: typography.lineHeight.relaxed
           }}
         >
-          Personnalisez l'apparence de Dicta. Les modifications sont appliquées en temps réel et
-          sauvegardées automatiquement.
+          Personnalisez l'apparence de Dicta. Les modifications sont appliquées
+          en temps réel et sauvegardées automatiquement.
         </p>
       </div>
 

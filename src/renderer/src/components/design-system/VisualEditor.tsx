@@ -27,17 +27,23 @@ const VisualEditor = () => {
             <ColorPicker
               label="Primaire"
               value={colors.background.primary}
-              onChange={(value) => setTheme({ colors: { background: { primary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { background: { primary: value } } })
+              }
             />
             <ColorPicker
               label="Secondaire"
               value={colors.background.secondary}
-              onChange={(value) => setTheme({ colors: { background: { secondary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { background: { secondary: value } } })
+              }
             />
             <ColorPicker
               label="Tertiaire"
               value={colors.background.tertiary}
-              onChange={(value) => setTheme({ colors: { background: { tertiary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { background: { tertiary: value } } })
+              }
             />
           </ColorGrid>
         </SubSection>
@@ -48,17 +54,23 @@ const VisualEditor = () => {
             <ColorPicker
               label="Primaire"
               value={colors.text.primary}
-              onChange={(value) => setTheme({ colors: { text: { primary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { text: { primary: value } } })
+              }
             />
             <ColorPicker
               label="Secondaire"
               value={colors.text.secondary}
-              onChange={(value) => setTheme({ colors: { text: { secondary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { text: { secondary: value } } })
+              }
             />
             <ColorPicker
               label="Tertiaire"
               value={colors.text.tertiary}
-              onChange={(value) => setTheme({ colors: { text: { tertiary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { text: { tertiary: value } } })
+              }
             />
           </ColorGrid>
         </SubSection>
@@ -69,21 +81,21 @@ const VisualEditor = () => {
             <ColorPicker
               label="Bleu"
               value={colors.accent.blue.primary}
-              onChange={(value) =>
+              onChange={value =>
                 setTheme({ colors: { accent: { blue: { primary: value } } } })
               }
             />
             <ColorPicker
               label="Vert (Enregistrer)"
               value={colors.accent.green.button}
-              onChange={(value) =>
+              onChange={value =>
                 setTheme({ colors: { accent: { green: { button: value } } } })
               }
             />
             <ColorPicker
               label="Rouge (En cours)"
               value={colors.accent.red.button}
-              onChange={(value) =>
+              onChange={value =>
                 setTheme({ colors: { accent: { red: { button: value } } } })
               }
             />
@@ -96,12 +108,16 @@ const VisualEditor = () => {
             <ColorPicker
               label="Primaire"
               value={colors.border.primary}
-              onChange={(value) => setTheme({ colors: { border: { primary: value } } })}
+              onChange={value =>
+                setTheme({ colors: { border: { primary: value } } })
+              }
             />
             <ColorPicker
               label="Accent"
               value={colors.border.accent}
-              onChange={(value) => setTheme({ colors: { border: { accent: value } } })}
+              onChange={value =>
+                setTheme({ colors: { border: { accent: value } } })
+              }
             />
           </ColorGrid>
         </SubSection>
@@ -120,7 +136,7 @@ const VisualEditor = () => {
             gap: spacing.lg
           }}
         >
-          {(['xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const).map((size) => (
+          {(['xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const).map(size => (
             <div
               key={size}
               style={{
@@ -153,7 +169,7 @@ const VisualEditor = () => {
                 min="0"
                 max="60"
                 value={parseInt(spacing[size])}
-                onChange={(e) => {
+                onChange={e => {
                   const value = `${e.target.value}px`;
                   setTheme({ spacing: { [size]: value } });
                 }}
@@ -191,7 +207,7 @@ const VisualEditor = () => {
             gap: spacing.lg
           }}
         >
-          {(['xs', 'sm', 'base', 'lg', 'xl'] as const).map((size) => (
+          {(['xs', 'sm', 'base', 'lg', 'xl'] as const).map(size => (
             <div
               key={size}
               style={{
@@ -225,7 +241,7 @@ const VisualEditor = () => {
                 min="8"
                 max="48"
                 value={parseInt(typography.fontSize[size])}
-                onChange={(e) => {
+                onChange={e => {
                   const value = `${e.target.value}px`;
                   setTheme({ typography: { fontSize: { [size]: value } } });
                 }}
@@ -308,7 +324,13 @@ const Section = ({
   );
 };
 
-const SubSection = ({ title, children }: { title: string; children: React.ReactNode }) => {
+const SubSection = ({
+  title,
+  children
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
 
