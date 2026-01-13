@@ -5,6 +5,20 @@
  */
 
 // =============================================================================
+// ENVIRONMENT-AWARE ACCENT COLOR
+// =============================================================================
+
+// In dev mode, use bright red accent to differentiate from production
+const isDev = import.meta.env.DEV;
+
+const accentColor = {
+  primary: isDev ? '#ef4444' : '#0ea5e9', // Red in dev, blue in prod
+  light: isDev ? '#f87171' : '#38bdf8',
+  dark: isDev ? '#7f1d1d' : '#0c4a6e',
+  rgb: isDev ? '239, 68, 68' : '14, 165, 233'
+};
+
+// =============================================================================
 // COLORS
 // =============================================================================
 
@@ -29,18 +43,18 @@ export const colors = {
   border: {
     primary: '#334155', // Main borders (slate-700)
     secondary: '#475569', // Hover borders (slate-600)
-    accent: '#0ea5e9' // Highlighted borders (sky-500)
+    accent: accentColor.primary // Environment-aware accent border
   },
 
   // Accent colors
   accent: {
     blue: {
-      primary: '#0ea5e9', // Main blue (sky-500)
-      light: '#38bdf8', // Light blue (sky-400)
-      dark: '#0c4a6e', // Dark blue (sky-900)
-      background: 'rgba(14, 165, 233, 0.1)', // Blue tint background
-      backgroundHover: 'rgba(14, 165, 233, 0.15)',
-      backgroundActive: 'rgba(14, 165, 233, 0.2)'
+      primary: accentColor.primary, // Environment-aware primary
+      light: accentColor.light, // Environment-aware light
+      dark: accentColor.dark, // Environment-aware dark
+      background: `rgba(${accentColor.rgb}, 0.1)`, // Tint background
+      backgroundHover: `rgba(${accentColor.rgb}, 0.15)`,
+      backgroundActive: `rgba(${accentColor.rgb}, 0.2)`
     },
     green: {
       primary: '#4ade80', // Success green (green-400)
@@ -160,14 +174,14 @@ export const shadows = {
 
 export const charts = {
   bar: {
-    fill: '#3b82f6', // sky-500 for recharts compatibility
-    rgb: '59, 130, 246' // RGB values for dynamic opacity
+    fill: accentColor.primary, // Environment-aware chart color
+    rgb: accentColor.rgb // RGB values for dynamic opacity
   },
   brush: {
-    stroke: 'rgba(59, 130, 246, 0.6)', // sky-500 with opacity
-    fill: 'rgba(59, 130, 246, 0.08)' // sky-500 with low opacity
+    stroke: `rgba(${accentColor.rgb}, 0.6)`, // Environment-aware with opacity
+    fill: `rgba(${accentColor.rgb}, 0.08)` // Environment-aware with low opacity
   }
-} as const;
+};
 
 // =============================================================================
 // COMPONENT STYLES
