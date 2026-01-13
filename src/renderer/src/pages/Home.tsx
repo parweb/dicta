@@ -235,7 +235,7 @@ const HomePage = () => {
             zIndex: 10,
             ...theme.components.card.base,
             padding: theme.spacing.md,
-            backgroundColor: theme.colors.accent.yellow + '20',
+            backgroundColor: '#ffffff',
             borderLeft: `4px solid ${theme.colors.accent.yellow}`,
             maxWidth: '500px',
             width: 'calc(100% - 32px)'
@@ -253,7 +253,7 @@ const HomePage = () => {
               <p
                 style={{
                   fontSize: theme.typography.fontSize.sm,
-                  color: theme.colors.text.primary,
+                  color: '#000000',
                   marginBottom: theme.spacing.xs
                 }}
               >
@@ -262,7 +262,7 @@ const HomePage = () => {
               <p
                 style={{
                   fontSize: theme.typography.fontSize.xs,
-                  color: theme.colors.text.tertiary,
+                  color: '#666666',
                   marginBottom: theme.spacing.sm
                 }}
               >
@@ -283,18 +283,6 @@ const HomePage = () => {
                 Configurer maintenant
               </button>
             </div>
-            <button
-              onClick={() => setShowApiKeyBanner(false)}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: theme.colors.text.tertiary,
-                fontSize: theme.typography.fontSize.xs
-              }}
-            >
-              ✕
-            </button>
           </div>
         </div>
       )}
