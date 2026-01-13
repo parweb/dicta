@@ -35,9 +35,6 @@ const INITIAL_PROXY_STATUSES: Record<string, ProxyStatus> =
     {}
   );
 
-// SECURITY: Move API key to environment variables
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY || '';
-
 export interface TranscriptionResult {
   text?: string;
   error?: string;
@@ -62,6 +59,7 @@ export interface UseTranscriptionAPIReturn {
 }
 
 export function useTranscriptionAPI(
+  apiKey: string | null,
   onHistoryUpdate?: () => Promise<void>
 ): UseTranscriptionAPIReturn {
   const [proxyStatuses, setProxyStatuses] = useState<
@@ -152,7 +150,10 @@ export function useTranscriptionAPI(
     ): Promise<TranscriptionResult> => {
       if (!apiKey) {
         console.error('API key is not configured');
-        return { error: 'API key is not configured' };
+        return {
+          error:
+            'Clé API non configurée. Veuillez ajouter votre clé OpenAI dans les paramètres.'
+        };
       }
 
       setIsLoading(true);
@@ -236,7 +237,7 @@ export function useTranscriptionAPI(
         return { error: errorMessage };
       }
     },
-    [saveToHistory]
+    [apiKey, saveToHistory]
   );
 
   return {
