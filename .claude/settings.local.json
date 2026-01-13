@@ -34,7 +34,18 @@
       "Bash(tail:*)",
       "Bash(/usr/bin/log show:*)",
       "Bash(log stream:*)",
-      "Bash(du:*)"
+      "Bash(du:*)",
+      "Bash(grep:*)",
+      "Bash(git -C /Users/chris.le-guichoux/Sites/dicta remote:*)",
+      "Bash(gh release create:*)",
+      "Bash(gh auth login:*)",
+      "Bash(gh release view:*)",
+      "Bash(npm ls:*)",
+      "Bash(git tag:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run watch:*)",
+      "Bash(gh run view:*)",
+      "Bash(npm version:*)"
     ]
   }
 }

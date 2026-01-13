@@ -71,8 +71,12 @@ function saveUpdateChannel(channel: 'stable' | 'beta'): boolean {
 
 // Set initial channel
 const currentChannel = loadUpdateChannel();
-autoUpdater.channel = currentChannel;
-console.log('[AUTO-UPDATE] Update channel set to:', currentChannel);
+// Map our channel names to electron-updater channel names
+// stable -> latest (electron-builder generates latest-mac.yml by default)
+// beta -> beta
+const electronUpdaterChannel = currentChannel === 'stable' ? 'latest' : 'beta';
+autoUpdater.channel = electronUpdaterChannel;
+console.log('[AUTO-UPDATE] Update channel set to:', currentChannel, '(electron-updater channel:', electronUpdaterChannel + ')');
 
 // Auto-updater event handlers
 autoUpdater.on('checking-for-update', () => {
@@ -500,8 +504,10 @@ app.whenReady().then(() => {
     try {
       const success = saveUpdateChannel(channel);
       if (success) {
-        autoUpdater.channel = channel;
-        console.log('[AUTO-UPDATE] Channel changed to:', channel);
+        // Map our channel names to electron-updater channel names
+        const electronUpdaterChannel = channel === 'stable' ? 'latest' : 'beta';
+        autoUpdater.channel = electronUpdaterChannel;
+        console.log('[AUTO-UPDATE] Channel changed to:', channel, '(electron-updater channel:', electronUpdaterChannel + ')');
         // Check for updates immediately after channel change
         if (!is.dev) {
           setTimeout(() => checkForUpdates(), 1000);
