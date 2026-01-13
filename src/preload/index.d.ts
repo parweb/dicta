@@ -27,6 +27,26 @@ interface CustomAPI {
     save: (theme: unknown) => Promise<{ success: boolean; error?: string }>;
     reset: () => Promise<{ success: boolean; error?: string }>;
   };
+  credentials: {
+    checkEncryptionAvailable: () => Promise<{
+      success: boolean;
+      available: boolean;
+      error?: string;
+    }>;
+    saveApiKey: (apiKey: string) => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+    loadApiKey: () => Promise<{
+      success: boolean;
+      apiKey: string | null;
+      error?: string;
+    }>;
+    deleteApiKey: () => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+  };
 }
 
 declare global {

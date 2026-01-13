@@ -43,6 +43,27 @@ const api = {
       ipcRenderer.invoke('theme:save', theme),
     reset: (): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('theme:reset')
+  },
+  // Credentials management
+  credentials: {
+    checkEncryptionAvailable: (): Promise<{
+      success: boolean;
+      available: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:check-encryption-available'),
+    saveApiKey: (apiKey: string): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:save-api-key', apiKey),
+    loadApiKey: (): Promise<{
+      success: boolean;
+      apiKey: string | null;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:load-api-key'),
+    deleteApiKey: (): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:delete-api-key')
   }
 };
 
