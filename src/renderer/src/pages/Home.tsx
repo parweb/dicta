@@ -169,13 +169,10 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  // Check API key and redirect to settings if missing
+  // Check API key and show banner if missing
   useEffect(() => {
     if (!isApiKeyLoading && !hasApiKey) {
-      // Redirect to Settings > Model tab automatically
-      setCurrentView('settings');
-      setSettingsTab('model');
-      setShowApiKeyBanner(false);
+      setShowApiKeyBanner(true);
     } else {
       setShowApiKeyBanner(false);
     }
