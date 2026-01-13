@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import { Palette, Key } from 'lucide-react';
+import { Palette, Key, Download } from 'lucide-react';
 
 import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
 import ModelSettings from '../components/settings/ModelSettings';
+import UpdateSettings from '../components/settings/UpdateSettings';
 import { useTheme } from '../lib/theme-context';
 import DesignSystem from './DesignSystem';
 
 interface SettingsProps {
-  defaultTab?: 'theme' | 'model';
+  defaultTab?: 'theme' | 'model' | 'updates';
 }
 
 const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
-  const [activeTab, setActiveTab] = useState<'theme' | 'model'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'theme' | 'model' | 'updates'>(defaultTab);
 
   return (
     <div
@@ -155,6 +156,47 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
               <Palette size={16} />
               <span>Thème</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('updates')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                padding: `${spacing.md}px ${spacing.lg}px`,
+                backgroundColor: 'transparent',
+                color:
+                  activeTab === 'updates'
+                    ? colors.text.primary
+                    : colors.text.tertiary,
+                border: 'none',
+                borderBottom:
+                  activeTab === 'updates'
+                    ? `2px solid ${colors.text.primary}`
+                    : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: typography.fontSize.sm,
+                fontWeight:
+                  activeTab === 'updates'
+                    ? typography.fontWeight.medium
+                    : typography.fontWeight.normal,
+                marginBottom: '-1px',
+                transition: 'color 0.15s'
+              }}
+              onMouseEnter={e => {
+                if (activeTab !== 'updates') {
+                  e.currentTarget.style.color = colors.text.secondary;
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== 'updates') {
+                  e.currentTarget.style.color = colors.text.tertiary;
+                }
+              }}
+            >
+              <Download size={16} />
+              <span>Mises à jour</span>
+            </button>
           </div>
         </div>
 
@@ -196,6 +238,8 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
               </div>
             </>
           )}
+
+          {activeTab === 'updates' && <UpdateSettings />}
         </div>
       </div>
     </div>
