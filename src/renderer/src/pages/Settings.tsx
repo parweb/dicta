@@ -82,12 +82,21 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
                 gap: spacing.sm,
                 padding: `${spacing.md}px ${spacing.lg}px`,
                 backgroundColor: 'transparent',
-                color: activeTab === 'model' ? colors.text.primary : colors.text.tertiary,
+                color:
+                  activeTab === 'model'
+                    ? colors.text.primary
+                    : colors.text.tertiary,
                 border: 'none',
-                borderBottom: activeTab === 'model' ? `2px solid ${colors.text.primary}` : '2px solid transparent',
+                borderBottom:
+                  activeTab === 'model'
+                    ? `2px solid ${colors.text.primary}`
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: typography.fontSize.sm,
-                fontWeight: activeTab === 'model' ? typography.fontWeight.medium : typography.fontWeight.normal,
+                fontWeight:
+                  activeTab === 'model'
+                    ? typography.fontWeight.medium
+                    : typography.fontWeight.normal,
                 marginBottom: '-1px',
                 transition: 'color 0.15s'
               }}
@@ -114,12 +123,21 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
                 gap: spacing.sm,
                 padding: `${spacing.md}px ${spacing.lg}px`,
                 backgroundColor: 'transparent',
-                color: activeTab === 'theme' ? colors.text.primary : colors.text.tertiary,
+                color:
+                  activeTab === 'theme'
+                    ? colors.text.primary
+                    : colors.text.tertiary,
                 border: 'none',
-                borderBottom: activeTab === 'theme' ? `2px solid ${colors.text.primary}` : '2px solid transparent',
+                borderBottom:
+                  activeTab === 'theme'
+                    ? `2px solid ${colors.text.primary}`
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: typography.fontSize.sm,
-                fontWeight: activeTab === 'theme' ? typography.fontWeight.medium : typography.fontWeight.normal,
+                fontWeight:
+                  activeTab === 'theme'
+                    ? typography.fontWeight.medium
+                    : typography.fontWeight.normal,
                 marginBottom: '-1px',
                 transition: 'color 0.15s'
               }}
@@ -171,7 +189,8 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
                     marginBottom: spacing['2xl']
                   }}
                 >
-                  Les changements de thème sont appliqués immédiatement ci-dessous
+                  Les changements de thème sont appliqués immédiatement
+                  ci-dessous
                 </p>
                 <DesignSystem />
               </div>

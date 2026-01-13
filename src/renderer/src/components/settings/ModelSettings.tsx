@@ -8,11 +8,7 @@ import { Button } from '../ui/button';
 export default function ModelSettings() {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
-  const {
-    hasApiKey,
-    saveApiKey,
-    deleteApiKey
-  } = useApiKey();
+  const { hasApiKey, saveApiKey, deleteApiKey } = useApiKey();
 
   const [isEditing, setIsEditing] = useState(!hasApiKey);
   const [inputValue, setInputValue] = useState('');

@@ -1,5 +1,12 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
-import { app, BrowserWindow, globalShortcut, ipcMain, safeStorage, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  safeStorage,
+  shell
+} from 'electron';
 import { exec } from 'node:child_process';
 import {
   existsSync,
@@ -60,7 +67,10 @@ function createWindow(): void {
 
     // Charge l'URL de développement ou le fichier HTML en production.
     if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      console.log('[DICTA] Loading dev URL:', process.env['ELECTRON_RENDERER_URL']);
+      console.log(
+        '[DICTA] Loading dev URL:',
+        process.env['ELECTRON_RENDERER_URL']
+      );
       mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
     } else {
       const htmlPath = join(__dirname, '../renderer/index.html');
@@ -87,7 +97,10 @@ app.whenReady().then(() => {
       app.dock.setIcon(iconPath);
       console.log('[DICTA] Icône du dock définie au démarrage');
     } catch (error) {
-      console.error('[DICTA] Erreur lors de la définition de l\'icône du dock:', error);
+      console.error(
+        "[DICTA] Erreur lors de la définition de l'icône du dock:",
+        error
+      );
     }
   }
 
@@ -254,7 +267,11 @@ app.whenReady().then(() => {
       };
 
       writeFileSync(credentialsPath, JSON.stringify(data, null, 2));
-      console.log('API key saved successfully (encrypted:', data.isEncrypted, ')');
+      console.log(
+        'API key saved successfully (encrypted:',
+        data.isEncrypted,
+        ')'
+      );
       return { success: true };
     } catch (error) {
       console.error('Error saving API key:', error);
@@ -278,7 +295,11 @@ app.whenReady().then(() => {
         ? safeStorage.decryptString(buffer)
         : buffer.toString('utf-8');
 
-      console.log('API key loaded successfully (was encrypted:', data.isEncrypted, ')');
+      console.log(
+        'API key loaded successfully (was encrypted:',
+        data.isEncrypted,
+        ')'
+      );
       return { success: true, apiKey };
     } catch (error) {
       console.error('Error loading API key:', error);

@@ -51,7 +51,9 @@ const api = {
       available: boolean;
       error?: string;
     }> => ipcRenderer.invoke('credentials:check-encryption-available'),
-    saveApiKey: (apiKey: string): Promise<{
+    saveApiKey: (
+      apiKey: string
+    ): Promise<{
       success: boolean;
       error?: string;
     }> => ipcRenderer.invoke('credentials:save-api-key', apiKey),

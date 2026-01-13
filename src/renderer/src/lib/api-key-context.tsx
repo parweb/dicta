@@ -108,10 +108,7 @@ export function ApiKeyProvider({ children }: { children: React.ReactNode }) {
           await window.api?.credentials.checkEncryptionAvailable();
         if (encryptionResult?.success) {
           setIsEncryptionAvailable(encryptionResult.available);
-          console.log(
-            'Encryption available:',
-            encryptionResult.available
-          );
+          console.log('Encryption available:', encryptionResult.available);
         }
       } catch (error) {
         console.error('Error checking encryption availability:', error);
