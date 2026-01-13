@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Key, Trash2 } from 'lucide-react';
+import { Key } from 'lucide-react';
 
 import { useApiKey } from '../../lib/api-key-context';
 import { useTheme } from '../../lib/theme-context';
