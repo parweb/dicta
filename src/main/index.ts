@@ -7,6 +7,7 @@ import {
   safeStorage,
   shell
 } from 'electron';
+import { autoUpdater } from 'electron-updater';
 import { exec } from 'node:child_process';
 import {
   existsSync,
@@ -21,6 +22,160 @@ import icon from '../../resources/icon.png?asset';
 
 // Déclaration de mainWindow dans un scope accessible
 let mainWindow: BrowserWindow | null = null;
+
+// Auto-updater configuration
+let updateCheckInterval: NodeJS.Timeout | null = null;
+const UPDATE_CHECK_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+const INITIAL_CHECK_DELAY = 5 * 60 * 1000; // 5 minutes after startup
+
+// Configure autoUpdater
+autoUpdater.autoDownload = true; // Download automatically when update is available
+autoUpdater.autoInstallOnAppQuit = true; // Install on next quit
+autoUpdater.logger = console;
+
+// Update channel management
+const getUpdateConfigPath = () => join(app.getPath('userData'), 'config', 'update.json');
+
+function loadUpdateChannel(): 'stable' | 'beta' {
+  try {
+    const updateConfigPath = getUpdateConfigPath();
+    if (existsSync(updateConfigPath)) {
+      const content = readFileSync(updateConfigPath, 'utf-8');
+      const config = JSON.parse(content);
+      return config.channel === 'beta' ? 'beta' : 'stable';
+    }
+  } catch (error) {
+    console.error('[AUTO-UPDATE] Error loading update channel:', error);
+  }
+  return 'stable'; // Default to stable
+}
+
+function saveUpdateChannel(channel: 'stable' | 'beta'): boolean {
+  try {
+    const configDir = join(app.getPath('userData'), 'config');
+    if (!existsSync(configDir)) {
+      mkdirSync(configDir, { recursive: true });
+    }
+    const updateConfigPath = getUpdateConfigPath();
+    const config = {
+      channel,
+      lastCheck: Date.now()
+    };
+    writeFileSync(updateConfigPath, JSON.stringify(config, null, 2));
+    return true;
+  } catch (error) {
+    console.error('[AUTO-UPDATE] Error saving update channel:', error);
+    return false;
+  }
+}
+
+// Set initial channel
+const currentChannel = loadUpdateChannel();
+autoUpdater.channel = currentChannel;
+console.log('[AUTO-UPDATE] Update channel set to:', currentChannel);
+
+// Auto-updater event handlers
+autoUpdater.on('checking-for-update', () => {
+  console.log('[AUTO-UPDATE] Checking for update...');
+  if (mainWindow) {
+    mainWindow.webContents.send('update:status', {
+      status: 'checking',
+      message: 'Recherche de mises à jour...'
+    });
+  }
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('[AUTO-UPDATE] Update available:', info.version);
+  if (mainWindow) {
+    mainWindow.webContents.send('update:status', {
+      status: 'downloading',
+      message: `Téléchargement v${info.version}...`,
+      version: info.version
+    });
+  }
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  console.log('[AUTO-UPDATE] Update not available. Current version:', info.version);
+  if (mainWindow) {
+    mainWindow.webContents.send('update:status', {
+      status: 'up-to-date',
+      message: 'Application à jour',
+      version: info.version
+    });
+  }
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  const logMessage = `[AUTO-UPDATE] Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`;
+  console.log(logMessage);
+  if (mainWindow) {
+    mainWindow.webContents.send('update:progress', {
+      percent: Math.round(progressObj.percent),
+      bytesPerSecond: progressObj.bytesPerSecond,
+      transferred: progressObj.transferred,
+      total: progressObj.total
+    });
+  }
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('[AUTO-UPDATE] Update downloaded:', info.version);
+  if (mainWindow) {
+    mainWindow.webContents.send('update:status', {
+      status: 'ready',
+      message: `v${info.version} s'installera au redémarrage`,
+      version: info.version
+    });
+  }
+});
+
+autoUpdater.on('error', (err) => {
+  console.error('[AUTO-UPDATE] Error:', err);
+  if (mainWindow) {
+    mainWindow.webContents.send('update:status', {
+      status: 'error',
+      message: 'Erreur de mise à jour',
+      error: err.message
+    });
+  }
+});
+
+// Function to check for updates
+function checkForUpdates() {
+  if (!is.dev) {
+    // Only check for updates in production
+    console.log('[AUTO-UPDATE] Starting update check...');
+    autoUpdater.checkForUpdates().catch(err => {
+      console.error('[AUTO-UPDATE] Error checking for updates:', err);
+    });
+  } else {
+    console.log('[AUTO-UPDATE] Skipping update check in development mode');
+  }
+}
+
+// Schedule periodic update checks
+function startUpdateSchedule() {
+  // Check 5 minutes after startup
+  console.log('[AUTO-UPDATE] Scheduling initial update check in 5 minutes...');
+  setTimeout(() => {
+    checkForUpdates();
+  }, INITIAL_CHECK_DELAY);
+
+  // Then check every 4 hours
+  updateCheckInterval = setInterval(() => {
+    checkForUpdates();
+  }, UPDATE_CHECK_INTERVAL);
+}
+
+// Clean up interval on app quit
+function stopUpdateSchedule() {
+  if (updateCheckInterval) {
+    clearInterval(updateCheckInterval);
+    updateCheckInterval = null;
+  }
+}
 
 function createWindow(): void {
   console.log('[DICTA] Creating window...');
@@ -325,7 +480,75 @@ app.whenReady().then(() => {
     }
   });
 
+  // Update management handlers
+  ipcMain.handle('update:get-current-version', () => {
+    return {
+      success: true,
+      version: app.getVersion(),
+      channel: loadUpdateChannel()
+    };
+  });
+
+  ipcMain.handle('update:get-channel', () => {
+    return {
+      success: true,
+      channel: loadUpdateChannel()
+    };
+  });
+
+  ipcMain.handle('update:set-channel', (_event, channel: 'stable' | 'beta') => {
+    try {
+      const success = saveUpdateChannel(channel);
+      if (success) {
+        autoUpdater.channel = channel;
+        console.log('[AUTO-UPDATE] Channel changed to:', channel);
+        // Check for updates immediately after channel change
+        if (!is.dev) {
+          setTimeout(() => checkForUpdates(), 1000);
+        }
+      }
+      return { success };
+    } catch (error) {
+      console.error('[AUTO-UPDATE] Error setting update channel:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  ipcMain.handle('update:check-now', () => {
+    try {
+      if (!is.dev) {
+        checkForUpdates();
+        return { success: true };
+      } else {
+        return {
+          success: false,
+          error: 'Update checks are disabled in development mode'
+        };
+      }
+    } catch (error) {
+      console.error('[AUTO-UPDATE] Error checking for updates:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  ipcMain.handle('update:get-last-check-time', () => {
+    try {
+      const updateConfigPath = getUpdateConfigPath();
+      if (existsSync(updateConfigPath)) {
+        const content = readFileSync(updateConfigPath, 'utf-8');
+        const config = JSON.parse(content);
+        return { success: true, lastCheck: config.lastCheck || null };
+      }
+      return { success: true, lastCheck: null };
+    } catch (error) {
+      return { success: false, error: String(error), lastCheck: null };
+    }
+  });
+
   createWindow();
+
+  // Start auto-update schedule
+  startUpdateSchedule();
 
   // Enregistrement du raccourci global pour amener l'app au premier plan.
   // Dev: Cmd/Ctrl+Shift+C, Prod: Cmd/Ctrl+Shift+X
@@ -396,6 +619,7 @@ app.on('window-all-closed', () => {
 // Désenregistre tous les raccourcis quand l'application quitte.
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  stopUpdateSchedule();
 });
 
 // Fonction qui simule le collage du contenu du presse-papier.

@@ -66,6 +66,53 @@ const api = {
       success: boolean;
       error?: string;
     }> => ipcRenderer.invoke('credentials:delete-api-key')
+  },
+  // Update management
+  updates: {
+    getCurrentVersion: (): Promise<{
+      success: boolean;
+      version?: string;
+      channel?: 'stable' | 'beta';
+      error?: string;
+    }> => ipcRenderer.invoke('update:get-current-version'),
+    getChannel: (): Promise<{
+      success: boolean;
+      channel?: 'stable' | 'beta';
+      error?: string;
+    }> => ipcRenderer.invoke('update:get-channel'),
+    setChannel: (channel: 'stable' | 'beta'): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('update:set-channel', channel),
+    checkNow: (): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('update:check-now'),
+    getLastCheckTime: (): Promise<{
+      success: boolean;
+      lastCheck?: number | null;
+      error?: string;
+    }> => ipcRenderer.invoke('update:get-last-check-time'),
+    onStatus: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.on('update:status', callback);
+    },
+    onProgress: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.on('update:progress', callback);
+    },
+    removeStatusListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.removeListener('update:status', callback);
+    },
+    removeProgressListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.removeListener('update:progress', callback);
+    }
   }
 };
 
