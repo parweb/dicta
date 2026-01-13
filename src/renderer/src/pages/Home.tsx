@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import HomeContent from '../components/home/HomeContent';
 import ProxyStatusIndicators from '../components/home/ProxyStatusIndicators';
 import Layout from '../components/Layout';
+import { Button } from '../components/ui/button';
 import { useApiKey } from '../lib/api-key-context';
 import { useTheme } from '../lib/theme-context';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
@@ -268,20 +269,16 @@ const HomePage = () => {
               >
                 Ajoutez votre clé OpenAI pour utiliser la transcription vocale
               </p>
-              <button
+              <Button
                 onClick={() => {
                   setCurrentView('settings');
                   setSettingsTab('model');
                   setShowApiKeyBanner(false);
                 }}
-                style={{
-                  ...theme.components.button.base,
-                  fontSize: theme.typography.fontSize.xs,
-                  padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`
-                }}
+                size="sm"
               >
                 Configurer maintenant
-              </button>
+              </Button>
             </div>
           </div>
         </div>
