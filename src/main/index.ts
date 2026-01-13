@@ -328,8 +328,12 @@ app.whenReady().then(() => {
   createWindow();
 
   // Enregistrement du raccourci global pour amener l'app au premier plan.
+  // Dev: Cmd/Ctrl+Shift+C, Prod: Cmd/Ctrl+Shift+X
+  const globalShortcutKey = is.dev ? 'CommandOrControl+Shift+C' : 'CommandOrControl+Shift+X';
+  console.log('[DICTA] Registering global shortcut:', globalShortcutKey);
+
   const shortcutRegistered = globalShortcut.register(
-    'CommandOrControl+Shift+X',
+    globalShortcutKey,
     () => {
       console.log('Global shortcut triggered!');
       if (mainWindow) {
