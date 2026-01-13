@@ -30,7 +30,9 @@
       "Bash(/Applications/dicta.app/Contents/MacOS/dicta:*)",
       "Bash(log show:*)",
       "Bash(npx asar:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(/usr/bin/log show:*)"
     ]
   }
 }
