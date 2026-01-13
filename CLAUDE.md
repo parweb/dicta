@@ -158,15 +158,46 @@ The application follows standard Electron architecture with three distinct proce
 
 ## Environment Variables
 
-- `VITE_OPENAI_API_KEY`: Required for OpenAI transcription API
-- Configure in `.env` (see `.env.example`)
+**DEPRECATED**: The `VITE_OPENAI_API_KEY` environment variable is no longer used.
+
+**NEW**: API keys are now stored securely using Electron's `safeStorage` API:
+- Configure via Settings > Model tab in the application
+- Keys are encrypted using OS-level encryption (Keychain on macOS, DPAPI on Windows, libsecret on Linux)
+- Stored in `userData/config/credentials.json` as encrypted data
+- Migration tool available in Settings for users with existing `.env` files
 
 ## Data Storage
 
 - **History files**: Stored as JSON in `userData/history/` directory
 - Each transcription saved as `{timestamp}.json`
-- Contains: id, text, timestamp
+- Contains: id, text, timestamp, durationMs, audioAmplitudes
 - Loaded on-demand when history sidebar is opened
+
+## Secure Credentials Storage
+
+API keys are managed through Electron's `safeStorage` API:
+
+**IPC Handlers** (`src/main/index.ts`):
+- `credentials:check-encryption-available` - Check if OS encryption is available
+- `credentials:save-api-key` - Encrypt and save API key
+- `credentials:load-api-key` - Load and decrypt API key
+- `credentials:delete-api-key` - Remove stored API key
+
+**Storage Location**: `userData/config/credentials.json`
+- Contains Base64-encoded encrypted buffer
+- Automatically encrypted on save, decrypted on load
+- Falls back to plain text with user warning if encryption unavailable
+
+**UI**: Settings > Model tab
+- Input field for API key (masked by default)
+- Migration tool for `.env` users
+- Encryption status indicator
+- Delete with confirmation
+
+**Context**: `ApiKeyProvider` (`src/renderer/src/lib/api-key-context.tsx`)
+- Provides: `apiKey`, `hasApiKey`, `isLoading`, `isEncryptionAvailable`
+- Methods: `saveApiKey()`, `deleteApiKey()`, `loadApiKey()`
+- Auto-loads on mount and checks encryption availability
 
 ## Important Notes
 
