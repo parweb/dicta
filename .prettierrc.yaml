@@ -7,3 +7,5 @@ semi: true
 requirePragma: false
 proseWrap: preserve
 arrowParens: avoid
+plugins:
+  - prettier-plugin-tailwindcss
