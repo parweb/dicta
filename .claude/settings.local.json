@@ -14,7 +14,17 @@
       "Bash(node migrate-duration.js:*)",
       "Bash(git revert:*)",
       "Bash(__NEW_LINE__ ls -la src/renderer/src/components/statistics/)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(md5:*)",
+      "WebFetch(domain:www.electronjs.org)",
+      "WebFetch(domain:www.electron.build)",
+      "Bash(npm view:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(node:*)",
+      "Bash(ncu)",
+      "Bash(ncu -u:*)",
+      "Bash(electron-vite build:*)"
     ]
   }
 }
