@@ -31,7 +31,6 @@ const HomePage = () => {
     'home' | 'statistics' | 'settings'
   >('home');
   const [settingsTab, setSettingsTab] = useState<'theme' | 'model'>('theme');
-  const [showApiKeyBanner, setShowApiKeyBanner] = useState(false);
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(
     undefined
@@ -177,14 +176,8 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  // Check API key and show banner if missing
-  useEffect(() => {
-    if (!isApiKeyLoading && !hasApiKey) {
-      setShowApiKeyBanner(true);
-    } else {
-      setShowApiKeyBanner(false);
-    }
-  }, [isApiKeyLoading, hasApiKey]);
+  // Calculate whether to show API key banner
+  const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home';
 
   const handleCopyTranscript = useCallback(() => {
     if (transcript) {
@@ -295,7 +288,6 @@ const HomePage = () => {
                     onClick={() => {
                       setCurrentView('settings');
                       setSettingsTab('model');
-                      setShowApiKeyBanner(false);
                     }}
                     size="sm"
                   >
