@@ -3,7 +3,7 @@ import { useTheme } from '../../lib/theme-context';
 
 interface TranscriptionDisplayProps {
   transcript: string;
-  transcriptRef: React.RefObject<HTMLParagraphElement>;
+  transcriptRef: React.RefObject<HTMLParagraphElement | null>;
   slideDirection: 'up' | 'down' | null;
   audioAmplitudes: number[];
   audioDuration?: number;

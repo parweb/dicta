@@ -40,7 +40,7 @@ const HistorySidebar = ({
   const { components, spacing, colors, typography, borderRadius } = theme;
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
   const [searchQuery, setSearchQuery] = useState('');
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Defer the search query to not block the UI while typing

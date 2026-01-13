@@ -86,7 +86,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (result?.success && result.theme) {
         const validation = validateTheme(result.theme);
         if (validation.success) {
-          setBaseConfig(validation.data);
+          setBaseConfig(validation.theme);
           setActivePresetState('custom');
           console.log('Loaded custom theme from file');
         } else {

@@ -7,7 +7,7 @@ import VisualEditor from './VisualEditor';
 
 export default function ThemeConfigurator() {
   const { theme } = useTheme();
-  const { colors, spacing, typography, borderRadius } = theme;
+  const { colors, spacing, typography } = theme;
 
   return (
     <div

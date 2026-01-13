@@ -199,7 +199,9 @@ app.whenReady().then(() => {
           mainWindow.setVisibleOnAllWorkspaces(true, {
             visibleOnFullScreen: true
           });
-          app.dock.show();
+          if (app.dock) {
+            app.dock.show();
+          }
         } else {
           // Sur Windows/Linux, mise en "always on top".
           mainWindow.setAlwaysOnTop(true);
@@ -214,10 +216,12 @@ app.whenReady().then(() => {
 
         // Rétablit les réglages temporaires après un court délai.
         setTimeout(() => {
-          if (process.platform === 'darwin') {
-            mainWindow.setVisibleOnAllWorkspaces(false);
-          } else {
-            mainWindow.setAlwaysOnTop(false);
+          if (mainWindow) {
+            if (process.platform === 'darwin') {
+              mainWindow.setVisibleOnAllWorkspaces(false);
+            } else {
+              mainWindow.setAlwaysOnTop(false);
+            }
           }
         }, 1000);
       }

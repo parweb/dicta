@@ -19,7 +19,7 @@ const DailyTimelineGridChart = ({
   transcriptions
 }: DailyTimelineGridChartProps) => {
   const { theme } = useTheme();
-  const { colors, spacing, typography, borderRadius } = theme;
+  const { colors, spacing, typography } = theme;
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 
   // Aggregate by day with transcriptions

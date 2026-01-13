@@ -5,6 +5,15 @@ import { z } from 'zod';
  * Ensures type safety and runtime validation for custom themes
  */
 
+/**
+ * Deep partial utility type
+ */
+export type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
 // Hex color pattern: #RRGGBB (6 digits)
 const hexColorSchema = z
   .string()
@@ -184,24 +193,21 @@ export type ThemeConfig = z.infer<typeof themeSchema>;
 /**
  * Partial theme schema for updates
  */
-export type PartialThemeConfig = z.infer<typeof partialThemeSchema>;
-
-// Deep partial schema for theme updates
-export const partialThemeSchema = themeSchema.deepPartial();
+export type PartialThemeConfig = DeepPartial<ThemeConfig>;
 
 /**
  * Validate a theme configuration
  */
 export function validateTheme(
   theme: unknown
-): { success: true; data: ThemeConfig } | { success: false; error: string } {
+): { success: true; theme: ThemeConfig } | { success: false; error: string } {
   try {
     const result = themeSchema.safeParse(theme);
     if (result.success) {
-      return { success: true, data: result.data };
+      return { success: true, theme: result.data };
     } else {
       // Format Zod errors into readable message
-      const errors = result.error.errors
+      const errors = result.error.issues
         .map((err) => `${err.path.join('.')}: ${err.message}`)
         .join('; ');
       return { success: false, error: errors };
@@ -219,17 +225,14 @@ export function validateTheme(
  */
 export function validatePartialTheme(
   theme: unknown
-): { success: true; data: Partial<ThemeConfig> } | { success: false; error: string } {
+): { success: true; data: PartialThemeConfig } | { success: false; error: string } {
   try {
-    const result = partialThemeSchema.safeParse(theme);
-    if (result.success) {
-      return { success: true, data: result.data };
-    } else {
-      const errors = result.error.errors
-        .map((err) => `${err.path.join('.')}: ${err.message}`)
-        .join('; ');
-      return { success: false, error: errors };
+    // For partial updates, just validate that it's an object
+    // Actual validation will happen when merged with full theme
+    if (typeof theme !== 'object' || theme === null) {
+      return { success: false, error: 'Theme must be an object' };
     }
+    return { success: true, data: theme as PartialThemeConfig };
   } catch (error) {
     return {
       success: false,

@@ -27,7 +27,7 @@ export default function JsonEditor() {
       if (validation.success) {
         setError(null);
         setIsValid(true);
-        replaceTheme(validation.data);
+        replaceTheme(validation.theme);
         setActivePreset('custom');
       } else {
         setError(validation.error);
