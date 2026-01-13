@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
+import { IpcRendererEvent } from 'electron';
 
 interface CustomAPI {
   send: (channel: string, data?: unknown) => void;
@@ -46,6 +47,44 @@ interface CustomAPI {
       success: boolean;
       error?: string;
     }>;
+  };
+  updates: {
+    getCurrentVersion: () => Promise<{
+      success: boolean;
+      version?: string;
+      channel?: 'stable' | 'beta';
+      error?: string;
+    }>;
+    getChannel: () => Promise<{
+      success: boolean;
+      channel?: 'stable' | 'beta';
+      error?: string;
+    }>;
+    setChannel: (channel: 'stable' | 'beta') => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+    checkNow: () => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+    getLastCheckTime: () => Promise<{
+      success: boolean;
+      lastCheck?: number | null;
+      error?: string;
+    }>;
+    onStatus: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
+    onProgress: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
+    removeStatusListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
+    removeProgressListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
   };
 }
 
