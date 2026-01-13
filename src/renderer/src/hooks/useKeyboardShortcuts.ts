@@ -17,7 +17,7 @@ export function useKeyboardShortcuts({
   stopRecording,
   onNavigate
 }: UseKeyboardShortcutsParams): void {
-  const xKeyIsDown = useRef(false);
+  const cKeyIsDown = useRef(false);
 
   // Global hot key handler (Cmd/Ctrl+Shift+X)
   useEffect(() => {
@@ -31,20 +31,20 @@ export function useKeyboardShortcuts({
     };
   }, [startRecording]);
 
-  // Local keyboard shortcut handler (X key)
+  // Local keyboard shortcut handler (C key)
   useEffect(() => {
     const controller = new AbortController();
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'x' && !xKeyIsDown.current) {
-        xKeyIsDown.current = true;
+      if (e.key === 'c' && !cKeyIsDown.current) {
+        cKeyIsDown.current = true;
         startRecording();
       }
     };
 
     const handleKeyUp = () => {
       if (isRecording) {
-        xKeyIsDown.current = false;
+        cKeyIsDown.current = false;
         stopRecording();
       }
     };
