@@ -6,17 +6,12 @@ import type { ThemeConfig } from './theme-schema';
  * Contains predefined themes: dark (current), light, and high contrast
  */
 
-// Environment-aware accent colors
-// In dev mode, use bright red to differentiate from production
+// Environment-aware colors for dev mode
+// In dev mode, use bright red background to differentiate from production
 const isDev = import.meta.env.DEV;
-const accentPrimary = isDev ? '#ef4444' : '#0ea5e9'; // Red in dev, blue in prod
-const accentLight = isDev ? '#f87171' : '#38bdf8';
-const accentDark = isDev ? '#7f1d1d' : '#0c4a6e';
-const accentRgb = isDev ? '239, 68, 68' : '14, 165, 233';
 
 console.log('[THEME-PRESETS] Environment:', import.meta.env.MODE);
 console.log('[THEME-PRESETS] isDev:', isDev);
-console.log('[THEME-PRESETS] Accent color:', accentPrimary);
 
 /**
  * Dark Theme - Current design system (default)
@@ -24,9 +19,9 @@ console.log('[THEME-PRESETS] Accent color:', accentPrimary);
 export const darkTheme: ThemeConfig = {
   colors: {
     background: {
-      primary: '#0f172a',
-      secondary: '#1e293b',
-      tertiary: '#334155',
+      primary: isDev ? '#2d0a0a' : '#0f172a', // Dark red in dev, slate in prod
+      secondary: isDev ? '#3d1515' : '#1e293b',
+      tertiary: isDev ? '#4d2020' : '#334155',
       overlay: 'rgba(0, 0, 0, 0.5)'
     },
     text: {
@@ -36,18 +31,18 @@ export const darkTheme: ThemeConfig = {
       disabled: '#64748b'
     },
     border: {
-      primary: '#334155',
-      secondary: '#475569',
-      accent: accentPrimary
+      primary: isDev ? '#5d3030' : '#334155',
+      secondary: isDev ? '#6d4040' : '#475569',
+      accent: isDev ? '#ef4444' : '#0ea5e9'
     },
     accent: {
       blue: {
-        primary: accentPrimary,
-        light: accentLight,
-        dark: accentDark,
-        background: `rgba(${accentRgb}, 0.1)`,
-        backgroundHover: `rgba(${accentRgb}, 0.15)`,
-        backgroundActive: `rgba(${accentRgb}, 0.2)`
+        primary: isDev ? '#ef4444' : '#0ea5e9',
+        light: isDev ? '#f87171' : '#38bdf8',
+        dark: isDev ? '#7f1d1d' : '#0c4a6e',
+        background: isDev ? 'rgba(239, 68, 68, 0.1)' : 'rgba(14, 165, 233, 0.1)',
+        backgroundHover: isDev ? 'rgba(239, 68, 68, 0.15)' : 'rgba(14, 165, 233, 0.15)',
+        backgroundActive: isDev ? 'rgba(239, 68, 68, 0.2)' : 'rgba(14, 165, 233, 0.2)'
       },
       green: {
         primary: '#4ade80',
