@@ -22,7 +22,7 @@ function createWindow(): void {
     show: false,
     frame: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: false,
@@ -50,6 +50,11 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Définir l'App User Model ID pour Windows.
   electronApp.setAppUserModelId('com.electron');
+
+  // Définir l'icône du dock pour macOS
+  if (process.platform === 'darwin' && app.dock) {
+    app.dock.setIcon(icon);
+  }
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
