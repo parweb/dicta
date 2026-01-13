@@ -19,12 +19,6 @@ import { join } from 'node:path';
 
 import icon from '../../resources/icon.png?asset';
 
-// Chemin vers l'icône PNG (utilisé pour tout: BrowserWindow et dock)
-// Le .icns configuré dans electron-builder.yml est uniquement pour l'icône du bundle
-const iconPath = is.dev
-  ? join(__dirname, '../../resources/icon.png')
-  : join(process.resourcesPath, 'app.asar.unpacked/resources/icon.png');
-
 // Déclaration de mainWindow dans un scope accessible
 let mainWindow: BrowserWindow | null = null;
 
@@ -37,7 +31,7 @@ function createWindow(): void {
       show: false,
       frame: false,
       autoHideMenuBar: true,
-      icon: iconPath,
+      ...(process.platform === 'linux' ? { icon } : {}),
       webPreferences: {
         preload: join(__dirname, '../preload/index.js'),
         contextIsolation: false,
@@ -88,21 +82,7 @@ app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron');
 
   console.log('[DICTA] App ready, starting...');
-  console.log('[DICTA] iconPath:', iconPath);
   console.log('[DICTA] is.dev:', is.dev);
-
-  // Définir l'icône du dock pour macOS (utilise .icns pour meilleure compatibilité)
-  if (process.platform === 'darwin' && app.dock) {
-    try {
-      app.dock.setIcon(iconPath);
-      console.log('[DICTA] Icône du dock définie au démarrage');
-    } catch (error) {
-      console.error(
-        "[DICTA] Erreur lors de la définition de l'icône du dock:",
-        error
-      );
-    }
-  }
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window);
@@ -350,13 +330,6 @@ app.whenReady().then(() => {
         mainWindow.show();
         mainWindow.focus();
 
-        // Sur macOS, redéfinir l'icône APRÈS les manipulations de fenêtre
-        // car show()/focus() peuvent forcer macOS à rafraîchir l'icône du dock
-        if (process.platform === 'darwin' && app.dock) {
-          app.dock.setIcon(iconPath);
-          console.log('Icône du dock redéfinie après manipulations:', iconPath);
-        }
-
         // Notifie le renderer pour afficher l'interface miniature.
         mainWindow.webContents.send('show-mini-app-hot-key');
 
@@ -365,10 +338,6 @@ app.whenReady().then(() => {
           if (mainWindow) {
             if (process.platform === 'darwin') {
               mainWindow.setVisibleOnAllWorkspaces(false);
-              // Redéfinir l'icône une dernière fois pour être sûr
-              if (app.dock) {
-                app.dock.setIcon(iconPath);
-              }
             } else {
               mainWindow.setAlwaysOnTop(false);
             }
