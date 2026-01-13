@@ -1,6 +1,7 @@
-import { Palette } from 'lucide-react';
+import { Palette, Key } from 'lucide-react';
 
 import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
+import ModelSettings from '../components/settings/ModelSettings';
 import {
   Tabs,
   TabsContent,
@@ -10,7 +11,11 @@ import {
 import { useTheme } from '../lib/theme-context';
 import DesignSystem from './DesignSystem';
 
-const Settings = () => {
+interface SettingsProps {
+  defaultTab?: 'theme' | 'model';
+}
+
+const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
 
@@ -65,12 +70,24 @@ const Settings = () => {
         </div>
 
         {/* Settings Tabs */}
-        <Tabs defaultValue="theme" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList
             style={{
               marginBottom: spacing['2xl']
             }}
           >
+            <TabsTrigger value="model">
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: spacing.sm
+                }}
+              >
+                <Key size={16} />
+                <span>Modèle</span>
+              </div>
+            </TabsTrigger>
             <TabsTrigger value="theme">
               <div
                 style={{
@@ -84,6 +101,10 @@ const Settings = () => {
               </div>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="model">
+            <ModelSettings />
+          </TabsContent>
 
           <TabsContent value="theme">
             {/* Theme Configurator */}
