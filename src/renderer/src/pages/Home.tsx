@@ -43,6 +43,7 @@ const HomePage = () => {
   );
 
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
+  const hasRedirectedRef = useRef(false);
 
   // Use theme and API key hooks
   const { theme } = useTheme();
@@ -176,8 +177,17 @@ const HomePage = () => {
     }
   }, [transcript]);
 
-  // Calculate whether to show API key banner
-  const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home';
+  // Auto-redirect to settings if no API key on initial mount
+  useEffect(() => {
+    if (!isApiKeyLoading && !hasApiKey && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true;
+      setCurrentView('settings');
+      setSettingsTab('model');
+    }
+  }, [isApiKeyLoading, hasApiKey]);
+
+  // Calculate whether to show API key banner (only when user voluntarily returns to home)
+  const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home' && hasRedirectedRef.current;
 
   const handleCopyTranscript = useCallback(() => {
     if (transcript) {
