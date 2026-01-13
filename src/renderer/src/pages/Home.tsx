@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 import HomeContent from '../components/home/HomeContent';
 import ProxyStatusIndicators from '../components/home/ProxyStatusIndicators';
 import Layout from '../components/Layout';
+import { useApiKey } from '../lib/api-key-context';
+import { useTheme } from '../lib/theme-context';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
@@ -19,6 +22,8 @@ const HomePage = () => {
   const [currentView, setCurrentView] = useState<
     'home' | 'statistics' | 'settings'
   >('home');
+  const [settingsTab, setSettingsTab] = useState<'theme' | 'model'>('theme');
+  const [showApiKeyBanner, setShowApiKeyBanner] = useState(false);
   const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
   const [audioDuration, setAudioDuration] = useState<number | undefined>(
     undefined
@@ -31,6 +36,10 @@ const HomePage = () => {
   );
 
   const transcriptRef = useRef<HTMLParagraphElement | null>(null);
+
+  // Use theme and API key hooks
+  const { theme } = useTheme();
+  const { apiKey, hasApiKey, isLoading: isApiKeyLoading } = useApiKey();
 
   // Use custom hooks
   const {
@@ -49,7 +58,7 @@ const HomePage = () => {
   } = useTranscriptionNavigation();
 
   const { transcribeAudio, proxyStatuses, isLoading, analyzeAudio } =
-    useTranscriptionAPI(reloadTranscriptions);
+    useTranscriptionAPI(apiKey, reloadTranscriptions);
 
   // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
@@ -160,6 +169,15 @@ const HomePage = () => {
     }
   }, [transcript]);
 
+  // Check API key and show banner if missing
+  useEffect(() => {
+    if (!isApiKeyLoading && !hasApiKey) {
+      setShowApiKeyBanner(true);
+    } else {
+      setShowApiKeyBanner(false);
+    }
+  }, [isApiKeyLoading, hasApiKey]);
+
   const handleCopyTranscript = useCallback(() => {
     if (transcript) {
       navigator.clipboard.writeText(transcript);
@@ -206,11 +224,86 @@ const HomePage = () => {
     >
       <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
 
+      {/* API Key Missing Banner */}
+      {showApiKeyBanner && currentView === 'home' && (
+        <div
+          style={{
+            position: 'absolute',
+            top: theme.spacing['4xl'],
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            ...theme.components.card.base,
+            padding: theme.spacing.md,
+            backgroundColor: theme.colors.accent.yellow + '20',
+            borderLeft: `4px solid ${theme.colors.accent.yellow}`,
+            maxWidth: '500px',
+            width: 'calc(100% - 32px)'
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'start',
+              gap: theme.spacing.sm
+            }}
+          >
+            <AlertCircle size={18} color={theme.colors.accent.yellow} />
+            <div style={{ flex: 1 }}>
+              <p
+                style={{
+                  fontSize: theme.typography.fontSize.sm,
+                  color: theme.colors.text.primary,
+                  marginBottom: theme.spacing.xs
+                }}
+              >
+                Clé API non configurée
+              </p>
+              <p
+                style={{
+                  fontSize: theme.typography.fontSize.xs,
+                  color: theme.colors.text.tertiary,
+                  marginBottom: theme.spacing.sm
+                }}
+              >
+                Ajoutez votre clé OpenAI pour utiliser la transcription vocale
+              </p>
+              <button
+                onClick={() => {
+                  setCurrentView('settings');
+                  setSettingsTab('model');
+                  setShowApiKeyBanner(false);
+                }}
+                style={{
+                  ...theme.components.button.base,
+                  fontSize: theme.typography.fontSize.xs,
+                  padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`
+                }}
+              >
+                Configurer maintenant
+              </button>
+            </div>
+            <button
+              onClick={() => setShowApiKeyBanner(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: theme.colors.text.tertiary,
+                fontSize: theme.typography.fontSize.xs
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading...</div>}>
         {currentView === 'statistics' ? (
           <Statistics />
         ) : currentView === 'settings' ? (
-          <Settings />
+          <Settings defaultTab={settingsTab} />
         ) : (
           <HomeContent
             isRecording={isRecording}
