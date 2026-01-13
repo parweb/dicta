@@ -46,11 +46,13 @@ function createWindow(): void {
       mainWindow?.show();
     });
 
-    // Configure session to allow Origin header for CORS proxies
+    // Configure session to inject Origin header for CORS proxies
+    // Force localhost origin for both dev and prod to satisfy CORS proxy requirements
     mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
       { urls: ['https://proxy.corsfix.com/*', 'https://corsproxy.io/*'] },
       (details, callback) => {
-        details.requestHeaders['Origin'] = 'https://dicta.app';
+        console.log('[MAIN] Injecting Origin header for:', details.url);
+        details.requestHeaders['Origin'] = 'http://localhost:5173';
         callback({ requestHeaders: details.requestHeaders });
       }
     );
