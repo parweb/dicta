@@ -1,13 +1,8 @@
+import { useState } from 'react';
 import { Palette, Key } from 'lucide-react';
 
 import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
 import ModelSettings from '../components/settings/ModelSettings';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
-} from '../components/ui/tabs';
 import { useTheme } from '../lib/theme-context';
 import DesignSystem from './DesignSystem';
 
@@ -18,6 +13,7 @@ interface SettingsProps {
 const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
+  const [activeTab, setActiveTab] = useState<'theme' | 'model'>(defaultTab);
 
   return (
     <div
@@ -69,75 +65,119 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
           </p>
         </div>
 
-        {/* Settings Tabs */}
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList
+        {/* Custom Tabs */}
+        <div style={{ marginBottom: spacing['3xl'] }}>
+          <div
             style={{
-              marginBottom: spacing['2xl']
+              display: 'flex',
+              gap: spacing.xs,
+              borderBottom: `1px solid ${colors.border.primary}`
             }}
           >
-            <TabsTrigger value="model">
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: spacing.sm
-                }}
-              >
-                <Key size={16} />
-                <span>Modèle</span>
+            <button
+              onClick={() => setActiveTab('model')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                padding: `${spacing.md}px ${spacing.lg}px`,
+                backgroundColor: 'transparent',
+                color: activeTab === 'model' ? colors.text.primary : colors.text.tertiary,
+                border: 'none',
+                borderBottom: activeTab === 'model' ? `2px solid ${colors.text.primary}` : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: typography.fontSize.sm,
+                fontWeight: activeTab === 'model' ? typography.fontWeight.medium : typography.fontWeight.normal,
+                marginBottom: '-1px',
+                transition: 'color 0.15s'
+              }}
+              onMouseEnter={e => {
+                if (activeTab !== 'model') {
+                  e.currentTarget.style.color = colors.text.secondary;
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== 'model') {
+                  e.currentTarget.style.color = colors.text.tertiary;
+                }
+              }}
+            >
+              <Key size={16} />
+              <span>Modèle</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('theme')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                padding: `${spacing.md}px ${spacing.lg}px`,
+                backgroundColor: 'transparent',
+                color: activeTab === 'theme' ? colors.text.primary : colors.text.tertiary,
+                border: 'none',
+                borderBottom: activeTab === 'theme' ? `2px solid ${colors.text.primary}` : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: typography.fontSize.sm,
+                fontWeight: activeTab === 'theme' ? typography.fontWeight.medium : typography.fontWeight.normal,
+                marginBottom: '-1px',
+                transition: 'color 0.15s'
+              }}
+              onMouseEnter={e => {
+                if (activeTab !== 'theme') {
+                  e.currentTarget.style.color = colors.text.secondary;
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== 'theme') {
+                  e.currentTarget.style.color = colors.text.tertiary;
+                }
+              }}
+            >
+              <Palette size={16} />
+              <span>Thème</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div style={{ paddingTop: spacing.md }}>
+          {activeTab === 'model' && <ModelSettings />}
+
+          {activeTab === 'theme' && (
+            <>
+              {/* Theme Configurator */}
+              <div style={{ marginBottom: spacing['4xl'] }}>
+                <ThemeConfigurator />
               </div>
-            </TabsTrigger>
-            <TabsTrigger value="theme">
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: spacing.sm
-                }}
-              >
-                <Palette size={16} />
-                <span>Thème</span>
+
+              {/* Live Preview */}
+              <div style={{ marginBottom: spacing['4xl'] }}>
+                <h2
+                  style={{
+                    fontSize: typography.fontSize.xl,
+                    fontWeight: typography.fontWeight.bold,
+                    color: colors.text.primary,
+                    marginBottom: spacing.sm
+                  }}
+                >
+                  Aperçu en Direct
+                </h2>
+                <p
+                  style={{
+                    fontSize: typography.fontSize.base,
+                    color: colors.text.tertiary,
+                    lineHeight: typography.lineHeight.relaxed,
+                    marginBottom: spacing['2xl']
+                  }}
+                >
+                  Les changements de thème sont appliqués immédiatement ci-dessous
+                </p>
+                <DesignSystem />
               </div>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="model">
-            <ModelSettings />
-          </TabsContent>
-
-          <TabsContent value="theme">
-            {/* Theme Configurator */}
-            <div style={{ marginBottom: spacing['4xl'] }}>
-              <ThemeConfigurator />
-            </div>
-
-            {/* Live Preview */}
-            <div style={{ marginBottom: spacing['4xl'] }}>
-              <h2
-                style={{
-                  fontSize: typography.fontSize.xl,
-                  fontWeight: typography.fontWeight.bold,
-                  color: colors.text.primary,
-                  marginBottom: spacing.sm
-                }}
-              >
-                Aperçu en Direct
-              </h2>
-              <p
-                style={{
-                  fontSize: typography.fontSize.base,
-                  color: colors.text.tertiary,
-                  lineHeight: typography.lineHeight.relaxed,
-                  marginBottom: spacing['2xl']
-                }}
-              >
-                Les changements de thème sont appliqués immédiatement ci-dessous
-              </p>
-              <DesignSystem />
-            </div>
-          </TabsContent>
-        </Tabs>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
