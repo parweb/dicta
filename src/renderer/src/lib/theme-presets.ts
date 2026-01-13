@@ -6,6 +6,18 @@ import type { ThemeConfig } from './theme-schema';
  * Contains predefined themes: dark (current), light, and high contrast
  */
 
+// Environment-aware accent colors
+// In dev mode, use bright red to differentiate from production
+const isDev = import.meta.env.DEV;
+const accentPrimary = isDev ? '#ef4444' : '#0ea5e9'; // Red in dev, blue in prod
+const accentLight = isDev ? '#f87171' : '#38bdf8';
+const accentDark = isDev ? '#7f1d1d' : '#0c4a6e';
+const accentRgb = isDev ? '239, 68, 68' : '14, 165, 233';
+
+console.log('[THEME-PRESETS] Environment:', import.meta.env.MODE);
+console.log('[THEME-PRESETS] isDev:', isDev);
+console.log('[THEME-PRESETS] Accent color:', accentPrimary);
+
 /**
  * Dark Theme - Current design system (default)
  */
@@ -26,16 +38,16 @@ export const darkTheme: ThemeConfig = {
     border: {
       primary: '#334155',
       secondary: '#475569',
-      accent: '#0ea5e9'
+      accent: accentPrimary
     },
     accent: {
       blue: {
-        primary: '#0ea5e9',
-        light: '#38bdf8',
-        dark: '#0c4a6e',
-        background: 'rgba(14, 165, 233, 0.1)',
-        backgroundHover: 'rgba(14, 165, 233, 0.15)',
-        backgroundActive: 'rgba(14, 165, 233, 0.2)'
+        primary: accentPrimary,
+        light: accentLight,
+        dark: accentDark,
+        background: `rgba(${accentRgb}, 0.1)`,
+        backgroundHover: `rgba(${accentRgb}, 0.15)`,
+        backgroundActive: `rgba(${accentRgb}, 0.2)`
       },
       green: {
         primary: '#4ade80',

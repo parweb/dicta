@@ -11,12 +11,17 @@
 // In dev mode, use bright red accent to differentiate from production
 const isDev = import.meta.env.DEV;
 
+console.log('[DESIGN-SYSTEM] import.meta.env.DEV:', isDev);
+console.log('[DESIGN-SYSTEM] import.meta.env.MODE:', import.meta.env.MODE);
+
 const accentColor = {
   primary: isDev ? '#ef4444' : '#0ea5e9', // Red in dev, blue in prod
   light: isDev ? '#f87171' : '#38bdf8',
   dark: isDev ? '#7f1d1d' : '#0c4a6e',
   rgb: isDev ? '239, 68, 68' : '14, 165, 233'
 };
+
+console.log('[DESIGN-SYSTEM] accentColor.primary:', accentColor.primary);
 
 // =============================================================================
 // COLORS
