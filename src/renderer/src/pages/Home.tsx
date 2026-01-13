@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 
 import HomeContent from '../components/home/HomeContent';
 import ProxyStatusIndicators from '../components/home/ProxyStatusIndicators';
@@ -8,8 +8,10 @@ import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '../hooks/useTranscriptionNavigation';
 import type { Transcription } from '../lib/history';
-import Settings from './Settings';
-import Statistics from './Statistics';
+
+// Lazy load Statistics and Settings pages to reduce initial bundle size
+const Statistics = lazy(() => import('./Statistics'));
+const Settings = lazy(() => import('./Settings'));
 
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
@@ -204,27 +206,29 @@ const HomePage = () => {
     >
       <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
 
-      {currentView === 'statistics' ? (
-        <Statistics />
-      ) : currentView === 'settings' ? (
-        <Settings />
-      ) : (
-        <HomeContent
-          isRecording={isRecording}
-          isLoading={isLoading}
-          transcript={transcript}
-          transcriptRef={transcriptRef}
-          slideDirection={slideDirection}
-          audioAmplitudes={audioAmplitudes}
-          audioDuration={audioDuration}
-          startRecording={startRecording}
-          stopRecording={stopRecording}
-          onCopyTranscript={handleCopyTranscript}
-          transcriptionError={transcriptionError}
-          failedAudioBlob={failedAudioBlob}
-          onRetry={retryTranscription}
-        />
-      )}
+      <Suspense fallback={<div className="flex items-center justify-center h-full text-muted-foreground">Loading...</div>}>
+        {currentView === 'statistics' ? (
+          <Statistics />
+        ) : currentView === 'settings' ? (
+          <Settings />
+        ) : (
+          <HomeContent
+            isRecording={isRecording}
+            isLoading={isLoading}
+            transcript={transcript}
+            transcriptRef={transcriptRef}
+            slideDirection={slideDirection}
+            audioAmplitudes={audioAmplitudes}
+            audioDuration={audioDuration}
+            startRecording={startRecording}
+            stopRecording={stopRecording}
+            onCopyTranscript={handleCopyTranscript}
+            transcriptionError={transcriptionError}
+            failedAudioBlob={failedAudioBlob}
+            onRetry={retryTranscription}
+          />
+        )}
+      </Suspense>
     </Layout>
   );
 };
