@@ -20,6 +20,19 @@ export default defineConfig({
         '@': resolve('src/renderer/src')
       }
     },
-    plugins: [react()]
+    plugins: [react()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-charts': ['recharts'],
+            'vendor-date': ['date-fns']
+          }
+        }
+      },
+      minify: 'esbuild',
+      target: 'esnext'
+    }
   }
 });
