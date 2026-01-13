@@ -190,7 +190,8 @@ export function useTranscriptionAPI(
           const response = await fetch(proxy.url, {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${apiKey}`
+              Authorization: `Bearer ${apiKey}`,
+              Origin: 'https://dicta.app'
             },
             body: formData
           });
