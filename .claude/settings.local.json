@@ -24,7 +24,12 @@
       "Bash(node:*)",
       "Bash(ncu)",
       "Bash(ncu -u:*)",
-      "Bash(electron-vite build:*)"
+      "Bash(electron-vite build:*)",
+      "Bash(hdiutil attach:*)",
+      "Bash(pkill:*)",
+      "Bash(/Applications/dicta.app/Contents/MacOS/dicta:*)",
+      "Bash(log show:*)",
+      "Bash(npx asar:*)"
     ]
   }
 }

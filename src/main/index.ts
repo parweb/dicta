@@ -1,5 +1,5 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils';
-import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, safeStorage, shell } from 'electron';
 import { exec } from 'node:child_process';
 import {
   existsSync,
@@ -12,38 +12,64 @@ import { join } from 'node:path';
 
 import icon from '../../resources/icon.png?asset';
 
+// Chemin vers l'icône PNG (utilisé pour tout: BrowserWindow et dock)
+// Le .icns configuré dans electron-builder.yml est uniquement pour l'icône du bundle
+const iconPath = is.dev
+  ? join(__dirname, '../../resources/icon.png')
+  : join(process.resourcesPath, 'app.asar.unpacked/resources/icon.png');
+
 // Déclaration de mainWindow dans un scope accessible
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
-  mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
-    show: false,
-    frame: false,
-    autoHideMenuBar: true,
-    icon,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: false,
-      sandbox: false
+  console.log('[DICTA] Creating window...');
+  try {
+    mainWindow = new BrowserWindow({
+      width: 900,
+      height: 670,
+      show: false,
+      frame: false,
+      autoHideMenuBar: true,
+      icon: iconPath,
+      webPreferences: {
+        preload: join(__dirname, '../preload/index.js'),
+        contextIsolation: false,
+        sandbox: false
+      }
+    });
+
+    console.log('[DICTA] Window created successfully');
+
+    mainWindow.on('ready-to-show', () => {
+      console.log('[DICTA] Window ready to show');
+      mainWindow?.show();
+    });
+
+    // Open DevTools with Cmd+Alt+I (even in production for debugging)
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (input.meta && input.alt && input.key.toLowerCase() === 'i') {
+        mainWindow?.webContents.toggleDevTools();
+        event.preventDefault();
+      }
+    });
+
+    mainWindow.webContents.setWindowOpenHandler(details => {
+      shell.openExternal(details.url);
+      return { action: 'deny' };
+    });
+
+    // Charge l'URL de développement ou le fichier HTML en production.
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+      console.log('[DICTA] Loading dev URL:', process.env['ELECTRON_RENDERER_URL']);
+      mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+    } else {
+      const htmlPath = join(__dirname, '../renderer/index.html');
+      console.log('[DICTA] Loading HTML file:', htmlPath);
+      mainWindow.loadFile(htmlPath);
     }
-  });
-
-  mainWindow.on('ready-to-show', () => {
-    mainWindow?.show();
-  });
-
-  mainWindow.webContents.setWindowOpenHandler(details => {
-    shell.openExternal(details.url);
-    return { action: 'deny' };
-  });
-
-  // Charge l'URL de développement ou le fichier HTML en production.
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
-  } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+  } catch (error) {
+    console.error('[DICTA] Error creating window:', error);
+    throw error;
   }
 }
 
@@ -51,9 +77,18 @@ app.whenReady().then(() => {
   // Définir l'App User Model ID pour Windows.
   electronApp.setAppUserModelId('com.electron');
 
-  // Définir l'icône du dock pour macOS
+  console.log('[DICTA] App ready, starting...');
+  console.log('[DICTA] iconPath:', iconPath);
+  console.log('[DICTA] is.dev:', is.dev);
+
+  // Définir l'icône du dock pour macOS (utilise .icns pour meilleure compatibilité)
   if (process.platform === 'darwin' && app.dock) {
-    app.dock.setIcon(icon);
+    try {
+      app.dock.setIcon(iconPath);
+      console.log('[DICTA] Icône du dock définie au démarrage');
+    } catch (error) {
+      console.error('[DICTA] Erreur lors de la définition de l\'icône du dock:', error);
+    }
   }
 
   app.on('browser-window-created', (_, window) => {
@@ -136,6 +171,7 @@ app.whenReady().then(() => {
   // Theme configuration handlers
   const configDir = join(app.getPath('userData'), 'config');
   const themeConfigPath = join(configDir, 'design-system.json');
+  const credentialsPath = join(configDir, 'credentials.json');
 
   // Load theme configuration
   ipcMain.handle('theme:load', () => {
@@ -180,6 +216,91 @@ app.whenReady().then(() => {
     }
   });
 
+  // Credentials management handlers
+  // Check if encryption is available
+  ipcMain.handle('credentials:check-encryption-available', () => {
+    try {
+      return {
+        success: true,
+        available: safeStorage.isEncryptionAvailable()
+      };
+    } catch (error) {
+      console.error('Error checking encryption availability:', error);
+      return {
+        success: false,
+        available: false,
+        error: String(error)
+      };
+    }
+  });
+
+  // Save API key (encrypted)
+  ipcMain.handle('credentials:save-api-key', (_event, apiKey: string) => {
+    try {
+      if (!existsSync(configDir)) {
+        mkdirSync(configDir, { recursive: true });
+      }
+
+      // Encrypt the API key
+      const encrypted = safeStorage.isEncryptionAvailable()
+        ? safeStorage.encryptString(apiKey)
+        : Buffer.from(apiKey, 'utf-8'); // Fallback (warn user in UI)
+
+      // Store as Base64 string
+      const data = {
+        encrypted: encrypted.toString('base64'),
+        isEncrypted: safeStorage.isEncryptionAvailable(),
+        timestamp: Date.now()
+      };
+
+      writeFileSync(credentialsPath, JSON.stringify(data, null, 2));
+      console.log('API key saved successfully (encrypted:', data.isEncrypted, ')');
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving API key:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  // Load API key (decrypted)
+  ipcMain.handle('credentials:load-api-key', () => {
+    try {
+      if (!existsSync(credentialsPath)) {
+        return { success: true, apiKey: null };
+      }
+
+      const content = readFileSync(credentialsPath, 'utf-8');
+      const data = JSON.parse(content);
+
+      // Decrypt the API key
+      const buffer = Buffer.from(data.encrypted, 'base64');
+      const apiKey = data.isEncrypted
+        ? safeStorage.decryptString(buffer)
+        : buffer.toString('utf-8');
+
+      console.log('API key loaded successfully (was encrypted:', data.isEncrypted, ')');
+      return { success: true, apiKey };
+    } catch (error) {
+      console.error('Error loading API key:', error);
+      return { success: false, error: String(error), apiKey: null };
+    }
+  });
+
+  // Delete API key
+  ipcMain.handle('credentials:delete-api-key', () => {
+    try {
+      if (existsSync(credentialsPath)) {
+        const fs = require('fs');
+        fs.unlinkSync(credentialsPath);
+        console.log('API key deleted successfully');
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
   createWindow();
 
   // Enregistrement du raccourci global pour amener l'app au premier plan.
@@ -199,9 +320,6 @@ app.whenReady().then(() => {
           mainWindow.setVisibleOnAllWorkspaces(true, {
             visibleOnFullScreen: true
           });
-          if (app.dock) {
-            app.dock.show();
-          }
         } else {
           // Sur Windows/Linux, mise en "always on top".
           mainWindow.setAlwaysOnTop(true);
@@ -211,6 +329,13 @@ app.whenReady().then(() => {
         mainWindow.show();
         mainWindow.focus();
 
+        // Sur macOS, redéfinir l'icône APRÈS les manipulations de fenêtre
+        // car show()/focus() peuvent forcer macOS à rafraîchir l'icône du dock
+        if (process.platform === 'darwin' && app.dock) {
+          app.dock.setIcon(iconPath);
+          console.log('Icône du dock redéfinie après manipulations:', iconPath);
+        }
+
         // Notifie le renderer pour afficher l'interface miniature.
         mainWindow.webContents.send('show-mini-app-hot-key');
 
@@ -219,6 +344,10 @@ app.whenReady().then(() => {
           if (mainWindow) {
             if (process.platform === 'darwin') {
               mainWindow.setVisibleOnAllWorkspaces(false);
+              // Redéfinir l'icône une dernière fois pour être sûr
+              if (app.dock) {
+                app.dock.setIcon(iconPath);
+              }
             } else {
               mainWindow.setAlwaysOnTop(false);
             }
