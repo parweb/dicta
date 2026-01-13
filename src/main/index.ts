@@ -230,31 +230,36 @@ app.whenReady().then(() => {
   // Save API key (encrypted)
   ipcMain.handle('credentials:save-api-key', (_event, apiKey: string) => {
     try {
+      console.log('[CREDENTIALS] Saving API key, length:', apiKey?.length);
+      console.log('[CREDENTIALS] API key starts with:', apiKey?.substring(0, 7));
+
       if (!existsSync(configDir)) {
         mkdirSync(configDir, { recursive: true });
       }
 
       // Encrypt the API key
-      const encrypted = safeStorage.isEncryptionAvailable()
+      const isEncryptionAvailable = safeStorage.isEncryptionAvailable();
+      console.log('[CREDENTIALS] Encryption available:', isEncryptionAvailable);
+
+      const encrypted = isEncryptionAvailable
         ? safeStorage.encryptString(apiKey)
         : Buffer.from(apiKey, 'utf-8'); // Fallback (warn user in UI)
+
+      console.log('[CREDENTIALS] Encrypted buffer length:', encrypted.length);
 
       // Store as Base64 string
       const data = {
         encrypted: encrypted.toString('base64'),
-        isEncrypted: safeStorage.isEncryptionAvailable(),
+        isEncrypted: isEncryptionAvailable,
         timestamp: Date.now()
       };
 
       writeFileSync(credentialsPath, JSON.stringify(data, null, 2));
-      console.log(
-        'API key saved successfully (encrypted:',
-        data.isEncrypted,
-        ')'
-      );
+      console.log('[CREDENTIALS] API key saved successfully to:', credentialsPath);
+      console.log('[CREDENTIALS] Data isEncrypted:', data.isEncrypted);
       return { success: true };
     } catch (error) {
-      console.error('Error saving API key:', error);
+      console.error('[CREDENTIALS] Error saving API key:', error);
       return { success: false, error: String(error) };
     }
   });
@@ -262,27 +267,34 @@ app.whenReady().then(() => {
   // Load API key (decrypted)
   ipcMain.handle('credentials:load-api-key', () => {
     try {
+      console.log('[CREDENTIALS] Loading API key from:', credentialsPath);
+
       if (!existsSync(credentialsPath)) {
+        console.log('[CREDENTIALS] No credentials file found');
         return { success: true, apiKey: null };
       }
 
       const content = readFileSync(credentialsPath, 'utf-8');
+      console.log('[CREDENTIALS] Read credentials file, length:', content.length);
+
       const data = JSON.parse(content);
+      console.log('[CREDENTIALS] Parsed data, isEncrypted:', data.isEncrypted);
+      console.log('[CREDENTIALS] Encrypted base64 length:', data.encrypted?.length);
 
       // Decrypt the API key
       const buffer = Buffer.from(data.encrypted, 'base64');
+      console.log('[CREDENTIALS] Buffer from base64, length:', buffer.length);
+
       const apiKey = data.isEncrypted
         ? safeStorage.decryptString(buffer)
         : buffer.toString('utf-8');
 
-      console.log(
-        'API key loaded successfully (was encrypted:',
-        data.isEncrypted,
-        ')'
-      );
+      console.log('[CREDENTIALS] Decrypted API key length:', apiKey?.length);
+      console.log('[CREDENTIALS] Decrypted API key starts with:', apiKey?.substring(0, 7));
+
       return { success: true, apiKey };
     } catch (error) {
-      console.error('Error loading API key:', error);
+      console.error('[CREDENTIALS] Error loading API key:', error);
       return { success: false, error: String(error), apiKey: null };
     }
   });

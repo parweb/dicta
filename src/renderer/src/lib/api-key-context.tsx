@@ -46,15 +46,21 @@ export function ApiKeyProvider({ children }: { children: React.ReactNode }) {
   const loadApiKey = useCallback(async () => {
     setIsLoading(true);
     try {
+      console.log('[API-KEY-CONTEXT] Loading API key...');
       const result = await window.api?.credentials.loadApiKey();
+      console.log('[API-KEY-CONTEXT] Load result:', result);
       if (result?.success) {
         setApiKey(result.apiKey);
-        console.log('API key loaded:', result.apiKey ? 'present' : 'not found');
+        console.log('[API-KEY-CONTEXT] API key loaded:', result.apiKey ? 'present' : 'not found');
+        if (result.apiKey) {
+          console.log('[API-KEY-CONTEXT] API key length:', result.apiKey.length);
+          console.log('[API-KEY-CONTEXT] API key starts with:', result.apiKey.substring(0, 7));
+        }
       } else {
-        console.error('Failed to load API key:', result?.error);
+        console.error('[API-KEY-CONTEXT] Failed to load API key:', result?.error);
       }
     } catch (error) {
-      console.error('Error loading API key:', error);
+      console.error('[API-KEY-CONTEXT] Error loading API key:', error);
     } finally {
       setIsLoading(false);
     }

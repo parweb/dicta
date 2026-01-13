@@ -148,8 +148,15 @@ export function useTranscriptionAPI(
       durationMs?: number,
       audioAmplitudes?: number[]
     ): Promise<TranscriptionResult> => {
+      console.log('[TRANSCRIPTION] Starting transcription...');
+      console.log('[TRANSCRIPTION] API key present:', !!apiKey);
+      console.log('[TRANSCRIPTION] API key length:', apiKey?.length);
+      console.log('[TRANSCRIPTION] API key starts with:', apiKey?.substring(0, 7));
+      console.log('[TRANSCRIPTION] Blob size:', blob.size, 'bytes');
+      console.log('[TRANSCRIPTION] Blob type:', blob.type);
+
       if (!apiKey) {
-        console.error('API key is not configured');
+        console.error('[TRANSCRIPTION] API key is not configured');
         return {
           error:
             'Clé API non configurée. Veuillez ajouter votre clé OpenAI dans les paramètres.'
@@ -161,6 +168,7 @@ export function useTranscriptionAPI(
       const formData = new FormData();
       formData.append('file', blob, 'recording.webm');
       formData.append('model', 'gpt-4o-transcribe');
+      console.log('[TRANSCRIPTION] FormData prepared with model: gpt-4o-transcribe');
 
       // Reset proxy statuses
       setProxyStatuses(
@@ -175,6 +183,10 @@ export function useTranscriptionAPI(
         proxy: ProxyConfig
       ): Promise<TranscriptionResponse> => {
         try {
+          console.log('[TRANSCRIPTION] Fetching with proxy:', proxy.name);
+          console.log('[TRANSCRIPTION] Proxy URL:', proxy.url);
+          console.log('[TRANSCRIPTION] Authorization header starts with:', `Bearer ${apiKey}`.substring(0, 17));
+
           const response = await fetch(proxy.url, {
             method: 'POST',
             headers: {
@@ -183,8 +195,12 @@ export function useTranscriptionAPI(
             body: formData
           });
 
+          console.log('[TRANSCRIPTION] Response status:', response.status, response.statusText);
+          console.log('[TRANSCRIPTION] Response ok:', response.ok);
+
           if (!response.ok) {
             const data = await response.json().catch(() => ({}));
+            console.error('[TRANSCRIPTION] Error response data:', data);
             setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
             throw new Error(
               data.error?.message || `Proxy error: ${proxy.name}`
@@ -192,9 +208,11 @@ export function useTranscriptionAPI(
           }
 
           const data: TranscriptionResponse = await response.json();
+          console.log('[TRANSCRIPTION] Success! Transcription length:', data.text?.length);
           setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'success' }));
           return data;
         } catch (error) {
+          console.error('[TRANSCRIPTION] Proxy error:', proxy.name, error);
           setProxyStatuses(prev => ({ ...prev, [proxy.name]: 'error' }));
           throw error;
         }

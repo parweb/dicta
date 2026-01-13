@@ -70,6 +70,11 @@ const HomePage = () => {
 
   // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
+    console.log('[HOME] ========== STARTING RECORDING ==========');
+    console.log('[HOME] API key present:', !!apiKey);
+    console.log('[HOME] API key length:', apiKey?.length);
+    console.log('[HOME] Has API key:', hasApiKey);
+
     // Switch to home view and close sidebar when starting recording
     setCurrentView('home');
     setIsHistoryOpen(false);
@@ -78,13 +83,18 @@ const HomePage = () => {
     setFailedAudioBlob(undefined);
 
     await startAudioRecording(async audioBlob => {
+      console.log('[HOME] Audio recorded, blob size:', audioBlob.size, 'type:', audioBlob.type);
+
       // Analyze audio
       const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
+      console.log('[HOME] Audio analyzed, duration:', durationMs, 'ms');
       setAudioDuration(durationMs);
       setAudioAmplitudes(amplitudes);
 
       // Transcribe and get the result
+      console.log('[HOME] Starting transcription with API key length:', apiKey?.length);
       const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
+      console.log('[HOME] Transcription result:', result);
       if (result.text) {
         setTranscript(result.text);
         setTranscriptionError(undefined);
