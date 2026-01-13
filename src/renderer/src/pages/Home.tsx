@@ -266,22 +266,23 @@ const HomePage = () => {
                   marginBottom: theme.spacing.sm
                 }}
               >
-                Ajoutez votre clé OpenAI pour utiliser la transcription vocale
+                Ajoutez votre clé OpenAI dans les{' '}
+                <a
+                  onClick={() => {
+                    setCurrentView('settings');
+                    setSettingsTab('model');
+                    setShowApiKeyBanner(false);
+                  }}
+                  style={{
+                    color: theme.colors.accent.blue,
+                    textDecoration: 'underline',
+                    cursor: 'pointer'
+                  }}
+                >
+                  paramètres
+                </a>{' '}
+                pour utiliser la transcription vocale
               </p>
-              <button
-                onClick={() => {
-                  setCurrentView('settings');
-                  setSettingsTab('model');
-                  setShowApiKeyBanner(false);
-                }}
-                style={{
-                  ...theme.components.button.base,
-                  fontSize: theme.typography.fontSize.xs,
-                  padding: `${theme.spacing.xs}px ${theme.spacing.sm}px`
-                }}
-              >
-                Configurer maintenant
-              </button>
             </div>
           </div>
         </div>
