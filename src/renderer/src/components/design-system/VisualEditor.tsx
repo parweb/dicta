@@ -1,10 +1,11 @@
 import { Palette, Type, Ruler } from 'lucide-react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useTheme, useThemeConfig } from '../../lib/theme-context';
 import ColorPicker from './ColorPicker';
 
 const VisualEditor = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
+  const { setTheme } = useThemeConfig();
   const { colors, spacing, typography } = theme;
 
   return (

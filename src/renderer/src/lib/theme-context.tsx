@@ -24,11 +24,17 @@ export interface Theme extends ThemeConfig {
 }
 
 /**
- * Theme context value
+ * Theme context value (computed styles only - for most components)
  */
 interface ThemeContextValue {
   theme: Theme;
   baseConfig: ThemeConfig;
+}
+
+/**
+ * Theme config context value (editing methods - for Settings page only)
+ */
+interface ThemeConfigContextValue {
   setTheme: (updates: PartialThemeConfig) => void;
   replaceTheme: (newTheme: ThemeConfig) => void;
   resetTheme: () => void;
@@ -39,14 +45,30 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+const ThemeConfigContext = createContext<ThemeConfigContextValue | undefined>(
+  undefined
+);
 
 /**
- * Hook to access theme context
+ * Hook to access theme (computed styles only)
+ * Use this hook in most components - it won't re-render when config is edited
  */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
+
+/**
+ * Hook to access theme configuration methods
+ * Use this hook only in Settings page for editing theme
+ */
+export function useThemeConfig(): ThemeConfigContextValue {
+  const context = useContext(ThemeConfigContext);
+  if (!context) {
+    throw new Error('useThemeConfig must be used within a ThemeProvider');
   }
   return context;
 }
@@ -197,19 +219,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setActivePresetState(preset);
   };
 
-  const value: ThemeContextValue = {
-    theme,
-    baseConfig,
-    setTheme,
-    replaceTheme,
-    resetTheme,
-    saveTheme,
-    loadTheme,
-    activePreset,
-    setActivePreset
-  };
+  const themeValue: ThemeContextValue = useMemo(
+    () => ({
+      theme,
+      baseConfig
+    }),
+    [theme, baseConfig]
+  );
+
+  const configValue: ThemeConfigContextValue = useMemo(
+    () => ({
+      setTheme,
+      replaceTheme,
+      resetTheme,
+      saveTheme,
+      loadTheme,
+      activePreset,
+      setActivePreset
+    }),
+    [activePreset]
+  );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={themeValue}>
+      <ThemeConfigContext.Provider value={configValue}>
+        {children}
+      </ThemeConfigContext.Provider>
+    </ThemeContext.Provider>
   );
 }

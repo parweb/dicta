@@ -1,11 +1,12 @@
 import { AlertCircle, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useTheme, useThemeConfig } from '../../lib/theme-context';
 import { validateTheme } from '../../lib/theme-schema';
 
 export default function JsonEditor() {
-  const { theme, baseConfig, replaceTheme, setActivePreset } = useTheme();
+  const { theme, baseConfig } = useTheme();
+  const { replaceTheme, setActivePreset } = useThemeConfig();
   const [jsonText, setJsonText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isValid, setIsValid] = useState(true);

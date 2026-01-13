@@ -5,7 +5,8 @@ import {
   useDeferredValue,
   useTransition,
   useCallback,
-  useRef
+  useRef,
+  memo
 } from 'react';
 import Fuse from 'fuse.js';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -30,12 +31,13 @@ type VirtualItem =
   | { type: 'header'; dayLabel: string }
   | { type: 'transcription'; transcription: Transcription };
 
-const HistorySidebar = ({
-  isOpen,
-  onClose,
-  onSelectTranscription,
-  currentTranscript
-}: HistorySidebarProps) => {
+const HistorySidebar = memo(
+  ({
+    isOpen,
+    onClose,
+    onSelectTranscription,
+    currentTranscript
+  }: HistorySidebarProps) => {
   const { theme } = useTheme();
   const { components, spacing, colors, typography, borderRadius } = theme;
   const { transcriptions, isLoading, loadHistory } = useHistoryData();
@@ -295,6 +297,8 @@ const HistorySidebar = ({
       </div>
     </>
   );
-};
+});
+
+HistorySidebar.displayName = 'HistorySidebar';
 
 export default HistorySidebar;

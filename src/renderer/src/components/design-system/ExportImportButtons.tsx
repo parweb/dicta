@@ -1,12 +1,12 @@
 import { Download, Upload, RotateCcw } from 'lucide-react';
 import { useRef, useState } from 'react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useTheme, useThemeConfig } from '../../lib/theme-context';
 import { downloadThemeFile, readThemeFile } from '../../lib/theme-utils';
 
 export default function ExportImportButtons() {
-  const { theme, baseConfig, replaceTheme, resetTheme, setActivePreset } =
-    useTheme();
+  const { theme, baseConfig } = useTheme();
+  const { replaceTheme, resetTheme, setActivePreset } = useThemeConfig();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{
     text: string;
