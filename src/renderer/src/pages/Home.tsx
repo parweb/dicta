@@ -263,8 +263,9 @@ const HomePage = () => {
                 padding: theme.spacing.md,
                 backgroundColor: '#ffffff',
                 borderLeft: `4px solid ${theme.colors.accent.yellow}`,
-                maxWidth: '500px'
-              }}
+                maxWidth: '500px',
+                WebkitAppRegion: 'no-drag'
+              } as React.CSSProperties}
             >
               <div
                 style={{
