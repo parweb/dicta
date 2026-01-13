@@ -29,7 +29,8 @@
       "Bash(pkill:*)",
       "Bash(/Applications/dicta.app/Contents/MacOS/dicta:*)",
       "Bash(log show:*)",
-      "Bash(npx asar:*)"
+      "Bash(npx asar:*)",
+      "Bash(ls:*)"
     ]
   }
 }
