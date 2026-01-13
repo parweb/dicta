@@ -6,6 +6,9 @@ on:
       - 'v*.*.*'        # Stable releases: v1.0.0, v1.2.3
       - 'v*.*.*-beta.*' # Beta releases: v1.0.0-beta.1
 
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
