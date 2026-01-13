@@ -1,4 +1,4 @@
-import { BarChart3, History, Palette } from 'lucide-react';
+import { BarChart3, History, Settings } from 'lucide-react';
 import { ReactNode } from 'react';
 
 import type { Transcription } from '../lib/history';
@@ -151,7 +151,7 @@ const Layout = ({
             }
             title="Paramètres"
           >
-            <Palette
+            <Settings
               size={18}
               color={
                 currentView === 'settings'
