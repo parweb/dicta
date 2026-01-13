@@ -20,10 +20,6 @@ interface TranscriptionResponse {
 
 const PROXY_CONFIGS: ProxyConfig[] = [
   {
-    name: 'direct',
-    url: 'https://api.openai.com/v1/audio/transcriptions'
-  },
-  {
     name: 'corsfix',
     url: 'https://proxy.corsfix.com/?https://api.openai.com/v1/audio/transcriptions'
   },
@@ -194,8 +190,7 @@ export function useTranscriptionAPI(
           const response = await fetch(proxy.url, {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${apiKey}`,
-              Origin: 'https://dicta.app'
+              Authorization: `Bearer ${apiKey}`
             },
             body: formData
           });

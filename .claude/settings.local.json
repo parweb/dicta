@@ -32,7 +32,9 @@
       "Bash(npx asar:*)",
       "Bash(ls:*)",
       "Bash(tail:*)",
-      "Bash(/usr/bin/log show:*)"
+      "Bash(/usr/bin/log show:*)",
+      "Bash(log stream:*)",
+      "Bash(du:*)"
     ]
   }
 }

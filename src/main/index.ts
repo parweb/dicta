@@ -46,6 +46,15 @@ function createWindow(): void {
       mainWindow?.show();
     });
 
+    // Configure session to allow Origin header for CORS proxies
+    mainWindow.webContents.session.webRequest.onBeforeSendHeaders(
+      { urls: ['https://proxy.corsfix.com/*', 'https://corsproxy.io/*'] },
+      (details, callback) => {
+        details.requestHeaders['Origin'] = 'https://dicta.app';
+        callback({ requestHeaders: details.requestHeaders });
+      }
+    );
+
     // Open DevTools with Cmd+Alt+I (even in production for debugging)
     mainWindow.webContents.on('before-input-event', (event, input) => {
       if (input.meta && input.alt && input.key.toLowerCase() === 'i') {
