@@ -629,7 +629,7 @@ end tell
 
         // Execute AppleScript
         return new Promise((resolve) => {
-          exec(`osascript -e '${script.replace(/'/g, "'\\''")}'`, (error, stdout, stderr) => {
+          exec(`osascript -e '${script.replace(/'/g, "'\\''")}'`, (error, _stdout, stderr) => {
             if (error) {
               console.error('[BEDROCK-TOOLS] AppleScript error:', error);
               console.error('[BEDROCK-TOOLS] stderr:', stderr);
