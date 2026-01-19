@@ -7,9 +7,10 @@ import { useCallback, useState } from 'react'
 
 import { useBedrock } from '../contexts/BedrockContext'
 import { BedrockAdapter } from '../lib/bedrock/adapter'
-import { getAllTools } from '../lib/bedrock/tools'
+import { executeTool, getAllTools } from '../lib/bedrock/tools'
 import type {
   BedrockConverseRequest,
+  BedrockContentBlock,
   BedrockMessage,
   BedrockToolConfig,
   ToolExecution
@@ -59,7 +60,7 @@ export function useBedrockAgent(): UseBedrockAgentReturn {
   }, [])
 
   /**
-   * Execute agent with streaming
+   * Execute agent with tool orchestration loop
    */
   const executeAgent = useCallback(
     async (prompt: string, transcriptContext?: string) => {
@@ -94,7 +95,7 @@ Tu as accès à des outils pour ajouter des événements au calendrier, sauvegar
 Utilise ces outils de manière appropriée en fonction de la demande de l'utilisateur.
 ${transcriptContext ? `\n\nContexte de la transcription:\n"${transcriptContext}"` : ''}`
 
-        // Build messages
+        // Build initial messages
         const messages: BedrockMessage[] = [
           {
             role: 'user',
@@ -108,59 +109,137 @@ ${transcriptContext ? `\n\nContexte de la transcription:\n"${transcriptContext}"
           toolChoice: { auto: {} }
         }
 
-        // Build request
-        const request: BedrockConverseRequest = {
-          messages,
-          system: [{ text: systemPrompt }],
-          toolConfig,
-          inferenceConfig: {
-            maxTokens: 4096,
-            temperature: 1.0
+        console.log('[BEDROCK-AGENT] Starting agentic loop')
+
+        // Agentic loop (max 10 rounds)
+        const MAX_ROUNDS = 10
+        let round = 0
+        let stopReason = ''
+
+        while (round < MAX_ROUNDS) {
+          round++
+          console.log(`[BEDROCK-AGENT] Round ${round}/${MAX_ROUNDS}`)
+
+          // Build request
+          const request: BedrockConverseRequest = {
+            messages,
+            system: [{ text: systemPrompt }],
+            toolConfig,
+            inferenceConfig: {
+              maxTokens: 4096,
+              temperature: 1.0
+            }
           }
+
+          // Call API (non-streaming for simplicity in agentic loop)
+          const response = await adapter.callConverseAPI(request)
+          stopReason = response.stopReason
+
+          // Extract text and add to response
+          const responseText = adapter.extractText(response)
+          if (responseText) {
+            setState((prev) => ({
+              ...prev,
+              response: prev.response + responseText
+            }))
+          }
+
+          // Add assistant message to conversation
+          messages.push(response.output.message)
+
+          // Check stop reason
+          if (stopReason === 'end_turn') {
+            console.log('[BEDROCK-AGENT] Agent completed naturally')
+            break
+          }
+
+          if (stopReason === 'tool_use') {
+            // Extract tool uses
+            const toolUses = adapter.extractToolUses(response)
+            console.log(`[BEDROCK-AGENT] Tool uses detected: ${toolUses.length}`)
+
+            if (toolUses.length === 0) {
+              console.warn('[BEDROCK-AGENT] stopReason=tool_use but no tools found')
+              break
+            }
+
+            // Execute tools and collect results
+            const toolResults: BedrockContentBlock[] = []
+
+            for (const toolUse of toolUses) {
+              // Update state: mark tool as running
+              setState((prev) => ({
+                ...prev,
+                toolsExecuted: [
+                  ...prev.toolsExecuted,
+                  {
+                    id: toolUse.toolUseId,
+                    name: toolUse.name,
+                    input: toolUse.input,
+                    status: 'running'
+                  }
+                ]
+              }))
+
+              // Execute tool
+              const result = await executeTool(toolUse.name, toolUse.input)
+
+              // Update state: mark tool as complete
+              setState((prev) => ({
+                ...prev,
+                toolsExecuted: prev.toolsExecuted.map((t) =>
+                  t.id === toolUse.toolUseId
+                    ? {
+                        ...t,
+                        status: result.success ? 'success' : 'error',
+                        result: result.message,
+                        error: result.error
+                      }
+                    : t
+                )
+              }))
+
+              // Add tool result to conversation
+              toolResults.push({
+                toolResult: {
+                  toolUseId: toolUse.toolUseId,
+                  content: [
+                    {
+                      text: result.success
+                        ? result.message
+                        : `Error: ${result.error || 'Unknown error'}`
+                    }
+                  ],
+                  status: result.success ? 'success' : 'error'
+                }
+              })
+            }
+
+            // Add user message with tool results
+            messages.push({
+              role: 'user',
+              content: toolResults
+            })
+
+            // Continue loop for next round
+            continue
+          }
+
+          // Other stop reasons (max_tokens, stop_sequence, etc.)
+          console.log('[BEDROCK-AGENT] Stopped with reason:', stopReason)
+          break
         }
 
-        console.log('[BEDROCK-AGENT] Starting agent execution')
+        if (round >= MAX_ROUNDS) {
+          console.warn('[BEDROCK-AGENT] Max rounds reached')
+        }
 
-        // Execute with streaming
-        await adapter.callConverseStreamAPI(request, {
-          onTextDelta: (text) => {
-            setState((prev) => ({
-              ...prev,
-              response: prev.response + text
-            }))
-          },
-          onToolUse: (toolUseId, toolName, input) => {
-            console.log('[BEDROCK-AGENT] Tool use detected:', { toolUseId, toolName, input })
-            setState((prev) => ({
-              ...prev,
-              toolsExecuted: [
-                ...prev.toolsExecuted,
-                {
-                  id: toolUseId,
-                  name: toolName,
-                  input,
-                  status: 'pending'
-                }
-              ]
-            }))
-          },
-          onComplete: (stopReason, usage) => {
-            console.log('[BEDROCK-AGENT] Agent complete:', { stopReason, usage })
-            setState((prev) => ({
-              ...prev,
-              isStreaming: false,
-              isComplete: true
-            }))
-          },
-          onError: (error) => {
-            console.error('[BEDROCK-AGENT] Agent error:', error)
-            setState((prev) => ({
-              ...prev,
-              isStreaming: false,
-              error: error.message
-            }))
-          }
-        })
+        // Mark complete
+        setState((prev) => ({
+          ...prev,
+          isStreaming: false,
+          isComplete: true
+        }))
       } catch (error) {
         console.error('[BEDROCK-AGENT] Execution error:', error)
         setState((prev) => ({
