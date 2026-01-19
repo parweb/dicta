@@ -88,6 +88,28 @@ export default function ConversationTimeline({
   const trackHeight = trackRef.current?.clientHeight || 500
   const thumbPosition = scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
 
+  // Calculate activity bars (density visualization)
+  const activitySegments = 20 // Number of segments to divide timeline into
+  const activityBars = Array.from({ length: activitySegments }).map((_, segmentIndex) => {
+    const segmentStart = (segmentIndex / activitySegments) * itemCount
+    const segmentEnd = ((segmentIndex + 1) / activitySegments) * itemCount
+
+    // Count items in this segment
+    let count = 0
+    for (let i = Math.floor(segmentStart); i < Math.ceil(segmentEnd) && i < itemCount; i++) {
+      count++
+    }
+
+    // Normalize to 0-1 range
+    const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
+    const intensity = Math.min(1, count / maxItemsPerSegment)
+
+    return {
+      position: ((segmentIndex + 0.5) / activitySegments) * 100, // Center of segment
+      intensity
+    }
+  })
+
   return (
     <div
       ref={trackRef}
@@ -107,6 +129,39 @@ export default function ConversationTimeline({
       }}
       onClick={handleTrackClick}
     >
+      {/* Activity bars - shown during drag */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: 0,
+          bottom: 0,
+          width: '40px',
+          transform: 'translateX(-100%)',
+          opacity: isDragging ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+          pointerEvents: 'none'
+        }}
+      >
+        {activityBars.map((bar, index) => (
+          <div
+            key={`activity-${index}`}
+            style={{
+              position: 'absolute',
+              right: '8px',
+              top: `${bar.position}%`,
+              transform: 'translateY(-50%)',
+              width: `${8 + bar.intensity * 24}px`, // 8px to 32px based on intensity
+              height: '2px',
+              backgroundColor: colors.accent.blue.primary,
+              opacity: 0.3 + bar.intensity * 0.5, // 0.3 to 0.8 opacity
+              borderRadius: '1px',
+              transition: 'all 0.15s ease'
+            }}
+          />
+        ))}
+      </div>
+
       {/* Track background */}
       <div
         style={{
