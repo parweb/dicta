@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { AlertCircle } from 'lucide-react';
 
+import BedrockAgentDrawer from '../components/bedrock/BedrockAgentDrawer';
 import HomeContent from '../components/home/HomeContent';
 import ProxyStatusIndicators from '../components/home/ProxyStatusIndicators';
 import Layout from '../components/Layout';
@@ -27,6 +28,7 @@ const Settings = lazy(() => import('./Settings'));
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentView, setCurrentView] = useState<
     'home' | 'statistics' | 'settings'
   >('home');
@@ -205,6 +207,10 @@ const HomePage = () => {
     }
   }, [transcript]);
 
+  const handleOpenActions = useCallback(() => {
+    setIsDrawerOpen(true);
+  }, []);
+
   const handleSelectTranscription = useCallback(
     (transcription: Transcription) => {
       setTranscript(transcription.text);
@@ -330,12 +336,20 @@ const HomePage = () => {
             startRecording={startRecording}
             stopRecording={stopRecording}
             onCopyTranscript={handleCopyTranscript}
+            onOpenActions={handleOpenActions}
             transcriptionError={transcriptionError}
             failedAudioBlob={failedAudioBlob}
             onRetry={retryTranscription}
           />
         )}
       </Suspense>
+
+      {/* Bedrock Agent Drawer */}
+      <BedrockAgentDrawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        transcriptContext={transcript}
+      />
     </Layout>
   );
 };

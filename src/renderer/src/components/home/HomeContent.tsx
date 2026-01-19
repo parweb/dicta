@@ -14,6 +14,7 @@ interface HomeContentProps {
   startRecording: () => void;
   stopRecording: () => void;
   onCopyTranscript: () => void;
+  onOpenActions?: () => void;
   transcriptionError?: string;
   failedAudioBlob?: Blob;
   onRetry: () => void;
@@ -30,6 +31,7 @@ const HomeContent = ({
   startRecording,
   stopRecording,
   onCopyTranscript,
+  onOpenActions,
   transcriptionError,
   failedAudioBlob,
   onRetry
@@ -82,6 +84,7 @@ const HomeContent = ({
           audioAmplitudes={audioAmplitudes}
           audioDuration={audioDuration}
           onCopyTranscript={onCopyTranscript}
+          onOpenActions={onOpenActions}
         />
       </div>
     </div>
