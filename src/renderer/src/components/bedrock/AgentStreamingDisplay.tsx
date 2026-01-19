@@ -31,9 +31,7 @@ export default function AgentStreamingDisplay({ state }: AgentStreamingDisplayPr
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing.md,
-        height: '100%',
-        overflow: 'hidden'
+        gap: spacing.md
       }}
     >
       {/* Response Text */}
@@ -41,17 +39,17 @@ export default function AgentStreamingDisplay({ state }: AgentStreamingDisplayPr
         <div
           ref={responseRef}
           style={{
-            flex: 1,
             padding: spacing.lg,
             backgroundColor: colors.background.secondary + '20',
             border: `1px solid ${colors.border.primary}`,
             borderRadius: '2px',
-            overflowY: 'auto',
             fontSize: typography.fontSize.base,
             lineHeight: typography.lineHeight.relaxed,
             color: colors.text.primary,
             whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            maxHeight: '400px',
+            overflowY: 'auto'
           }}
         >
           {state.response || (
