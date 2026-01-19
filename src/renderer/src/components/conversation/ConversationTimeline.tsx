@@ -318,25 +318,27 @@ export default function ConversationTimeline({
             <div
               style={{
                 position: 'relative',
-                width: isCurrent ? '16px' : isRemarkable ? '14px' : '10px',
-                height: isCurrent ? '16px' : isRemarkable ? '14px' : '10px',
+                width: isCurrent ? '18px' : isRemarkable ? '14px' : '10px',
+                height: isCurrent ? '18px' : isRemarkable ? '14px' : '10px',
                 borderRadius: '50%',
                 background: isCurrent
-                  ? `radial-gradient(circle, ${colors.background.primary} 0%, ${colors.background.primary} 40%, ${colors.state.error} 100%)`
+                  ? `radial-gradient(circle, #fbbf24 0%, #f59e0b 40%, #ef4444 100%)`
                   : isRemarkable
                   ? `radial-gradient(circle, ${colors.accent.blue.light} 0%, ${colors.accent.blue.primary} 100%)`
                   : `radial-gradient(circle, ${colors.text.primary} 0%, ${colors.text.tertiary} 100%)`,
                 border: isCurrent
-                  ? `2px solid ${colors.state.error}`
+                  ? `2.5px solid #fbbf24`
                   : isRemarkable
                   ? `2px solid ${colors.accent.blue.light}`
                   : `1.5px solid ${colors.border.primary}`,
                 transition: 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
                 boxShadow: isCurrent
-                  ? `0 0 0 4px rgba(239, 68, 68, 0.15),
-                     0 0 0 8px rgba(239, 68, 68, 0.08),
-                     0 0 16px rgba(239, 68, 68, 0.4),
-                     inset 0 1px 2px rgba(255, 255, 255, 0.3)`
+                  ? `0 0 0 4px rgba(251, 191, 36, 0.3),
+                     0 0 0 8px rgba(251, 191, 36, 0.15),
+                     0 0 24px rgba(251, 191, 36, 0.8),
+                     0 0 40px rgba(239, 68, 68, 0.6),
+                     inset 0 2px 4px rgba(255, 255, 255, 0.5),
+                     inset 0 -2px 4px rgba(239, 68, 68, 0.3)`
                   : isRemarkable
                   ? `0 0 0 4px ${colors.accent.blue.primary}20,
                      0 0 12px ${colors.accent.blue.primary}60,
@@ -373,14 +375,15 @@ export default function ConversationTimeline({
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
-                    width: '28px',
-                    height: '28px',
+                    width: '32px',
+                    height: '32px',
                     transform: 'translate(-50%, -50%)',
                     borderRadius: '50%',
-                    border: `2px solid ${colors.state.error}`,
+                    border: `2.5px solid #fbbf24`,
                     opacity: 0,
                     animation: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    boxShadow: '0 0 20px rgba(251, 191, 36, 0.6)'
                   }}
                 />
               )}
