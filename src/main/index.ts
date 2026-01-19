@@ -652,6 +652,84 @@ end tell
     }
   );
 
+  // Save content as markdown note
+  ipcMain.handle(
+    'bedrock:save-note',
+    (_event, params: { title: string; content: string; folder?: string }) => {
+      try {
+        console.log('[BEDROCK-TOOLS] Saving note:', params.title);
+
+        // Create notes directory
+        const notesDir = join(app.getPath('userData'), 'notes');
+        if (!existsSync(notesDir)) {
+          mkdirSync(notesDir, { recursive: true });
+        }
+
+        // Handle optional subfolder
+        let targetDir = notesDir;
+        if (params.folder) {
+          targetDir = join(notesDir, params.folder);
+          if (!existsSync(targetDir)) {
+            mkdirSync(targetDir, { recursive: true });
+          }
+        }
+
+        // Create filename: timestamp-slug(title).md
+        const timestamp = Date.now();
+        const slug = params.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .substring(0, 50);
+        const filename = `${timestamp}-${slug}.md`;
+        const filepath = join(targetDir, filename);
+
+        // Write markdown file
+        writeFileSync(filepath, params.content, 'utf-8');
+
+        console.log('[BEDROCK-TOOLS] Note saved:', filepath);
+        return {
+          success: true,
+          message: `Note saved as ${filename}`,
+          filepath
+        };
+      } catch (error) {
+        console.error('[BEDROCK-TOOLS] Error saving note:', error);
+        return { success: false, error: String(error) };
+      }
+    }
+  );
+
+  // Send email via mailto: URL
+  ipcMain.handle(
+    'bedrock:send-email',
+    (_event, params: { to?: string; subject: string; body: string }) => {
+      try {
+        console.log('[BEDROCK-TOOLS] Opening email client:', params.subject);
+
+        // URL encode parameters
+        const to = params.to ? encodeURIComponent(params.to) : '';
+        const subject = encodeURIComponent(params.subject);
+        const body = encodeURIComponent(params.body);
+
+        // Build mailto: URL
+        const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
+
+        // Open in default mail client
+        shell.openExternal(mailtoUrl);
+
+        console.log('[BEDROCK-TOOLS] Email client opened');
+        return {
+          success: true,
+          message: 'Email draft created in default mail client'
+        };
+      } catch (error) {
+        console.error('[BEDROCK-TOOLS] Error opening email client:', error);
+        return { success: false, error: String(error) };
+      }
+    }
+  );
+
   // Update management handlers
   ipcMain.handle('update:get-current-version', () => {
     return {

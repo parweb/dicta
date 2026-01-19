@@ -210,6 +210,66 @@ export async function executeAddToCalendar(input: AddToCalendarInput): Promise<T
 }
 
 /**
+ * Execute save_as_note tool
+ */
+export async function executeSaveAsNote(input: SaveAsNoteInput): Promise<ToolResult> {
+  try {
+    console.log('[TOOL-EXECUTION] Executing save_as_note:', input)
+    const result = await window.api?.bedrock.saveNote(input)
+
+    if (result?.success) {
+      return {
+        success: true,
+        message: result.message || 'Note saved successfully'
+      }
+    } else {
+      return {
+        success: false,
+        message: 'Failed to save note',
+        error: result?.error
+      }
+    }
+  } catch (error) {
+    console.error('[TOOL-EXECUTION] Error executing save_as_note:', error)
+    return {
+      success: false,
+      message: 'Error saving note',
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
+ * Execute send_email tool
+ */
+export async function executeSendEmail(input: SendEmailInput): Promise<ToolResult> {
+  try {
+    console.log('[TOOL-EXECUTION] Executing send_email:', input)
+    const result = await window.api?.bedrock.sendEmail(input)
+
+    if (result?.success) {
+      return {
+        success: true,
+        message: result.message || 'Email draft created'
+      }
+    } else {
+      return {
+        success: false,
+        message: 'Failed to create email draft',
+        error: result?.error
+      }
+    }
+  } catch (error) {
+    console.error('[TOOL-EXECUTION] Error executing send_email:', error)
+    return {
+      success: false,
+      message: 'Error creating email draft',
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
  * Execute a tool by name with dynamic input
  */
 export async function executeTool(
@@ -219,6 +279,10 @@ export async function executeTool(
   switch (toolName) {
     case 'add_to_calendar':
       return executeAddToCalendar(input as AddToCalendarInput)
+    case 'save_as_note':
+      return executeSaveAsNote(input as SaveAsNoteInput)
+    case 'send_email':
+      return executeSendEmail(input as SendEmailInput)
     default:
       return {
         success: false,

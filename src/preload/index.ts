@@ -96,7 +96,26 @@ const api = {
       success: boolean;
       message?: string;
       error?: string;
-    }> => ipcRenderer.invoke('bedrock:add-to-calendar', params)
+    }> => ipcRenderer.invoke('bedrock:add-to-calendar', params),
+    saveNote: (params: {
+      title: string;
+      content: string;
+      folder?: string;
+    }): Promise<{
+      success: boolean;
+      message?: string;
+      filepath?: string;
+      error?: string;
+    }> => ipcRenderer.invoke('bedrock:save-note', params),
+    sendEmail: (params: {
+      to?: string;
+      subject: string;
+      body: string;
+    }): Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }> => ipcRenderer.invoke('bedrock:send-email', params)
   },
   // Update management
   updates: {
