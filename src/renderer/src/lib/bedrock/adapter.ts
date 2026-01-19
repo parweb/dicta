@@ -3,7 +3,9 @@
  * HTTP-based adapter for calling Bedrock from renderer process
  */
 
+import { BedrockStreamParser, type StreamCallbacks } from './stream-parser'
 import type {
+  BedrockAdapterCallbacks,
   BedrockAdapterConfig,
   BedrockConverseRequest,
   BedrockConverseResponse,
@@ -27,6 +29,13 @@ export class BedrockAdapter {
    */
   private getEndpoint(): string {
     return `https://bedrock-runtime.${this.region}.amazonaws.com/model/${this.modelId}/converse`
+  }
+
+  /**
+   * Build the Bedrock streaming endpoint URL
+   */
+  private getStreamEndpoint(): string {
+    return `https://bedrock-runtime.${this.region}.amazonaws.com/model/${this.modelId}/converse-stream`
   }
 
   /**
@@ -75,6 +84,72 @@ export class BedrockAdapter {
       return data
     } catch (error) {
       console.error('[BEDROCK-ADAPTER] Request failed:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Call Bedrock Converse API with streaming
+   */
+  async callConverseStreamAPI(
+    request: BedrockConverseRequest,
+    callbacks: StreamCallbacks = {}
+  ): Promise<void> {
+    const endpoint = this.getStreamEndpoint()
+
+    console.log('[BEDROCK-ADAPTER] Calling Converse Stream API:', {
+      endpoint,
+      messagesCount: request.messages.length,
+      hasTools: !!request.toolConfig?.tools?.length
+    })
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.bearerToken}`,
+          Accept: 'application/vnd.amazon.eventstream'
+        },
+        body: JSON.stringify(request)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('[BEDROCK-ADAPTER] Stream API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        throw new Error(
+          `Bedrock Stream API error: ${response.status} ${response.statusText}\n${errorText}`
+        )
+      }
+
+      if (!response.body) {
+        throw new Error('No response body available for streaming')
+      }
+
+      // Process the stream
+      const parser = new BedrockStreamParser(callbacks)
+      const reader = response.body.getReader()
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          if (value) {
+            await parser.processChunk(value)
+          }
+        }
+      } finally {
+        reader.releaseLock()
+      }
+
+      console.log('[BEDROCK-ADAPTER] Stream complete')
+    } catch (error) {
+      console.error('[BEDROCK-ADAPTER] Stream request failed:', error)
+      callbacks.onError?.(error instanceof Error ? error : new Error(String(error)))
       throw error
     }
   }
