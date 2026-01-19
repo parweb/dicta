@@ -239,7 +239,8 @@ const HomePage = () => {
               height: '100vh',
               display: 'flex',
               flexDirection: 'column',
-              position: 'relative'
+              position: 'relative',
+              paddingTop: theme.spacing['4xl']
             }}
           >
             {/* Conversation List */}
