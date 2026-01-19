@@ -29,6 +29,7 @@ const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerFollowUpTranscript, setDrawerFollowUpTranscript] = useState<string | undefined>(undefined);
   const [currentView, setCurrentView] = useState<
     'home' | 'statistics' | 'settings'
   >('home');
@@ -76,10 +77,13 @@ const HomePage = () => {
     console.log('[HOME] API key present:', !!apiKey);
     console.log('[HOME] API key length:', apiKey?.length);
     console.log('[HOME] Has API key:', hasApiKey);
+    console.log('[HOME] Drawer open:', isDrawerOpen);
 
-    // Switch to home view and close sidebar when starting recording
-    setCurrentView('home');
-    setIsHistoryOpen(false);
+    // Switch to home view and close sidebar when starting recording (unless drawer is open)
+    if (!isDrawerOpen) {
+      setCurrentView('home');
+      setIsHistoryOpen(false);
+    }
     // Clear any previous error and failed audio
     setTranscriptionError(undefined);
     setFailedAudioBlob(undefined);
@@ -98,18 +102,25 @@ const HomePage = () => {
       const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
       console.log('[HOME] Transcription result:', result);
       if (result.text) {
-        setTranscript(result.text);
-        setTranscriptionError(undefined);
-        setFailedAudioBlob(undefined);
-        // The transcription ID is set by the useTranscriptionAPI hook via reloadTranscriptions
-        // We need to manually set it after save
-        const historyResult = await window.api?.history.loadAll();
-        if (historyResult?.success && historyResult.transcriptions) {
-          const transcriptions =
-            historyResult.transcriptions as Transcription[];
-          transcriptions.sort((a, b) => b.timestamp - a.timestamp);
-          if (transcriptions.length > 0) {
-            setCurrentTranscriptionId(transcriptions[0].id);
+        // If drawer is open, send transcription to drawer as follow-up
+        if (isDrawerOpen) {
+          console.log('[HOME] Drawer is open, sending transcription as follow-up');
+          setDrawerFollowUpTranscript(result.text);
+        } else {
+          // Normal flow: display transcription
+          setTranscript(result.text);
+          setTranscriptionError(undefined);
+          setFailedAudioBlob(undefined);
+          // The transcription ID is set by the useTranscriptionAPI hook via reloadTranscriptions
+          // We need to manually set it after save
+          const historyResult = await window.api?.history.loadAll();
+          if (historyResult?.success && historyResult.transcriptions) {
+            const transcriptions =
+              historyResult.transcriptions as Transcription[];
+            transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+            if (transcriptions.length > 0) {
+              setCurrentTranscriptionId(transcriptions[0].id);
+            }
           }
         }
       } else if (result.error) {
@@ -122,7 +133,8 @@ const HomePage = () => {
     startAudioRecording,
     analyzeAudio,
     transcribeAudio,
-    setCurrentTranscriptionId
+    setCurrentTranscriptionId,
+    isDrawerOpen
   ]);
 
   const stopRecording = useCallback(() => {
@@ -349,6 +361,8 @@ const HomePage = () => {
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         transcriptContext={transcript}
+        newTranscript={drawerFollowUpTranscript}
+        onTranscriptConsumed={() => setDrawerFollowUpTranscript(undefined)}
       />
     </Layout>
   );

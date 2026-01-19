@@ -3,8 +3,8 @@
  * Main UI for interacting with Bedrock agent on transcriptions
  */
 
-import { useState } from 'react'
-import { Sparkles, X } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Mic, Sparkles, X } from 'lucide-react'
 
 import { useBedrock } from '../../contexts/BedrockContext'
 import { useBedrockAgent } from '../../hooks/useBedrockAgent'
@@ -12,43 +12,67 @@ import { useTheme } from '../../lib/theme-context'
 import { Button } from '../ui/button'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '../ui/drawer'
 import AgentStreamingDisplay from './AgentStreamingDisplay'
+import ConversationView from './ConversationView'
 
 interface BedrockAgentDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   transcriptContext?: string
+  newTranscript?: string
+  onTranscriptConsumed?: () => void
 }
 
 export default function BedrockAgentDrawer({
   open,
   onOpenChange,
-  transcriptContext
+  transcriptContext,
+  newTranscript,
+  onTranscriptConsumed
 }: BedrockAgentDrawerProps) {
   const { theme } = useTheme()
   const { colors, spacing, typography } = theme
   const { hasCredentials } = useBedrock()
-  const { state, executeAgent, reset } = useBedrockAgent()
+  const { state, conversationMessages, executeAgent, continueConversation, reset } = useBedrockAgent()
 
-  const [prompt, setPrompt] = useState('')
+  const [followUpPrompt, setFollowUpPrompt] = useState('')
+  const followUpInputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Auto-execute when drawer opens with a transcript
+  useEffect(() => {
+    if (open && transcriptContext && hasCredentials && !state.isStreaming && !state.response && !state.error) {
+      executeAgent(transcriptContext)
+    }
+  }, [open, transcriptContext, hasCredentials, state.isStreaming, state.response, state.error, executeAgent])
+
+  // Handle new transcript from recording (follow-up)
+  useEffect(() => {
+    if (newTranscript && state.isComplete && !state.isStreaming) {
+      setFollowUpPrompt(newTranscript)
+      followUpInputRef.current?.focus()
+      // Notify parent that transcript was consumed
+      onTranscriptConsumed?.()
+    }
+  }, [newTranscript, state.isComplete, state.isStreaming, onTranscriptConsumed])
 
   // Handle drawer close
   const handleClose = () => {
     reset()
-    setPrompt('')
+    setFollowUpPrompt('')
     onOpenChange(false)
   }
 
-  // Handle execute
-  const handleExecute = async () => {
-    if (!prompt.trim()) return
-    await executeAgent(prompt, transcriptContext)
+  // Handle follow-up submit
+  const handleFollowUp = async () => {
+    if (!followUpPrompt.trim()) return
+    await continueConversation(followUpPrompt)
+    setFollowUpPrompt('')
   }
 
-  // Handle key press
+  // Handle key press in follow-up input
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
-      handleExecute()
+      handleFollowUp()
     }
   }
 
@@ -114,56 +138,95 @@ export default function BedrockAgentDrawer({
         {/* Content */}
         <div
           style={{
-            padding: spacing.lg,
             display: 'flex',
             flexDirection: 'column',
-            gap: spacing.lg,
             height: '100%',
-            overflow: 'auto'
+            overflow: 'hidden'
           }}
         >
-          {/* Credentials warning */}
-          {!hasCredentials && (
+          {/* Scrollable area for response and tools */}
+          <div
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: spacing.lg,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: spacing.lg
+            }}
+          >
+            {/* Credentials warning */}
+            {!hasCredentials && (
+              <div
+                style={{
+                  padding: spacing.lg,
+                  backgroundColor: colors.accent.yellow + '10',
+                  border: `1px solid ${colors.accent.yellow}40`,
+                  borderRadius: '2px',
+                  fontSize: typography.fontSize.sm,
+                  color: colors.text.secondary
+                }}
+              >
+                Configurez vos credentials Bedrock dans Paramètres → Bedrock pour utiliser l'agent.
+              </div>
+            )}
+
+            {/* Display */}
+            {(state.isStreaming || state.response || state.error) && (
+              <div style={{ minHeight: 0 }}>
+                {state.isConversationMode ? (
+                  <ConversationView
+                    messages={conversationMessages}
+                    toolsExecuted={state.toolsExecuted}
+                    isStreaming={state.isStreaming}
+                  />
+                ) : (
+                  <AgentStreamingDisplay state={state} />
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Fixed follow-up section at bottom */}
+          {state.isComplete && !state.isStreaming && (
             <div
               style={{
+                borderTop: `1px solid ${colors.border.primary}`,
                 padding: spacing.lg,
-                backgroundColor: colors.accent.yellow + '10',
-                border: `1px solid ${colors.accent.yellow}40`,
-                borderRadius: '2px',
-                fontSize: typography.fontSize.sm,
-                color: colors.text.secondary
+                backgroundColor: colors.background.primary,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.md
               }}
             >
-              Configurez vos credentials Bedrock dans Paramètres → Bedrock pour utiliser l'agent.
-            </div>
-          )}
-
-          {/* Prompt Input (only show if not streaming and no response yet) */}
-          {!state.isStreaming && !state.response && !state.error && (
-            <>
               <div>
                 <label
-                  htmlFor="agent-prompt"
+                  htmlFor="follow-up"
                   style={{
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: spacing.xs,
                     fontSize: typography.fontSize.sm,
                     fontWeight: typography.fontWeight.medium,
                     color: colors.text.secondary,
                     marginBottom: spacing.sm
                   }}
                 >
-                  Que voulez-vous faire avec cette transcription ?
+                  <Mic size={14} />
+                  <span>Follow-up (utilisez Cmd+Shift+X pour dicter)</span>
                 </label>
                 <textarea
-                  id="agent-prompt"
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
+                  id="follow-up"
+                  ref={followUpInputRef}
+                  value={followUpPrompt}
+                  onChange={(e) => setFollowUpPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Ex: Ajoute un événement au calendrier pour demain à 14h, Sauvegarde cette transcription comme note, Envoie un email à Jean avec ce contenu..."
+                  placeholder="Continuer la conversation..."
                   disabled={!hasCredentials}
                   style={{
                     width: '100%',
-                    minHeight: '100px',
+                    minHeight: '60px',
+                    maxHeight: '120px',
                     padding: spacing.md,
                     backgroundColor: colors.background.secondary + '40',
                     border: `1px solid ${colors.border.primary}`,
@@ -190,44 +253,29 @@ export default function BedrockAgentDrawer({
                     color: colors.text.tertiary
                   }}
                 >
-                  Cmd/Ctrl + Enter pour exécuter
+                  Cmd/Ctrl + Enter pour envoyer
                 </div>
               </div>
 
-              <Button
-                onClick={handleExecute}
-                disabled={!hasCredentials || !prompt.trim() || state.isStreaming}
-                style={{
-                  alignSelf: 'flex-start'
-                }}
-              >
-                <Sparkles size={16} />
-                Exécuter
-              </Button>
-            </>
-          )}
-
-          {/* Streaming Display */}
-          {(state.isStreaming || state.response || state.error) && (
-            <div style={{ flex: 1, minHeight: 0 }}>
-              <AgentStreamingDisplay state={state} />
+              <div style={{ display: 'flex', gap: spacing.sm }}>
+                <Button
+                  onClick={handleFollowUp}
+                  disabled={!hasCredentials || !followUpPrompt.trim()}
+                  style={{
+                    flex: 1
+                  }}
+                >
+                  <Sparkles size={16} />
+                  Envoyer
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleClose}
+                >
+                  Fermer
+                </Button>
+              </div>
             </div>
-          )}
-
-          {/* Reset button after completion */}
-          {state.isComplete && !state.isStreaming && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                reset()
-                setPrompt('')
-              }}
-              style={{
-                alignSelf: 'flex-start'
-              }}
-            >
-              Nouvelle action
-            </Button>
           )}
         </div>
       </DrawerContent>
