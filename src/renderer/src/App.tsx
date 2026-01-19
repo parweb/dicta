@@ -1,3 +1,4 @@
+import { BedrockProvider } from './contexts/BedrockContext';
 import { ApiKeyProvider } from './lib/api-key-context';
 import { ThemeProvider } from './lib/theme-context';
 import { UpdateProvider } from './lib/update-context';
@@ -7,9 +8,11 @@ function App() {
   return (
     <ThemeProvider>
       <ApiKeyProvider>
-        <UpdateProvider>
-          <Home />
-        </UpdateProvider>
+        <BedrockProvider>
+          <UpdateProvider>
+            <Home />
+          </UpdateProvider>
+        </BedrockProvider>
       </ApiKeyProvider>
     </ThemeProvider>
   );

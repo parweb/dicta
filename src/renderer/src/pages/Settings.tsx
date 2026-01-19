@@ -1,20 +1,21 @@
 import { useState } from 'react';
-import { Palette, Key, Download } from 'lucide-react';
+import { Palette, Key, Download, Cloud } from 'lucide-react';
 
 import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
+import BedrockSettings from '../components/settings/BedrockSettings';
 import ModelSettings from '../components/settings/ModelSettings';
 import UpdateSettings from '../components/settings/UpdateSettings';
 import { useTheme } from '../lib/theme-context';
 import DesignSystem from './DesignSystem';
 
 interface SettingsProps {
-  defaultTab?: 'theme' | 'model' | 'updates';
+  defaultTab?: 'theme' | 'model' | 'bedrock' | 'updates';
 }
 
 const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
-  const [activeTab, setActiveTab] = useState<'theme' | 'model' | 'updates'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<'theme' | 'model' | 'bedrock' | 'updates'>(defaultTab);
 
   return (
     <div
@@ -117,6 +118,47 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
             </button>
 
             <button
+              onClick={() => setActiveTab('bedrock')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                padding: `${spacing.md}px ${spacing.lg}px`,
+                backgroundColor: 'transparent',
+                color:
+                  activeTab === 'bedrock'
+                    ? colors.text.primary
+                    : colors.text.tertiary,
+                border: 'none',
+                borderBottom:
+                  activeTab === 'bedrock'
+                    ? `2px solid ${colors.text.primary}`
+                    : '2px solid transparent',
+                cursor: 'pointer',
+                fontSize: typography.fontSize.sm,
+                fontWeight:
+                  activeTab === 'bedrock'
+                    ? typography.fontWeight.medium
+                    : typography.fontWeight.normal,
+                marginBottom: '-1px',
+                transition: 'color 0.15s'
+              }}
+              onMouseEnter={e => {
+                if (activeTab !== 'bedrock') {
+                  e.currentTarget.style.color = colors.text.secondary;
+                }
+              }}
+              onMouseLeave={e => {
+                if (activeTab !== 'bedrock') {
+                  e.currentTarget.style.color = colors.text.tertiary;
+                }
+              }}
+            >
+              <Cloud size={16} />
+              <span>Bedrock</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('theme')}
               style={{
                 display: 'flex',
@@ -203,6 +245,8 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
         {/* Tab Content */}
         <div style={{ paddingTop: spacing.md }}>
           {activeTab === 'model' && <ModelSettings />}
+
+          {activeTab === 'bedrock' && <BedrockSettings />}
 
           {activeTab === 'theme' && (
             <>
