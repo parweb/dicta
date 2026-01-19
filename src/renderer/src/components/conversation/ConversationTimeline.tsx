@@ -99,34 +99,68 @@ export default function ConversationTimeline({
     const maxTimestamp = timestamps[timestamps.length - 1]
     const timeRange = maxTimestamp - minTimestamp
 
-    return timestamps.map((timestamp, index) => {
-      // Calculate position based on real time (0-100%)
+    // First pass: calculate all positions and gaps
+    const allPoints = timestamps.map((timestamp, index) => {
       const position =
         itemCount === 1 || timeRange === 0
           ? 50
           : ((timestamp - minTimestamp) / timeRange) * 100
 
-      // Identify remarkable points
-      const isFirst = index === 0
-      const isLast = index === timestamps.length - 1
+      // Calculate gap from previous item
+      const gap = index > 0 ? timestamp - timestamps[index - 1] : 0
 
-      // Check for day boundary (new day from previous item)
-      const isDayBoundary =
+      // Check for week boundary (more significant than day)
+      const isWeekBoundary =
         index > 0 &&
-        new Date(timestamp).toDateString() !== new Date(timestamps[index - 1]).toDateString()
-
-      // Check for significant gap (> 1 hour from previous item)
-      const isSignificantGap =
-        index > 0 && timestamp - timestamps[index - 1] > 60 * 60 * 1000
-
-      const isRemarkable = isFirst || isLast || isDayBoundary || isSignificantGap
+        new Date(timestamp).toLocaleDateString('fr-FR', { weekday: 'long' }) === 'lundi' &&
+        new Date(timestamps[index - 1]).toLocaleDateString('fr-FR', { weekday: 'long' }) !== 'lundi'
 
       return {
+        index,
         position,
-        isRemarkable,
-        timestamp
+        timestamp,
+        gap,
+        isWeekBoundary
       }
     })
+
+    // Identify remarkable points intelligently
+    const remarkableIndices = new Set<number>()
+
+    // Always include first and last
+    remarkableIndices.add(0)
+    remarkableIndices.add(itemCount - 1)
+
+    // Find significant gaps (top 20 largest gaps)
+    const pointsWithGaps = allPoints
+      .filter((p) => p.gap > 0)
+      .sort((a, b) => b.gap - a.gap)
+
+    const maxRemarkablePoints = Math.min(20, Math.floor(itemCount / 20)) // Max 20 or 5% of total
+    const topGaps = pointsWithGaps.slice(0, maxRemarkablePoints)
+
+    // Add points with significant gaps (> 12 hours) or week boundaries
+    topGaps.forEach((point) => {
+      if (point.gap > 12 * 60 * 60 * 1000 || point.isWeekBoundary) {
+        remarkableIndices.add(point.index)
+      }
+    })
+
+    // If we have very few remarkable points, add some week boundaries
+    if (remarkableIndices.size < 10) {
+      allPoints.forEach((point) => {
+        if (point.isWeekBoundary && remarkableIndices.size < 15) {
+          remarkableIndices.add(point.index)
+        }
+      })
+    }
+
+    // Return final points with remarkable flag
+    return allPoints.map((point) => ({
+      position: point.position,
+      timestamp: point.timestamp,
+      isRemarkable: remarkableIndices.has(point.index)
+    }))
   }, [timestamps, itemCount])
 
   // Calculate activity bars (density visualization) - memoized
