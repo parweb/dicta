@@ -9,8 +9,7 @@ import {
 } from 'react';
 
 import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
-import ConversationTranscriptList from '@/components/conversation/ConversationTranscriptList';
-import RecordButton from '@/components/home/RecordButton';
+import HomeContent from '@/components/home/HomeContent';
 import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -35,8 +34,18 @@ const HomePage = () => {
     'home' | 'statistics' | 'settings'
   >('home');
   const [settingsTab, setSettingsTab] = useState<'theme' | 'model'>('theme');
-  const [selectedTranscription, setSelectedTranscription] = useState<Transcription | null>(null);
+  const [audioAmplitudes, setAudioAmplitudes] = useState<number[]>([]);
+  const [audioDuration, setAudioDuration] = useState<number | undefined>(
+    undefined
+  );
+  const [transcriptionError, setTranscriptionError] = useState<
+    string | undefined
+  >(undefined);
+  const [failedAudioBlob, setFailedAudioBlob] = useState<Blob | undefined>(
+    undefined
+  );
 
+  const transcriptRef = useRef<HTMLParagraphElement | null>(null);
   const hasRedirectedRef = useRef(false);
 
   // Use theme and API key hooks
@@ -65,12 +74,19 @@ const HomePage = () => {
   // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
     console.log('[HOME] ========== STARTING RECORDING ==========');
+    console.log('[HOME] API key present:', !!apiKey);
+    console.log('[HOME] API key length:', apiKey?.length);
+    console.log('[HOME] Has API key:', hasApiKey);
+    console.log('[HOME] Drawer open:', isDrawerOpen);
 
     // Switch to home view and close sidebar when starting recording (unless drawer is open)
     if (!isDrawerOpen) {
       setCurrentView('home');
       setIsHistoryOpen(false);
     }
+    // Clear any previous error and failed audio
+    setTranscriptionError(undefined);
+    setFailedAudioBlob(undefined);
 
     await startAudioRecording(async audioBlob => {
       console.log('[HOME] Audio recorded, blob size:', audioBlob.size, 'type:', audioBlob.type);
@@ -78,34 +94,89 @@ const HomePage = () => {
       // Analyze audio
       const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
       console.log('[HOME] Audio analyzed, duration:', durationMs, 'ms');
+      setAudioDuration(durationMs);
+      setAudioAmplitudes(amplitudes);
 
       // Transcribe and get the result
       console.log('[HOME] Starting transcription with API key length:', apiKey?.length);
       const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
       console.log('[HOME] Transcription result:', result);
-
       if (result.text) {
         // If drawer is open, send transcription to drawer as follow-up
         if (isDrawerOpen) {
           console.log('[HOME] Drawer is open, sending transcription as follow-up');
           setDrawerFollowUpTranscript(result.text);
         } else {
-          // Normal flow: transcription saved and list will auto-update
+          // Normal flow: display transcription
           setTranscript(result.text);
+          setTranscriptionError(undefined);
+          setFailedAudioBlob(undefined);
+          // The transcription ID is set by the useTranscriptionAPI hook via reloadTranscriptions
+          // We need to manually set it after save
+          const historyResult = await window.api?.history.loadAll();
+          if (historyResult?.success && historyResult.transcriptions) {
+            const transcriptions =
+              historyResult.transcriptions as Transcription[];
+            transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+            if (transcriptions.length > 0) {
+              setCurrentTranscriptionId(transcriptions[0].id);
+            }
+          }
         }
+      } else if (result.error) {
+        // Store the error and audio blob for retry
+        setTranscriptionError(result.error);
+        setFailedAudioBlob(audioBlob);
       }
     });
   }, [
     startAudioRecording,
     analyzeAudio,
     transcribeAudio,
-    apiKey,
+    setCurrentTranscriptionId,
     isDrawerOpen
   ]);
 
   const stopRecording = useCallback(() => {
     stopAudioRecording();
   }, [stopAudioRecording]);
+
+  const retryTranscription = useCallback(async () => {
+    if (!failedAudioBlob) return;
+
+    // Clear the error while retrying
+    setTranscriptionError(undefined);
+
+    // Retry the transcription with the stored audio blob
+    const result = await transcribeAudio(
+      failedAudioBlob,
+      audioDuration,
+      audioAmplitudes
+    );
+    if (result.text) {
+      setTranscript(result.text);
+      setTranscriptionError(undefined);
+      setFailedAudioBlob(undefined);
+      // Load the updated history
+      const historyResult = await window.api?.history.loadAll();
+      if (historyResult?.success && historyResult.transcriptions) {
+        const transcriptions = historyResult.transcriptions as Transcription[];
+        transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+        if (transcriptions.length > 0) {
+          setCurrentTranscriptionId(transcriptions[0].id);
+        }
+      }
+    } else if (result.error) {
+      // Set the error again if retry failed
+      setTranscriptionError(result.error);
+    }
+  }, [
+    failedAudioBlob,
+    audioDuration,
+    audioAmplitudes,
+    transcribeAudio,
+    setCurrentTranscriptionId
+  ]);
 
   // Use keyboard shortcuts hook
   useKeyboardShortcuts({
@@ -117,6 +188,19 @@ const HomePage = () => {
     onNavigate: navigateTranscription
   });
 
+  // Auto-select transcript text
+  useEffect(() => {
+    if (transcript && transcriptRef.current) {
+      const range = document.createRange();
+      const selection = window.getSelection();
+      if (selection) {
+        range.selectNodeContents(transcriptRef.current);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  }, [transcript]);
+
   // Auto-redirect to settings if no API key on initial mount
   useEffect(() => {
     if (!isApiKeyLoading && !hasApiKey && !hasRedirectedRef.current) {
@@ -126,28 +210,44 @@ const HomePage = () => {
     }
   }, [isApiKeyLoading, hasApiKey]);
 
-  // Calculate whether to show API key banner
+  // Calculate whether to show API key banner (only when user voluntarily returns to home)
   const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home' && hasRedirectedRef.current;
 
-  const handleCopyTranscript = useCallback((transcription: Transcription) => {
-    navigator.clipboard.writeText(transcription.text);
-  }, []);
+  const handleCopyTranscript = useCallback(() => {
+    if (transcript) {
+      navigator.clipboard.writeText(transcript);
+    }
+  }, [transcript]);
 
-  const handleOpenActions = useCallback((transcription: Transcription) => {
-    setSelectedTranscription(transcription);
-    setTranscript(transcription.text);
+  const handleOpenActions = useCallback(() => {
     setIsDrawerOpen(true);
   }, []);
 
   const handleSelectTranscription = useCallback(
     (transcription: Transcription) => {
       setTranscript(transcription.text);
+      setAudioAmplitudes(transcription.audioAmplitudes || []);
+      setAudioDuration(transcription.durationMs);
       setCurrentTranscriptionId(transcription.id);
       setIsHistoryOpen(false);
       setCurrentView('home');
     },
     [setCurrentTranscriptionId]
   );
+
+  // Update transcript when navigation changes currentTranscriptionId
+  useEffect(() => {
+    if (currentTranscriptionId && allTranscriptions.length > 0) {
+      const transcription = allTranscriptions.find(
+        t => t.id === currentTranscriptionId
+      );
+      if (transcription) {
+        setTranscript(transcription.text);
+        setAudioAmplitudes(transcription.audioAmplitudes || []);
+        setAudioDuration(transcription.durationMs);
+      }
+    }
+  }, [currentTranscriptionId, allTranscriptions]);
 
   return (
     <Layout
@@ -237,41 +337,22 @@ const HomePage = () => {
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative'
-            }}
-          >
-            {/* Conversation List */}
-            <ConversationTranscriptList
-              transcriptions={allTranscriptions}
-              onCopyTranscript={handleCopyTranscript}
-              onOpenActions={handleOpenActions}
-            />
-
-            {/* Fixed Record Button at Bottom */}
-            <div
-              style={{
-                padding: theme.spacing.xl,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.colors.background.primary,
-                borderTop: `1px solid ${theme.colors.border.primary}`
-              }}
-            >
-              <RecordButton
-                isRecording={isRecording}
-                isLoading={isLoading}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-              />
-            </div>
-          </div>
+          <HomeContent
+            isRecording={isRecording}
+            isLoading={isLoading}
+            transcript={transcript}
+            transcriptRef={transcriptRef}
+            slideDirection={slideDirection}
+            audioAmplitudes={audioAmplitudes}
+            audioDuration={audioDuration}
+            startRecording={startRecording}
+            stopRecording={stopRecording}
+            onCopyTranscript={handleCopyTranscript}
+            onOpenActions={handleOpenActions}
+            transcriptionError={transcriptionError}
+            failedAudioBlob={failedAudioBlob}
+            onRetry={retryTranscription}
+          />
         )}
       </Suspense>
 
