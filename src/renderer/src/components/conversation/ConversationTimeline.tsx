@@ -182,7 +182,7 @@ export default function ConversationTimeline({
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
-        zIndex: 10,
+        zIndex: 50,
         cursor: 'pointer',
         pointerEvents: 'auto'
       }}
@@ -200,7 +200,8 @@ export default function ConversationTimeline({
           opacity: isDragging ? 1 : 0,
           transition: 'opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
           pointerEvents: 'none',
-          willChange: 'opacity, transform'
+          willChange: 'opacity, transform',
+          zIndex: 1
         }}
       >
         {activityBars.map((bar, index) => (
@@ -241,7 +242,8 @@ export default function ConversationTimeline({
             ${colors.accent.blue.primary}20 100%)`,
           transform: 'translateX(-50%)',
           borderRadius: '2px',
-          boxShadow: `0 0 10px ${colors.accent.blue.primary}15, inset 0 0 10px ${colors.background.primary}40`
+          boxShadow: `0 0 10px ${colors.accent.blue.primary}15, inset 0 0 10px ${colors.background.primary}40`,
+          zIndex: 5
         }}
       />
 
@@ -283,7 +285,7 @@ export default function ConversationTimeline({
                inset 0 1px 2px rgba(255, 255, 255, 0.15)`,
           border: `1px solid ${colors.accent.blue.light}40`,
           backdropFilter: 'blur(8px)',
-          zIndex: 15,
+          zIndex: 10,
           willChange: 'transform, width, box-shadow'
         }}
         onMouseDown={handleThumbMouseDown}
@@ -306,7 +308,7 @@ export default function ConversationTimeline({
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
               cursor: 'pointer',
-              zIndex: 20
+              zIndex: 15
             }}
             onClick={(e) => {
               e.stopPropagation()
