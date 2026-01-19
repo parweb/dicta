@@ -5,9 +5,12 @@
 
 import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTheme } from '@/lib/theme-context'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface ConversationTimelineProps {
   timestamps: number[] // Unix timestamps in milliseconds for each item
+  texts?: string[] // Text content for tooltip preview (optional)
   currentIndex: number
   onNavigate?: (index: number) => void
   scrollProgress: number // 0-1 representing scroll position
@@ -16,6 +19,7 @@ interface ConversationTimelineProps {
 
 export default function ConversationTimeline({
   timestamps,
+  texts,
   currentIndex,
   onNavigate,
   scrollProgress,
@@ -25,6 +29,7 @@ export default function ConversationTimeline({
   const { colors, spacing } = theme
   const [isDragging, setIsDragging] = useState(false)
   const [isHoveringThumb, setIsHoveringThumb] = useState(false)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const trackRef = useRef<HTMLDivElement>(null)
   const thumbRef = useRef<HTMLDivElement>(null)
   const dragStartRef = useRef<{ y: number; scrollProgress: number } | null>(null)
@@ -331,6 +336,12 @@ export default function ConversationTimeline({
       {timelinePoints.map((point, index) => {
         const isCurrent = index === currentIndex
         const isRemarkable = point.isRemarkable
+        const isHovered = hoveredIndex === index
+
+        // Format date for label and tooltip
+        const dateLabel = format(point.timestamp, 'd MMM', { locale: fr })
+        const dateTime = format(point.timestamp, 'dd/MM/yyyy HH:mm', { locale: fr })
+        const textPreview = texts && texts[index] ? texts[index].slice(0, 60) + (texts[index].length > 60 ? '...' : '') : ''
 
         return (
           <div
@@ -342,14 +353,83 @@ export default function ConversationTimeline({
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
               cursor: 'pointer',
-              zIndex: isCurrent ? 20 : 15
+              zIndex: isCurrent ? 20 : 15,
+              padding: '8px' // Enlarged hover area
             }}
             onClick={(e) => {
               e.stopPropagation()
               onNavigate?.(index)
             }}
             onMouseDown={(e) => e.stopPropagation()}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
           >
+            {/* Tooltip */}
+            {isHovered && !isDragging && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '24px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  backgroundColor: colors.background.secondary,
+                  border: `1px solid ${colors.border.primary}`,
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  boxShadow: `0 4px 12px ${colors.background.primary}80`,
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                  zIndex: 100,
+                  minWidth: '200px',
+                  maxWidth: '300px'
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: theme.typography.fontSize.xs,
+                    fontWeight: theme.typography.fontWeight.semibold,
+                    color: colors.text.primary,
+                    marginBottom: '4px'
+                  }}
+                >
+                  {dateTime}
+                </div>
+                {textPreview && (
+                  <div
+                    style={{
+                      fontSize: theme.typography.fontSize.xs,
+                      color: colors.text.secondary,
+                      whiteSpace: 'normal',
+                      wordBreak: 'break-word'
+                    }}
+                  >
+                    {textPreview}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Temporal label for remarkable points */}
+            {isRemarkable && !isCurrent && !isDragging && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: '24px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: theme.typography.fontSize.xs,
+                  fontWeight: theme.typography.fontWeight.medium,
+                  color: colors.accent.blue.primary,
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                  opacity: isHovered ? 0 : 0.7,
+                  transition: 'opacity 0.2s'
+                }}
+              >
+                {dateLabel}
+              </div>
+            )}
+
             {/* Point with modern design */}
             <div
               style={{
@@ -381,27 +461,7 @@ export default function ConversationTimeline({
                      inset 0 1px 2px rgba(255, 255, 255, 0.2)`
                   : `0 0 4px ${colors.background.primary}60`,
                 willChange: 'transform, background, box-shadow',
-                transform: 'scale(1)'
-              }}
-              onMouseEnter={(e) => {
-                if (!isCurrent) {
-                  e.currentTarget.style.transform = 'scale(1.5)'
-                  e.currentTarget.style.background = `radial-gradient(circle,
-                    ${colors.accent.blue.light} 0%,
-                    ${colors.accent.blue.primary} 100%)`
-                  e.currentTarget.style.boxShadow = `0 0 0 4px ${colors.accent.blue.primary}20,
-                    0 0 16px ${colors.accent.blue.primary}80,
-                    inset 0 1px 3px rgba(255, 255, 255, 0.4)`
-                  e.currentTarget.style.border = `2px solid ${colors.accent.blue.light}`
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isCurrent) {
-                  e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.background = `radial-gradient(circle, ${colors.text.primary} 0%, ${colors.text.tertiary} 100%)`
-                  e.currentTarget.style.boxShadow = `0 0 4px ${colors.background.primary}60`
-                  e.currentTarget.style.border = `1.5px solid ${colors.border.primary}`
-                }
+                transform: isHovered && !isCurrent ? 'scale(1.5)' : 'scale(1)'
               }}
             >
               {/* Pulsing ring for current item */}

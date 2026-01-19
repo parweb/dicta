@@ -117,6 +117,7 @@ export default function ConversationTranscriptList({
       {transcriptions.length > 0 && (
         <ConversationTimeline
           timestamps={transcriptions.map((t) => t.timestamp)}
+          texts={transcriptions.map((t) => t.text)}
           currentIndex={currentIndex}
           scrollProgress={scrollProgress}
           onNavigate={handleNavigate}
