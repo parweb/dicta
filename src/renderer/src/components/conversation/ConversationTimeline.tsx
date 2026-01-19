@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTheme } from '@/lib/theme-context'
 
 interface ConversationTimelineProps {
-  itemCount: number
+  timestamps: number[] // Unix timestamps in milliseconds for each item
   currentIndex: number
   onNavigate?: (index: number) => void
   scrollProgress: number // 0-1 representing scroll position
@@ -15,7 +15,7 @@ interface ConversationTimelineProps {
 }
 
 export default function ConversationTimeline({
-  itemCount,
+  timestamps,
   currentIndex,
   onNavigate,
   scrollProgress,
@@ -29,6 +29,7 @@ export default function ConversationTimeline({
   const thumbRef = useRef<HTMLDivElement>(null)
   const dragStartRef = useRef<{ y: number; scrollProgress: number } | null>(null)
 
+  const itemCount = timestamps.length
   if (itemCount === 0) return null
 
   // Handle thumb drag
@@ -90,29 +91,83 @@ export default function ConversationTimeline({
     return scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
   }, [scrollProgress, thumbHeight, trackHeight])
 
+  // Calculate temporal positions and remarkable points - memoized
+  const timelinePoints = useMemo(() => {
+    if (itemCount === 0) return []
+
+    const minTimestamp = timestamps[0]
+    const maxTimestamp = timestamps[timestamps.length - 1]
+    const timeRange = maxTimestamp - minTimestamp
+
+    return timestamps.map((timestamp, index) => {
+      // Calculate position based on real time (0-100%)
+      const position =
+        itemCount === 1 || timeRange === 0
+          ? 50
+          : ((timestamp - minTimestamp) / timeRange) * 100
+
+      // Identify remarkable points
+      const isFirst = index === 0
+      const isLast = index === timestamps.length - 1
+
+      // Check for day boundary (new day from previous item)
+      const isDayBoundary =
+        index > 0 &&
+        new Date(timestamp).toDateString() !== new Date(timestamps[index - 1]).toDateString()
+
+      // Check for significant gap (> 1 hour from previous item)
+      const isSignificantGap =
+        index > 0 && timestamp - timestamps[index - 1] > 60 * 60 * 1000
+
+      const isRemarkable = isFirst || isLast || isDayBoundary || isSignificantGap
+
+      return {
+        position,
+        isRemarkable,
+        timestamp
+      }
+    })
+  }, [timestamps, itemCount])
+
   // Calculate activity bars (density visualization) - memoized
   const activityBars = useMemo(() => {
-    const activitySegments = 20 // Number of segments to divide timeline into
-    return Array.from({ length: activitySegments }).map((_, segmentIndex) => {
-      const segmentStart = (segmentIndex / activitySegments) * itemCount
-      const segmentEnd = ((segmentIndex + 1) / activitySegments) * itemCount
+    if (itemCount === 0) return []
 
-      // Count items in this segment
+    const minTimestamp = timestamps[0]
+    const maxTimestamp = timestamps[timestamps.length - 1]
+    const timeRange = maxTimestamp - minTimestamp
+
+    if (timeRange === 0) return []
+
+    const activitySegments = 20 // Number of segments to divide timeline into
+    const segmentDuration = timeRange / activitySegments
+
+    return Array.from({ length: activitySegments }).map((_, segmentIndex) => {
+      const segmentStartTime = minTimestamp + segmentIndex * segmentDuration
+      const segmentEndTime = segmentStartTime + segmentDuration
+
+      // Count items in this time segment
       let count = 0
-      for (let i = Math.floor(segmentStart); i < Math.ceil(segmentEnd) && i < itemCount; i++) {
-        count++
+      for (let i = 0; i < itemCount; i++) {
+        if (timestamps[i] >= segmentStartTime && timestamps[i] < segmentEndTime) {
+          count++
+        }
       }
 
       // Normalize to 0-1 range
       const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
       const intensity = Math.min(1, count / maxItemsPerSegment)
 
+      // Position is temporal, not linear
+      const segmentMiddleTime = segmentStartTime + segmentDuration / 2
+      const position = ((segmentMiddleTime - minTimestamp) / timeRange) * 100
+
       return {
-        position: ((segmentIndex + 0.5) / activitySegments) * 100, // Center of segment
+        position,
         intensity
       }
     })
-  }, [itemCount])
+  }, [timestamps, itemCount])
 
   return (
     <div
@@ -237,16 +292,16 @@ export default function ConversationTimeline({
       />
 
       {/* Navigation points */}
-      {Array.from({ length: itemCount }).map((_, index) => {
+      {timelinePoints.map((point, index) => {
         const isCurrent = index === currentIndex
-        const position = itemCount === 1 ? 50 : (index / (itemCount - 1)) * 100
+        const isRemarkable = point.isRemarkable
 
         return (
           <div
             key={index}
             style={{
               position: 'absolute',
-              top: `${position}%`,
+              top: `${point.position}%`,
               left: '50%',
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
@@ -263,14 +318,18 @@ export default function ConversationTimeline({
             <div
               style={{
                 position: 'relative',
-                width: isCurrent ? '16px' : '12px',
-                height: isCurrent ? '16px' : '12px',
+                width: isCurrent ? '16px' : isRemarkable ? '14px' : '10px',
+                height: isCurrent ? '16px' : isRemarkable ? '14px' : '10px',
                 borderRadius: '50%',
                 background: isCurrent
                   ? `radial-gradient(circle, ${colors.background.primary} 0%, ${colors.background.primary} 40%, ${colors.state.error} 100%)`
+                  : isRemarkable
+                  ? `radial-gradient(circle, ${colors.accent.blue.light} 0%, ${colors.accent.blue.primary} 100%)`
                   : `radial-gradient(circle, ${colors.text.primary} 0%, ${colors.text.tertiary} 100%)`,
                 border: isCurrent
                   ? `2px solid ${colors.state.error}`
+                  : isRemarkable
+                  ? `2px solid ${colors.accent.blue.light}`
                   : `1.5px solid ${colors.border.primary}`,
                 transition: 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
                 boxShadow: isCurrent
@@ -278,6 +337,10 @@ export default function ConversationTimeline({
                      0 0 0 8px rgba(239, 68, 68, 0.08),
                      0 0 16px rgba(239, 68, 68, 0.4),
                      inset 0 1px 2px rgba(255, 255, 255, 0.3)`
+                  : isRemarkable
+                  ? `0 0 0 4px ${colors.accent.blue.primary}20,
+                     0 0 12px ${colors.accent.blue.primary}60,
+                     inset 0 1px 2px rgba(255, 255, 255, 0.2)`
                   : `0 0 4px ${colors.background.primary}60`,
                 willChange: 'transform, background, box-shadow',
                 transform: 'scale(1)'
