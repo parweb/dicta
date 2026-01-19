@@ -154,10 +154,16 @@ export default function ToolExecutionStatus({ tools }: ToolExecutionStatusProps)
                   <div
                     style={{
                       fontSize: typography.fontSize.xs,
-                      color: colors.text.tertiary,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      color: colors.text.secondary,
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontFamily: 'monospace',
+                      backgroundColor: colors.background.primary + '40',
+                      padding: spacing.sm,
+                      borderRadius: '2px',
+                      marginTop: spacing.xs,
+                      userSelect: 'text',
+                      cursor: 'text'
                     }}
                   >
                     {tool.result}
@@ -169,9 +175,15 @@ export default function ToolExecutionStatus({ tools }: ToolExecutionStatusProps)
                     style={{
                       fontSize: typography.fontSize.xs,
                       color: colors.state.error,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      fontFamily: 'monospace',
+                      backgroundColor: colors.state.error + '10',
+                      padding: spacing.sm,
+                      borderRadius: '2px',
+                      marginTop: spacing.xs,
+                      userSelect: 'text',
+                      cursor: 'text'
                     }}
                   >
                     Erreur: {tool.error}
