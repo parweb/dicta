@@ -157,57 +157,79 @@ export default function ConversationTimeline({
               top: `${bar.position}%`,
               transform: `translateY(-50%) scaleX(${isDragging ? 1 : 0})`,
               transformOrigin: 'right center',
-              width: `${8 + bar.intensity * 24}px`, // 8px to 32px based on intensity
-              height: '2px',
-              backgroundColor: colors.accent.blue.primary,
-              opacity: 0.3 + bar.intensity * 0.5, // 0.3 to 0.8 opacity
-              borderRadius: '1px',
-              transition: `transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) ${index * 0.01}s`,
+              width: `${12 + bar.intensity * 28}px`, // 12px to 40px based on intensity
+              height: '3px',
+              background: `linear-gradient(90deg,
+                ${colors.accent.blue.primary}00 0%,
+                ${colors.accent.blue.primary}${Math.round((0.5 + bar.intensity * 0.5) * 255).toString(16).padStart(2, '0')} 50%,
+                ${colors.accent.blue.light}${Math.round((0.7 + bar.intensity * 0.3) * 255).toString(16).padStart(2, '0')} 100%)`,
+              borderRadius: '2px',
+              transition: `transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) ${index * 0.015}s`,
+              boxShadow: `0 0 ${4 + bar.intensity * 8}px ${colors.accent.blue.primary}${Math.round(bar.intensity * 128).toString(16).padStart(2, '0')}`,
               willChange: 'transform'
             }}
           />
         ))}
       </div>
 
-      {/* Track background */}
+      {/* Track background with gradient */}
       <div
         style={{
           position: 'absolute',
           left: '50%',
           top: 0,
           bottom: 0,
-          width: '4px',
-          backgroundColor: colors.background.tertiary,
+          width: '3px',
+          background: `linear-gradient(180deg,
+            ${colors.accent.blue.primary}20 0%,
+            ${colors.accent.blue.primary}40 50%,
+            ${colors.accent.blue.primary}20 100%)`,
           transform: 'translateX(-50%)',
-          borderRadius: '2px'
+          borderRadius: '2px',
+          boxShadow: `0 0 10px ${colors.accent.blue.primary}15, inset 0 0 10px ${colors.background.primary}40`
         }}
       />
 
-      {/* Scrollbar thumb */}
+      {/* Scrollbar thumb - ultra modern design */}
       <div
         ref={thumbRef}
         style={{
           position: 'absolute',
           left: '50%',
           top: 0,
-          width: isHoveringThumb || isDragging ? '12px' : '8px',
+          width: isHoveringThumb || isDragging ? '16px' : '10px',
           height: `${thumbHeight}px`,
-          backgroundColor: colors.accent.blue.primary,
+          background: isDragging
+            ? `linear-gradient(135deg,
+                ${colors.accent.blue.primary} 0%,
+                ${colors.accent.blue.light} 50%,
+                ${colors.accent.blue.primary} 100%)`
+            : `linear-gradient(135deg,
+                ${colors.accent.blue.primary}E0 0%,
+                ${colors.accent.blue.light}C0 100%)`,
           transform: `translate(-50%, ${thumbPosition}%)`,
-          borderRadius: '6px',
+          borderRadius: '8px',
           transition: isDragging
-            ? 'width 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0.0, 0.2, 1)'
+            ? 'width 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0.0, 0.2, 1)'
             : 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
-          opacity: isDragging ? 1 : isHoveringThumb ? 0.9 : 0.6,
           pointerEvents: 'auto',
           cursor: isDragging ? 'grabbing' : 'grab',
           boxShadow: isDragging
-            ? `0 0 20px ${colors.accent.blue.primary}, 0 0 40px ${colors.accent.blue.primary}40`
+            ? `0 0 30px ${colors.accent.blue.primary}E0,
+               0 0 60px ${colors.accent.blue.primary}80,
+               0 0 90px ${colors.accent.blue.primary}40,
+               inset 0 2px 8px rgba(255, 255, 255, 0.3),
+               inset 0 -2px 8px rgba(0, 0, 0, 0.3)`
             : isHoveringThumb
-            ? `0 0 12px ${colors.accent.blue.primary}`
-            : 'none',
+            ? `0 0 20px ${colors.accent.blue.primary}C0,
+               0 0 40px ${colors.accent.blue.primary}60,
+               inset 0 1px 4px rgba(255, 255, 255, 0.2)`
+            : `0 0 8px ${colors.accent.blue.primary}60,
+               inset 0 1px 2px rgba(255, 255, 255, 0.15)`,
+          border: `1px solid ${colors.accent.blue.light}40`,
+          backdropFilter: 'blur(8px)',
           zIndex: 15,
-          willChange: 'transform, width, opacity, box-shadow'
+          willChange: 'transform, width, box-shadow'
         }}
         onMouseDown={handleThumbMouseDown}
         onMouseEnter={() => setIsHoveringThumb(true)}
@@ -237,36 +259,69 @@ export default function ConversationTimeline({
             }}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* Point */}
+            {/* Point with modern design */}
             <div
               style={{
-                width: isCurrent ? '14px' : '10px',
-                height: isCurrent ? '14px' : '10px',
+                position: 'relative',
+                width: isCurrent ? '16px' : '12px',
+                height: isCurrent ? '16px' : '12px',
                 borderRadius: '50%',
-                backgroundColor: isCurrent ? colors.background.primary : colors.text.primary,
-                border: isCurrent ? `2px solid ${colors.state.error}` : `2px solid ${colors.border.primary}`,
+                background: isCurrent
+                  ? `radial-gradient(circle, ${colors.background.primary} 0%, ${colors.background.primary} 40%, ${colors.state.error} 100%)`
+                  : `radial-gradient(circle, ${colors.text.primary} 0%, ${colors.text.tertiary} 100%)`,
+                border: isCurrent
+                  ? `2px solid ${colors.state.error}`
+                  : `1.5px solid ${colors.border.primary}`,
                 transition: 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
                 boxShadow: isCurrent
-                  ? `0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 8px rgba(239, 68, 68, 0.3)`
-                  : 'none',
-                willChange: 'transform, background-color, box-shadow',
+                  ? `0 0 0 4px rgba(239, 68, 68, 0.15),
+                     0 0 0 8px rgba(239, 68, 68, 0.08),
+                     0 0 16px rgba(239, 68, 68, 0.4),
+                     inset 0 1px 2px rgba(255, 255, 255, 0.3)`
+                  : `0 0 4px ${colors.background.primary}60`,
+                willChange: 'transform, background, box-shadow',
                 transform: 'scale(1)'
               }}
               onMouseEnter={(e) => {
                 if (!isCurrent) {
-                  e.currentTarget.style.transform = 'scale(1.4)'
-                  e.currentTarget.style.backgroundColor = colors.accent.blue.primary
-                  e.currentTarget.style.boxShadow = `0 0 8px ${colors.accent.blue.primary}60`
+                  e.currentTarget.style.transform = 'scale(1.5)'
+                  e.currentTarget.style.background = `radial-gradient(circle,
+                    ${colors.accent.blue.light} 0%,
+                    ${colors.accent.blue.primary} 100%)`
+                  e.currentTarget.style.boxShadow = `0 0 0 4px ${colors.accent.blue.primary}20,
+                    0 0 16px ${colors.accent.blue.primary}80,
+                    inset 0 1px 3px rgba(255, 255, 255, 0.4)`
+                  e.currentTarget.style.border = `2px solid ${colors.accent.blue.light}`
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isCurrent) {
                   e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.backgroundColor = colors.text.primary
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.background = `radial-gradient(circle, ${colors.text.primary} 0%, ${colors.text.tertiary} 100%)`
+                  e.currentTarget.style.boxShadow = `0 0 4px ${colors.background.primary}60`
+                  e.currentTarget.style.border = `1.5px solid ${colors.border.primary}`
                 }
               }}
-            />
+            >
+              {/* Pulsing ring for current item */}
+              {isCurrent && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    width: '28px',
+                    height: '28px',
+                    transform: 'translate(-50%, -50%)',
+                    borderRadius: '50%',
+                    border: `2px solid ${colors.state.error}`,
+                    opacity: 0,
+                    animation: 'pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    pointerEvents: 'none'
+                  }}
+                />
+              )}
+            </div>
           </div>
         )
       })}
