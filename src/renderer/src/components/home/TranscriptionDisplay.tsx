@@ -1,3 +1,5 @@
+import { Sparkles } from 'lucide-react';
+
 import AudioWaveform from '../AudioWaveform';
 import { useTheme } from '../../lib/theme-context';
 
@@ -8,6 +10,7 @@ interface TranscriptionDisplayProps {
   audioAmplitudes: number[];
   audioDuration?: number;
   onCopyTranscript: () => void;
+  onOpenActions?: () => void;
 }
 
 const TranscriptionDisplay = ({
@@ -16,7 +19,8 @@ const TranscriptionDisplay = ({
   slideDirection,
   audioAmplitudes,
   audioDuration,
-  onCopyTranscript
+  onCopyTranscript,
+  onOpenActions
 }: TranscriptionDisplayProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography, borderRadius, components } = theme;
@@ -80,6 +84,39 @@ const TranscriptionDisplay = ({
       >
         {transcript}
       </p>
+
+      {/* Actions button */}
+      {onOpenActions && (
+        <button
+          onClick={onOpenActions}
+          style={
+            {
+              display: 'flex',
+              alignItems: 'center',
+              gap: spacing.sm,
+              padding: `${spacing.sm}px ${spacing.md}px`,
+              backgroundColor: colors.accent.blue,
+              color: colors.text.primary,
+              border: 'none',
+              borderRadius: borderRadius.sm,
+              fontSize: typography.fontSize.sm,
+              fontWeight: typography.fontWeight.medium,
+              cursor: 'pointer',
+              transition: 'opacity 0.15s',
+              WebkitAppRegion: 'no-drag'
+            } as React.CSSProperties
+          }
+          onMouseEnter={e => {
+            e.currentTarget.style.opacity = '0.8';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.opacity = '1';
+          }}
+        >
+          <Sparkles size={16} />
+          <span>Actions</span>
+        </button>
+      )}
 
       {/* Audio waveform visualization */}
       {audioAmplitudes.length > 0 && (
