@@ -335,6 +335,7 @@ app.whenReady().then(() => {
   const configDir = join(app.getPath('userData'), 'config');
   const themeConfigPath = join(configDir, 'design-system.json');
   const credentialsPath = join(configDir, 'credentials.json');
+  const credentialsBedrockPath = join(configDir, 'credentials-bedrock.json');
 
   // Load theme configuration
   ipcMain.handle('theme:load', () => {
@@ -480,6 +481,89 @@ app.whenReady().then(() => {
       return { success: true };
     } catch (error) {
       console.error('Error deleting API key:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
+  // Bedrock credentials management handlers
+  // Save Bedrock credentials (encrypted)
+  ipcMain.handle(
+    'credentials:save-bedrock',
+    (_event, credentials: { bearerToken: string; region: string; modelId: string }) => {
+      try {
+        console.log('[BEDROCK-CREDENTIALS] Saving credentials');
+
+        if (!existsSync(configDir)) {
+          mkdirSync(configDir, { recursive: true });
+        }
+
+        // Encrypt the credentials
+        const isEncryptionAvailable = safeStorage.isEncryptionAvailable();
+        console.log('[BEDROCK-CREDENTIALS] Encryption available:', isEncryptionAvailable);
+
+        const credentialsString = JSON.stringify(credentials);
+        const encrypted = isEncryptionAvailable
+          ? safeStorage.encryptString(credentialsString)
+          : Buffer.from(credentialsString, 'utf-8');
+
+        // Store as Base64 string
+        const data = {
+          encrypted: encrypted.toString('base64'),
+          isEncrypted: isEncryptionAvailable,
+          timestamp: Date.now()
+        };
+
+        writeFileSync(credentialsBedrockPath, JSON.stringify(data, null, 2));
+        console.log('[BEDROCK-CREDENTIALS] Credentials saved successfully');
+        return { success: true };
+      } catch (error) {
+        console.error('[BEDROCK-CREDENTIALS] Error saving credentials:', error);
+        return { success: false, error: String(error) };
+      }
+    }
+  );
+
+  // Load Bedrock credentials (decrypted)
+  ipcMain.handle('credentials:load-bedrock', () => {
+    try {
+      console.log('[BEDROCK-CREDENTIALS] Loading credentials from:', credentialsBedrockPath);
+
+      if (!existsSync(credentialsBedrockPath)) {
+        console.log('[BEDROCK-CREDENTIALS] No credentials file found');
+        return { success: true, credentials: null };
+      }
+
+      const content = readFileSync(credentialsBedrockPath, 'utf-8');
+      const data = JSON.parse(content);
+      console.log('[BEDROCK-CREDENTIALS] Parsed data, isEncrypted:', data.isEncrypted);
+
+      // Decrypt the credentials
+      const buffer = Buffer.from(data.encrypted, 'base64');
+      const credentialsString = data.isEncrypted
+        ? safeStorage.decryptString(buffer)
+        : buffer.toString('utf-8');
+
+      const credentials = JSON.parse(credentialsString);
+      console.log('[BEDROCK-CREDENTIALS] Credentials loaded successfully');
+
+      return { success: true, credentials };
+    } catch (error) {
+      console.error('[BEDROCK-CREDENTIALS] Error loading credentials:', error);
+      return { success: false, error: String(error), credentials: null };
+    }
+  });
+
+  // Delete Bedrock credentials
+  ipcMain.handle('credentials:delete-bedrock', () => {
+    try {
+      if (existsSync(credentialsBedrockPath)) {
+        const fs = require('fs');
+        fs.unlinkSync(credentialsBedrockPath);
+        console.log('[BEDROCK-CREDENTIALS] Credentials deleted successfully');
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('[BEDROCK-CREDENTIALS] Error deleting credentials:', error);
       return { success: false, error: String(error) };
     }
   });

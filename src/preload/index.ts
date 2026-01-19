@@ -65,7 +65,25 @@ const api = {
     deleteApiKey: (): Promise<{
       success: boolean;
       error?: string;
-    }> => ipcRenderer.invoke('credentials:delete-api-key')
+    }> => ipcRenderer.invoke('credentials:delete-api-key'),
+    // Bedrock credentials
+    saveBedrock: (credentials: {
+      bearerToken: string;
+      region: string;
+      modelId: string;
+    }): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:save-bedrock', credentials),
+    loadBedrock: (): Promise<{
+      success: boolean;
+      credentials: { bearerToken: string; region: string; modelId: string } | null;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:load-bedrock'),
+    deleteBedrock: (): Promise<{
+      success: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke('credentials:delete-bedrock')
   },
   // Update management
   updates: {
