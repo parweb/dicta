@@ -24,35 +24,54 @@ export default function ConversationTimeline({
   const { theme } = useTheme()
   const { colors, spacing } = theme
   const [isDragging, setIsDragging] = useState(false)
+  const [isHoveringThumb, setIsHoveringThumb] = useState(false)
   const trackRef = useRef<HTMLDivElement>(null)
+  const thumbRef = useRef<HTMLDivElement>(null)
+  const dragStartRef = useRef<{ y: number; scrollProgress: number } | null>(null)
 
   if (itemCount === 0) return null
 
-  // Handle drag to scroll
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Handle thumb drag
+  const handleThumbMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(true)
-    handleDrag(e.clientY)
+    dragStartRef.current = {
+      y: e.clientY,
+      scrollProgress: scrollProgress
+    }
   }
 
-  const handleDrag = (clientY: number) => {
+  // Handle track click (jump to position)
+  const handleTrackClick = (e: React.MouseEvent) => {
     if (!trackRef.current) return
 
+    // Don't trigger if clicking on thumb
+    if (thumbRef.current?.contains(e.target as Node)) return
+
     const rect = trackRef.current.getBoundingClientRect()
-    const y = clientY - rect.top
+    const y = e.clientY - rect.top
     const progress = Math.max(0, Math.min(1, y / rect.height))
     onScroll?.(progress)
   }
 
   useEffect(() => {
-    if (!isDragging) return
+    if (!isDragging || !dragStartRef.current) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      handleDrag(e.clientY)
+      if (!trackRef.current || !dragStartRef.current) return
+
+      const rect = trackRef.current.getBoundingClientRect()
+      const deltaY = e.clientY - dragStartRef.current.y
+      const deltaProgress = deltaY / rect.height
+      const newProgress = Math.max(0, Math.min(1, dragStartRef.current.scrollProgress + deltaProgress))
+
+      onScroll?.(newProgress)
     }
 
     const handleMouseUp = () => {
       setIsDragging(false)
+      dragStartRef.current = null
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -62,7 +81,7 @@ export default function ConversationTimeline({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging])
+  }, [isDragging, onScroll])
 
   // Calculate thumb height and position (20% of track minimum)
   const thumbHeight = Math.max(60, 200 * (1 / itemCount))
@@ -83,10 +102,10 @@ export default function ConversationTimeline({
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 10,
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: 'pointer',
         pointerEvents: 'auto'
       }}
-      onMouseDown={handleMouseDown}
+      onClick={handleTrackClick}
     >
       {/* Track background */}
       <div
@@ -104,20 +123,28 @@ export default function ConversationTimeline({
 
       {/* Scrollbar thumb */}
       <div
+        ref={thumbRef}
         style={{
           position: 'absolute',
           left: '50%',
           top: `${thumbPosition}%`,
-          width: '8px',
+          width: isHoveringThumb || isDragging ? '12px' : '8px',
           height: `${thumbHeight}px`,
           backgroundColor: colors.accent.blue.primary,
           transform: 'translateX(-50%)',
-          borderRadius: '4px',
-          transition: isDragging ? 'none' : 'top 0.1s ease',
-          opacity: isDragging ? 0.8 : 0.6,
-          pointerEvents: 'none',
-          boxShadow: isDragging ? `0 0 8px ${colors.accent.blue.primary}` : 'none'
+          borderRadius: '6px',
+          transition: isDragging ? 'none' : 'all 0.2s ease',
+          opacity: isDragging ? 1 : isHoveringThumb ? 0.9 : 0.6,
+          pointerEvents: 'auto',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          boxShadow: isDragging || isHoveringThumb
+            ? `0 0 12px ${colors.accent.blue.primary}`
+            : 'none',
+          zIndex: 15
         }}
+        onMouseDown={handleThumbMouseDown}
+        onMouseEnter={() => setIsHoveringThumb(true)}
+        onMouseLeave={() => setIsHoveringThumb(false)}
       />
 
       {/* Navigation points */}
