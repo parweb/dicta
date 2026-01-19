@@ -270,6 +270,36 @@ export async function executeSendEmail(input: SendEmailInput): Promise<ToolResul
 }
 
 /**
+ * Execute search_web tool
+ */
+export async function executeSearchWeb(input: SearchWebInput): Promise<ToolResult> {
+  try {
+    console.log('[TOOL-EXECUTION] Executing search_web:', input)
+    const result = await window.api?.bedrock.searchWeb(input)
+
+    if (result?.success) {
+      return {
+        success: true,
+        message: result.message || 'Web search opened'
+      }
+    } else {
+      return {
+        success: false,
+        message: 'Failed to open web search',
+        error: result?.error
+      }
+    }
+  } catch (error) {
+    console.error('[TOOL-EXECUTION] Error executing search_web:', error)
+    return {
+      success: false,
+      message: 'Error opening web search',
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
  * Execute a tool by name with dynamic input
  */
 export async function executeTool(
@@ -283,6 +313,8 @@ export async function executeTool(
       return executeSaveAsNote(input as SaveAsNoteInput)
     case 'send_email':
       return executeSendEmail(input as SendEmailInput)
+    case 'search_web':
+      return executeSearchWeb(input as SearchWebInput)
     default:
       return {
         success: false,

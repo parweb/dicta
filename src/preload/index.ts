@@ -115,7 +115,14 @@ const api = {
       success: boolean;
       message?: string;
       error?: string;
-    }> => ipcRenderer.invoke('bedrock:send-email', params)
+    }> => ipcRenderer.invoke('bedrock:send-email', params),
+    searchWeb: (params: {
+      query: string;
+    }): Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }> => ipcRenderer.invoke('bedrock:search-web', params)
   },
   // Update management
   updates: {

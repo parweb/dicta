@@ -730,6 +730,29 @@ end tell
     }
   );
 
+  // Search web via default browser
+  ipcMain.handle('bedrock:search-web', (_event, params: { query: string }) => {
+    try {
+      console.log('[BEDROCK-TOOLS] Opening web search:', params.query);
+
+      // Build Google search URL
+      const query = encodeURIComponent(params.query);
+      const searchUrl = `https://www.google.com/search?q=${query}`;
+
+      // Open in default browser
+      shell.openExternal(searchUrl);
+
+      console.log('[BEDROCK-TOOLS] Browser opened with search');
+      return {
+        success: true,
+        message: `Searching for "${params.query}"`
+      };
+    } catch (error) {
+      console.error('[BEDROCK-TOOLS] Error opening browser:', error);
+      return { success: false, error: String(error) };
+    }
+  });
+
   // Update management handlers
   ipcMain.handle('update:get-current-version', () => {
     return {
