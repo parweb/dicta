@@ -308,7 +308,7 @@ export default function ConversationTimeline({
               transform: 'translate(-50%, -50%)',
               pointerEvents: 'auto',
               cursor: 'pointer',
-              zIndex: 15
+              zIndex: isCurrent ? 20 : 15
             }}
             onClick={(e) => {
               e.stopPropagation()
