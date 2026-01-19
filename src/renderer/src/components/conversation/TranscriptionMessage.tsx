@@ -57,10 +57,8 @@ export default function TranscriptionMessage({
         >
           <AudioWaveform
             amplitudes={audioAmplitudes}
-            maxHeight={60}
-            barWidth={2}
-            barGap={1}
-            color={colors.accent.blue}
+            height={60}
+            showDuration={false}
           />
           <div
             style={{
@@ -127,7 +125,7 @@ export default function TranscriptionMessage({
                   backgroundColor: 'transparent',
                   border: 'none',
                   cursor: 'pointer',
-                  color: colors.accent.blue,
+                  color: colors.accent.blue.primary,
                   display: 'flex',
                   alignItems: 'center',
                   gap: spacing.xs,

@@ -5,7 +5,6 @@
 
 import { BedrockStreamParser, type StreamCallbacks } from './stream-parser'
 import type {
-  BedrockAdapterCallbacks,
   BedrockAdapterConfig,
   BedrockConverseRequest,
   BedrockConverseResponse,

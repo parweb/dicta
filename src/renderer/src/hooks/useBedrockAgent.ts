@@ -248,7 +248,8 @@ export function useBedrockAgent(): UseBedrockAgentReturn {
         response: '',
         toolsExecuted: [],
         error: null,
-        isComplete: false
+        isComplete: false,
+        isConversationMode: false
       })
 
       try {

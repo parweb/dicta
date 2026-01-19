@@ -47,6 +47,61 @@ interface CustomAPI {
       success: boolean;
       error?: string;
     }>;
+    saveBedrock: (credentials: {
+      bearerToken: string;
+      region: string;
+      modelId: string;
+    }) => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+    loadBedrock: () => Promise<{
+      success: boolean;
+      credentials: { bearerToken: string; region: string; modelId: string } | null;
+      error?: string;
+    }>;
+    deleteBedrock: () => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+  };
+  bedrock: {
+    addToCalendar: (params: {
+      title: string;
+      startTime: string;
+      endTime?: string;
+      description?: string;
+    }) => Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>;
+    saveNote: (params: {
+      title: string;
+      content: string;
+      folder?: string;
+    }) => Promise<{
+      success: boolean;
+      message?: string;
+      filepath?: string;
+      error?: string;
+    }>;
+    sendEmail: (params: {
+      to?: string;
+      subject: string;
+      body: string;
+    }) => Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>;
+    searchWeb: (params: {
+      query: string;
+    }) => Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }>;
   };
   updates: {
     getCurrentVersion: () => Promise<{

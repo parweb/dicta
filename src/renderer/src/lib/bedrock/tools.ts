@@ -308,13 +308,13 @@ export async function executeTool(
 ): Promise<ToolResult> {
   switch (toolName) {
     case 'add_to_calendar':
-      return executeAddToCalendar(input as AddToCalendarInput)
+      return executeAddToCalendar(input as unknown as AddToCalendarInput)
     case 'save_as_note':
-      return executeSaveAsNote(input as SaveAsNoteInput)
+      return executeSaveAsNote(input as unknown as SaveAsNoteInput)
     case 'send_email':
-      return executeSendEmail(input as SendEmailInput)
+      return executeSendEmail(input as unknown as SendEmailInput)
     case 'search_web':
-      return executeSearchWeb(input as SearchWebInput)
+      return executeSearchWeb(input as unknown as SearchWebInput)
     default:
       return {
         success: false,

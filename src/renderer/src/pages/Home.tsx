@@ -35,7 +35,6 @@ const HomePage = () => {
     'home' | 'statistics' | 'settings'
   >('home');
   const [settingsTab, setSettingsTab] = useState<'theme' | 'model'>('theme');
-  const [selectedTranscription, setSelectedTranscription] = useState<Transcription | null>(null);
 
   const hasRedirectedRef = useRef(false);
 
@@ -52,8 +51,6 @@ const HomePage = () => {
 
   const {
     allTranscriptions,
-    currentTranscriptionId,
-    slideDirection,
     navigateTranscription,
     setCurrentTranscriptionId,
     reloadTranscriptions
@@ -134,7 +131,6 @@ const HomePage = () => {
   }, []);
 
   const handleOpenActions = useCallback((transcription: Transcription) => {
-    setSelectedTranscription(transcription);
     setTranscript(transcription.text);
     setIsDrawerOpen(true);
   }, []);

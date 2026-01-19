@@ -76,7 +76,7 @@ export class BedrockStreamParser {
       }
 
       // Parse JSON payload
-      const bodyText = fromUtf8(message.body)
+      const bodyText = new TextDecoder().decode(message.body)
       const event = JSON.parse(bodyText) as BedrockStreamEvent
 
       // Handle event based on type
