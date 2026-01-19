@@ -285,3 +285,16 @@
 *::-webkit-scrollbar {
   display: none;
 }
+
+/* Ultra-smooth scrolling optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* GPU acceleration for transforms */
+.smooth-transform {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

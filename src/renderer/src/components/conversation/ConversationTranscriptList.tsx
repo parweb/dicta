@@ -136,7 +136,10 @@ export default function ConversationTranscriptList({
           WebkitAppRegion: 'no-drag',
           // Hide native scrollbar
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
+          // Enable smooth scrolling with GPU acceleration
+          scrollBehavior: 'smooth',
+          willChange: 'scroll-position'
         } as React.CSSProperties & { scrollbarWidth?: string; msOverflowStyle?: string }}
       >
         {transcriptions.length === 0 ? (

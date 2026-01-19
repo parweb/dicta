@@ -3,7 +3,7 @@
  * Custom scrollbar with timeline navigation points
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { useTheme } from '@/lib/theme-context'
 
 interface ConversationTimelineProps {
@@ -83,32 +83,36 @@ export default function ConversationTimeline({
     }
   }, [isDragging, onScroll])
 
-  // Calculate thumb height and position (20% of track minimum)
-  const thumbHeight = Math.max(60, 200 * (1 / itemCount))
+  // Calculate thumb height and position (20% of track minimum) - memoized for performance
+  const thumbHeight = useMemo(() => Math.max(60, 200 * (1 / itemCount)), [itemCount])
   const trackHeight = trackRef.current?.clientHeight || 500
-  const thumbPosition = scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
+  const thumbPosition = useMemo(() => {
+    return scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
+  }, [scrollProgress, thumbHeight, trackHeight])
 
-  // Calculate activity bars (density visualization)
-  const activitySegments = 20 // Number of segments to divide timeline into
-  const activityBars = Array.from({ length: activitySegments }).map((_, segmentIndex) => {
-    const segmentStart = (segmentIndex / activitySegments) * itemCount
-    const segmentEnd = ((segmentIndex + 1) / activitySegments) * itemCount
+  // Calculate activity bars (density visualization) - memoized
+  const activityBars = useMemo(() => {
+    const activitySegments = 20 // Number of segments to divide timeline into
+    return Array.from({ length: activitySegments }).map((_, segmentIndex) => {
+      const segmentStart = (segmentIndex / activitySegments) * itemCount
+      const segmentEnd = ((segmentIndex + 1) / activitySegments) * itemCount
 
-    // Count items in this segment
-    let count = 0
-    for (let i = Math.floor(segmentStart); i < Math.ceil(segmentEnd) && i < itemCount; i++) {
-      count++
-    }
+      // Count items in this segment
+      let count = 0
+      for (let i = Math.floor(segmentStart); i < Math.ceil(segmentEnd) && i < itemCount; i++) {
+        count++
+      }
 
-    // Normalize to 0-1 range
-    const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
-    const intensity = Math.min(1, count / maxItemsPerSegment)
+      // Normalize to 0-1 range
+      const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
+      const intensity = Math.min(1, count / maxItemsPerSegment)
 
-    return {
-      position: ((segmentIndex + 0.5) / activitySegments) * 100, // Center of segment
-      intensity
-    }
-  })
+      return {
+        position: ((segmentIndex + 0.5) / activitySegments) * 100, // Center of segment
+        intensity
+      }
+    })
+  }, [itemCount])
 
   return (
     <div
@@ -137,10 +141,11 @@ export default function ConversationTimeline({
           top: 0,
           bottom: 0,
           width: '40px',
-          transform: 'translateX(-100%)',
+          transform: `translateX(-100%) scale(${isDragging ? 1 : 0.8})`,
           opacity: isDragging ? 1 : 0,
-          transition: 'opacity 0.2s ease',
-          pointerEvents: 'none'
+          transition: 'opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
+          pointerEvents: 'none',
+          willChange: 'opacity, transform'
         }}
       >
         {activityBars.map((bar, index) => (
@@ -150,13 +155,15 @@ export default function ConversationTimeline({
               position: 'absolute',
               right: '8px',
               top: `${bar.position}%`,
-              transform: 'translateY(-50%)',
+              transform: `translateY(-50%) scaleX(${isDragging ? 1 : 0})`,
+              transformOrigin: 'right center',
               width: `${8 + bar.intensity * 24}px`, // 8px to 32px based on intensity
               height: '2px',
               backgroundColor: colors.accent.blue.primary,
               opacity: 0.3 + bar.intensity * 0.5, // 0.3 to 0.8 opacity
               borderRadius: '1px',
-              transition: 'all 0.15s ease'
+              transition: `transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) ${index * 0.01}s`,
+              willChange: 'transform'
             }}
           />
         ))}
@@ -182,20 +189,25 @@ export default function ConversationTimeline({
         style={{
           position: 'absolute',
           left: '50%',
-          top: `${thumbPosition}%`,
+          top: 0,
           width: isHoveringThumb || isDragging ? '12px' : '8px',
           height: `${thumbHeight}px`,
           backgroundColor: colors.accent.blue.primary,
-          transform: 'translateX(-50%)',
+          transform: `translate(-50%, ${thumbPosition}%)`,
           borderRadius: '6px',
-          transition: isDragging ? 'none' : 'all 0.2s ease',
+          transition: isDragging
+            ? 'width 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0.0, 0.2, 1)'
+            : 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
           opacity: isDragging ? 1 : isHoveringThumb ? 0.9 : 0.6,
           pointerEvents: 'auto',
           cursor: isDragging ? 'grabbing' : 'grab',
-          boxShadow: isDragging || isHoveringThumb
+          boxShadow: isDragging
+            ? `0 0 20px ${colors.accent.blue.primary}, 0 0 40px ${colors.accent.blue.primary}40`
+            : isHoveringThumb
             ? `0 0 12px ${colors.accent.blue.primary}`
             : 'none',
-          zIndex: 15
+          zIndex: 15,
+          willChange: 'transform, width, opacity, box-shadow'
         }}
         onMouseDown={handleThumbMouseDown}
         onMouseEnter={() => setIsHoveringThumb(true)}
@@ -233,19 +245,25 @@ export default function ConversationTimeline({
                 borderRadius: '50%',
                 backgroundColor: isCurrent ? colors.background.primary : colors.text.primary,
                 border: isCurrent ? `2px solid ${colors.state.error}` : `2px solid ${colors.border.primary}`,
-                transition: 'all 0.2s ease',
-                boxShadow: isCurrent ? '0 0 0 4px rgba(239, 68, 68, 0.2)' : 'none'
+                transition: 'all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                boxShadow: isCurrent
+                  ? `0 0 0 4px rgba(239, 68, 68, 0.2), 0 0 8px rgba(239, 68, 68, 0.3)`
+                  : 'none',
+                willChange: 'transform, background-color, box-shadow',
+                transform: 'scale(1)'
               }}
               onMouseEnter={(e) => {
                 if (!isCurrent) {
-                  e.currentTarget.style.transform = 'scale(1.3)'
+                  e.currentTarget.style.transform = 'scale(1.4)'
                   e.currentTarget.style.backgroundColor = colors.accent.blue.primary
+                  e.currentTarget.style.boxShadow = `0 0 8px ${colors.accent.blue.primary}60`
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isCurrent) {
                   e.currentTarget.style.transform = 'scale(1)'
                   e.currentTarget.style.backgroundColor = colors.text.primary
+                  e.currentTarget.style.boxShadow = 'none'
                 }
               }}
             />
