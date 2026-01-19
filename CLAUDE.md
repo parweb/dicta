@@ -204,6 +204,146 @@ API keys are managed through Electron's `safeStorage` API:
 - Methods: `saveApiKey()`, `deleteApiKey()`, `loadApiKey()`
 - Auto-loads on mount and checks encryption availability
 
+## AWS Bedrock Agent Integration
+
+Dicta integrates AWS Bedrock to provide an AI agent that can act on voice transcriptions. The agent has access to 4 tools for common actions.
+
+### Architecture
+
+**Renderer-Side HTTP Adapter** (`src/renderer/src/lib/bedrock/adapter.ts`):
+
+- Direct HTTP calls to Bedrock Converse API from renderer process
+- No CORS issues (Electron bypass)
+- Bearer Token authentication (simpler than AWS SigV4)
+- Both streaming and non-streaming support
+- Event stream parsing with `@smithy/eventstream-codec`
+
+**Credentials Storage** (`src/contexts/BedrockContext.tsx`):
+
+- Encrypted storage via Electron's `safeStorage` API
+- Stored in `userData/config/credentials-bedrock.json`
+- Contains: Bearer Token, AWS Region, Model ID (Inference Profile)
+- IPC handlers: `credentials:save-bedrock`, `credentials:load-bedrock`, `credentials:delete-bedrock`
+
+**Model Configuration**:
+
+- **Important**: Must use Inference Profile IDs, not direct model IDs
+- Example: `us.anthropic.claude-sonnet-4-5-20250929-v1:0`
+- Default region: `us-east-1`
+- Endpoint: `https://bedrock-runtime.{region}.amazonaws.com/model/{modelId}/converse`
+
+### Agent Tools (MVP)
+
+Four tools available for the agent to use:
+
+1. **add_to_calendar** (`bedrock:add-to-calendar`):
+   - Creates events in macOS Calendar via AppleScript
+   - Parameters: `title`, `startTime` (ISO 8601), `endTime` (optional), `description` (optional)
+   - IPC handler in main process executes AppleScript
+
+2. **save_as_note** (`bedrock:save-note`):
+   - Saves content as markdown files in `userData/notes/`
+   - Parameters: `title`, `content`, `folder` (optional subfolder)
+   - Filename format: `{timestamp}-{slug(title)}.md`
+
+3. **send_email** (`bedrock:send-email`):
+   - Creates email draft via `mailto:` URL
+   - Parameters: `to` (optional), `subject`, `body`
+   - Opens default mail client with pre-filled content
+
+4. **search_web** (`bedrock:search-web`):
+   - Opens Google search in default browser
+   - Parameters: `query`
+   - Uses `shell.openExternal()` with Google URL
+
+### Agentic Loop Implementation
+
+**useBedrockAgent Hook** (`src/hooks/useBedrockAgent.ts`):
+
+- Implements multi-turn agentic loop (max 10 rounds)
+- Flow:
+  1. Call Bedrock Converse API
+  2. If `stopReason === 'tool_use'`, extract and execute tools
+  3. Add tool results to conversation as user message
+  4. Continue loop until `stopReason === 'end_turn'` or max rounds
+- Non-streaming API calls for simpler state management in loop
+- Real-time state updates for tool execution status
+
+**Tool Execution** (`src/renderer/src/lib/bedrock/tools.ts`):
+
+- `executeTool()` dispatcher routes tool calls to implementations
+- Each tool returns `ToolResult` with success/error status
+- Tool results formatted and added back to conversation
+
+### UI Components
+
+**BedrockAgentDrawer** (`src/components/bedrock/BedrockAgentDrawer.tsx`):
+
+- Main interaction UI (Drawer from vaul)
+- Textarea for user prompt
+- Cmd/Ctrl+Enter keyboard shortcut
+- Shows warning if credentials not configured
+- "Nouvelle action" button to reset after completion
+
+**AgentStreamingDisplay** (`src/components/bedrock/AgentStreamingDisplay.tsx`):
+
+- Displays agent response text with typing cursor effect
+- Integrates ToolExecutionStatus component
+- Auto-scrolls to latest content
+- Error display with red styling
+- Completion indicator
+
+**ToolExecutionStatus** (`src/components/bedrock/ToolExecutionStatus.tsx`):
+
+- Real-time tool execution feedback
+- Tool-specific icons (Calendar, FileText, Mail, Search)
+- Status-based styling: pending (gray), running (blue spinner), success (green), error (red)
+- Shows result messages and errors
+
+**Actions Button** (TranscriptionDisplay):
+
+- Blue "Actions" button with Sparkles icon
+- Appears after successful transcription
+- Opens BedrockAgentDrawer with transcript context
+
+### Integration Flow
+
+1. User completes voice transcription
+2. Click "Actions" button in TranscriptionDisplay
+3. BedrockAgentDrawer opens with transcript as context
+4. User enters prompt (e.g., "Ajoute un rendez-vous demain à 14h")
+5. Agent executes with access to transcript and tools
+6. Tools execute with real-time status updates
+7. Agent responds with completion message
+8. User can start new action or close drawer
+
+### Configuration
+
+**Settings > Bedrock Tab**:
+
+- Bearer Token input (masked, encrypted storage)
+- AWS Region selector (6 common regions)
+- Model ID input (defaults to Sonnet 4.5 inference profile)
+- Delete with confirmation
+- Encryption status indicator
+
+**Getting Bearer Token**:
+
+- AWS Console → Bedrock → API Keys
+- Or via AWS CLI with temporary credentials
+- Format: JWT string (long token)
+
+### Key Files
+
+- `src/renderer/src/lib/bedrock/adapter.ts` - HTTP adapter
+- `src/renderer/src/lib/bedrock/stream-parser.ts` - Event stream parsing
+- `src/renderer/src/lib/bedrock/tools.ts` - Tool definitions and execution
+- `src/renderer/src/lib/bedrock/types.ts` - TypeScript types
+- `src/renderer/src/hooks/useBedrockAgent.ts` - Agentic loop
+- `src/renderer/src/contexts/BedrockContext.tsx` - Credentials management
+- `src/renderer/src/components/bedrock/` - UI components
+- `src/main/index.ts` - IPC handlers for tools (lines 571-754)
+
 ## Important Notes
 
 - **Linux clipboard paste** requires `xdotool` to be installed: `sudo apt-get install xdotool`
