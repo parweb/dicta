@@ -35,6 +35,7 @@ export default function TranscriptionMessage({
   return (
     <div
       style={{
+        position: 'relative',
         display: 'flex',
         gap: spacing.lg,
         padding: spacing.lg,
@@ -45,6 +46,18 @@ export default function TranscriptionMessage({
         WebkitAppRegion: 'no-drag'
       } as React.CSSProperties}
     >
+      {/* Connection line to timeline */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '-60px',
+          top: '50%',
+          width: '40px',
+          height: '2px',
+          backgroundColor: colors.border.primary,
+          transform: 'translateY(-50%)'
+        }}
+      />
       {/* Audio Waveform Section */}
       {audioAmplitudes.length > 0 && (
         <div
