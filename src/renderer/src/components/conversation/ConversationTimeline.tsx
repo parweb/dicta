@@ -1,52 +1,122 @@
 /**
  * Conversation Timeline Component
- * Non-linear vertical timeline with navigation points
+ * Custom scrollbar with timeline navigation points
  */
 
+import { useEffect, useRef, useState } from 'react'
 import { useTheme } from '@/lib/theme-context'
 
 interface ConversationTimelineProps {
   itemCount: number
   currentIndex: number
   onNavigate?: (index: number) => void
+  scrollProgress: number // 0-1 representing scroll position
+  onScroll?: (progress: number) => void
 }
 
 export default function ConversationTimeline({
   itemCount,
   currentIndex,
-  onNavigate
+  onNavigate,
+  scrollProgress,
+  onScroll
 }: ConversationTimelineProps) {
   const { theme } = useTheme()
   const { colors, spacing } = theme
+  const [isDragging, setIsDragging] = useState(false)
+  const trackRef = useRef<HTMLDivElement>(null)
 
   if (itemCount === 0) return null
 
+  // Handle drag to scroll
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+    handleDrag(e.clientY)
+  }
+
+  const handleDrag = (clientY: number) => {
+    if (!trackRef.current) return
+
+    const rect = trackRef.current.getBoundingClientRect()
+    const y = clientY - rect.top
+    const progress = Math.max(0, Math.min(1, y / rect.height))
+    onScroll?.(progress)
+  }
+
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      handleDrag(e.clientY)
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging])
+
+  // Calculate thumb height and position (20% of track minimum)
+  const thumbHeight = Math.max(60, 200 * (1 / itemCount))
+  const trackHeight = trackRef.current?.clientHeight || 500
+  const thumbPosition = scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
+
   return (
     <div
+      ref={trackRef}
       style={{
         position: 'absolute',
-        left: spacing.lg,
+        right: spacing.sm,
         top: spacing.lg,
         bottom: spacing.lg,
-        width: '40px',
+        width: '48px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         alignItems: 'center',
         zIndex: 10,
-        pointerEvents: 'none'
+        cursor: isDragging ? 'grabbing' : 'grab',
+        pointerEvents: 'auto'
       }}
+      onMouseDown={handleMouseDown}
     >
-      {/* Vertical line */}
+      {/* Track background */}
       <div
         style={{
           position: 'absolute',
           left: '50%',
-          top: '20px',
-          bottom: '20px',
-          width: '2px',
-          backgroundColor: colors.border.primary,
-          transform: 'translateX(-50%)'
+          top: 0,
+          bottom: 0,
+          width: '4px',
+          backgroundColor: colors.background.tertiary,
+          transform: 'translateX(-50%)',
+          borderRadius: '2px'
+        }}
+      />
+
+      {/* Scrollbar thumb */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: `${thumbPosition}%`,
+          width: '8px',
+          height: `${thumbHeight}px`,
+          backgroundColor: colors.accent.blue.primary,
+          transform: 'translateX(-50%)',
+          borderRadius: '4px',
+          transition: isDragging ? 'none' : 'top 0.1s ease',
+          opacity: isDragging ? 0.8 : 0.6,
+          pointerEvents: 'none',
+          boxShadow: isDragging ? `0 0 8px ${colors.accent.blue.primary}` : 'none'
         }}
       />
 
@@ -67,27 +137,33 @@ export default function ConversationTimeline({
               cursor: 'pointer',
               zIndex: 20
             }}
-            onClick={() => onNavigate?.(index)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onNavigate?.(index)
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             {/* Point */}
             <div
               style={{
-                width: isCurrent ? '16px' : '12px',
-                height: isCurrent ? '16px' : '12px',
+                width: isCurrent ? '14px' : '10px',
+                height: isCurrent ? '14px' : '10px',
                 borderRadius: '50%',
                 backgroundColor: isCurrent ? colors.background.primary : colors.text.primary,
-                border: isCurrent ? `2px solid ${colors.state.error}` : 'none',
+                border: isCurrent ? `2px solid ${colors.state.error}` : `2px solid ${colors.border.primary}`,
                 transition: 'all 0.2s ease',
                 boxShadow: isCurrent ? '0 0 0 4px rgba(239, 68, 68, 0.2)' : 'none'
               }}
               onMouseEnter={(e) => {
                 if (!isCurrent) {
-                  e.currentTarget.style.transform = 'scale(1.2)'
+                  e.currentTarget.style.transform = 'scale(1.3)'
+                  e.currentTarget.style.backgroundColor = colors.accent.blue.primary
                 }
               }}
               onMouseLeave={(e) => {
                 if (!isCurrent) {
                   e.currentTarget.style.transform = 'scale(1)'
+                  e.currentTarget.style.backgroundColor = colors.text.primary
                 }
               }}
             />

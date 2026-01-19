@@ -25,6 +25,7 @@ export default function ConversationTranscriptList({
   const { spacing } = theme
   const parentRef = useRef<HTMLDivElement>(null)
   const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1)
+  const [scrollProgress, setScrollProgress] = useState(1)
 
   // Virtualize the list for performance
   const virtualizer = useVirtualizer({
@@ -46,34 +47,43 @@ export default function ConversationTranscriptList({
     }
   }, [transcriptions.length, virtualizer])
 
-  // Update current index based on scroll position
+  // Update current index and scroll progress based on scroll position
   useEffect(() => {
     const handleScroll = () => {
+      const scrollElement = parentRef.current
+      if (!scrollElement) return
+
+      // Calculate scroll progress
+      const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight
+      const progress = maxScroll > 0 ? scrollElement.scrollTop / maxScroll : 0
+      setScrollProgress(progress)
+
+      // Find the item closest to the middle of the viewport
       const items = virtualizer.getVirtualItems()
       if (items.length > 0) {
-        // Find the item closest to the middle of the viewport
-        const scrollElement = parentRef.current
-        if (scrollElement) {
-          const viewportMiddle = scrollElement.scrollTop + scrollElement.clientHeight / 2
-          let closestIndex = 0
-          let closestDistance = Infinity
+        const viewportMiddle = scrollElement.scrollTop + scrollElement.clientHeight / 2
+        let closestIndex = 0
+        let closestDistance = Infinity
 
-          items.forEach((item) => {
-            const itemMiddle = item.start + item.size / 2
-            const distance = Math.abs(itemMiddle - viewportMiddle)
-            if (distance < closestDistance) {
-              closestDistance = distance
-              closestIndex = item.index
-            }
-          })
+        items.forEach((item) => {
+          const itemMiddle = item.start + item.size / 2
+          const distance = Math.abs(itemMiddle - viewportMiddle)
+          if (distance < closestDistance) {
+            closestDistance = distance
+            closestIndex = item.index
+          }
+        })
 
-          setCurrentIndex(closestIndex)
-        }
+        setCurrentIndex(closestIndex)
       }
     }
 
     const scrollElement = parentRef.current
     scrollElement?.addEventListener('scroll', handleScroll)
+
+    // Initial calculation
+    handleScroll()
+
     return () => scrollElement?.removeEventListener('scroll', handleScroll)
   }, [virtualizer])
 
@@ -86,6 +96,15 @@ export default function ConversationTranscriptList({
     })
   }
 
+  // Handle scroll from timeline drag
+  const handleTimelineScroll = (progress: number) => {
+    const scrollElement = parentRef.current
+    if (!scrollElement) return
+
+    const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight
+    scrollElement.scrollTop = progress * maxScroll
+  }
+
   return (
     <div
       style={{
@@ -94,12 +113,14 @@ export default function ConversationTranscriptList({
         overflow: 'hidden'
       }}
     >
-      {/* Timeline */}
+      {/* Timeline - positioned on right */}
       {transcriptions.length > 0 && (
         <ConversationTimeline
           itemCount={transcriptions.length}
           currentIndex={currentIndex}
+          scrollProgress={scrollProgress}
           onNavigate={handleNavigate}
+          onScroll={handleTimelineScroll}
         />
       )}
 
@@ -109,10 +130,14 @@ export default function ConversationTranscriptList({
         style={{
           height: '100%',
           overflowY: 'auto',
+          overflowX: 'hidden',
           padding: spacing.lg,
-          paddingLeft: transcriptions.length > 0 ? '80px' : spacing.lg, // Extra padding for timeline
-          WebkitAppRegion: 'no-drag'
-        } as React.CSSProperties}
+          paddingRight: transcriptions.length > 0 ? '72px' : spacing.lg, // Extra padding for timeline
+          WebkitAppRegion: 'no-drag',
+          // Hide native scrollbar
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        } as React.CSSProperties & { scrollbarWidth?: string; msOverflowStyle?: string }}
       >
         {transcriptions.length === 0 ? (
           <div
