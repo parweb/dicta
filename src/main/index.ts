@@ -588,22 +588,6 @@ app.whenReady().then(() => {
         const startDate = new Date(params.startTime);
         const endDate = params.endTime ? new Date(params.endTime) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default: 1 hour later
 
-        // Format dates for AppleScript (e.g., "January 20, 2024 at 2:00:00 PM")
-        const formatDateForAppleScript = (date: Date): string => {
-          return date.toLocaleString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-          });
-        };
-
-        const startDateStr = formatDateForAppleScript(startDate);
-        const endDateStr = formatDateForAppleScript(endDate);
-
         // Escape quotes in strings
         const escapeForAppleScript = (str: string): string => {
           return str.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
@@ -614,11 +598,28 @@ app.whenReady().then(() => {
           ? escapeForAppleScript(params.description)
           : '';
 
-        // Build AppleScript
+        // Build AppleScript by setting date properties manually (most reliable method)
+        // Month in AppleScript is 1-indexed (January = 1)
         const script = `
 tell application "Calendar"
   tell calendar "Calendar"
-    set newEvent to make new event with properties {summary:"${title}", start date:date "${startDateStr}", end date:date "${endDateStr}"}
+    set startDate to current date
+    set year of startDate to ${startDate.getFullYear()}
+    set month of startDate to ${startDate.getMonth() + 1}
+    set day of startDate to ${startDate.getDate()}
+    set hours of startDate to ${startDate.getHours()}
+    set minutes of startDate to ${startDate.getMinutes()}
+    set seconds of startDate to ${startDate.getSeconds()}
+
+    set endDate to current date
+    set year of endDate to ${endDate.getFullYear()}
+    set month of endDate to ${endDate.getMonth() + 1}
+    set day of endDate to ${endDate.getDate()}
+    set hours of endDate to ${endDate.getHours()}
+    set minutes of endDate to ${endDate.getMinutes()}
+    set seconds of endDate to ${endDate.getSeconds()}
+
+    set newEvent to make new event with properties {summary:"${title}", start date:startDate, end date:endDate}
     ${description ? `set description of newEvent to "${description}"` : ''}
   end tell
 end tell
@@ -640,7 +641,7 @@ end tell
               console.log('[BEDROCK-TOOLS] Calendar event created successfully');
               resolve({
                 success: true,
-                message: `Created event "${params.title}" from ${startDateStr} to ${endDateStr}`
+                message: `Created event "${params.title}" on ${startDate.toLocaleDateString()} at ${startDate.toLocaleTimeString()}`
               });
             }
           });
