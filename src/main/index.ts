@@ -568,6 +568,90 @@ app.whenReady().then(() => {
     }
   });
 
+  // Bedrock Tools handlers
+  // Add event to macOS Calendar via AppleScript
+  ipcMain.handle(
+    'bedrock:add-to-calendar',
+    (
+      _event,
+      params: {
+        title: string;
+        startTime: string;
+        endTime?: string;
+        description?: string;
+      }
+    ) => {
+      try {
+        console.log('[BEDROCK-TOOLS] Adding calendar event:', params);
+
+        // Parse ISO dates
+        const startDate = new Date(params.startTime);
+        const endDate = params.endTime ? new Date(params.endTime) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default: 1 hour later
+
+        // Format dates for AppleScript (e.g., "January 20, 2024 at 2:00:00 PM")
+        const formatDateForAppleScript = (date: Date): string => {
+          return date.toLocaleString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          });
+        };
+
+        const startDateStr = formatDateForAppleScript(startDate);
+        const endDateStr = formatDateForAppleScript(endDate);
+
+        // Escape quotes in strings
+        const escapeForAppleScript = (str: string): string => {
+          return str.replace(/"/g, '\\"').replace(/\\/g, '\\\\');
+        };
+
+        const title = escapeForAppleScript(params.title);
+        const description = params.description
+          ? escapeForAppleScript(params.description)
+          : '';
+
+        // Build AppleScript
+        const script = `
+tell application "Calendar"
+  tell calendar "Calendar"
+    set newEvent to make new event with properties {summary:"${title}", start date:date "${startDateStr}", end date:date "${endDateStr}"}
+    ${description ? `set description of newEvent to "${description}"` : ''}
+  end tell
+end tell
+`;
+
+        console.log('[BEDROCK-TOOLS] AppleScript:', script);
+
+        // Execute AppleScript
+        return new Promise((resolve) => {
+          exec(`osascript -e '${script.replace(/'/g, "'\\''")}'`, (error, stdout, stderr) => {
+            if (error) {
+              console.error('[BEDROCK-TOOLS] AppleScript error:', error);
+              console.error('[BEDROCK-TOOLS] stderr:', stderr);
+              resolve({
+                success: false,
+                error: `Failed to create calendar event: ${error.message}`
+              });
+            } else {
+              console.log('[BEDROCK-TOOLS] Calendar event created successfully');
+              resolve({
+                success: true,
+                message: `Created event "${params.title}" from ${startDateStr} to ${endDateStr}`
+              });
+            }
+          });
+        });
+      } catch (error) {
+        console.error('[BEDROCK-TOOLS] Error in add-to-calendar:', error);
+        return { success: false, error: String(error) };
+      }
+    }
+  );
+
   // Update management handlers
   ipcMain.handle('update:get-current-version', () => {
     return {

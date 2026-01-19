@@ -176,3 +176,54 @@ export function getToolByName(name: string): BedrockToolSpec | undefined {
   const tools = getAllTools()
   return tools.find((tool) => tool.toolSpec.name === name)
 }
+
+// ===== Tool Execution Functions =====
+
+/**
+ * Execute add_to_calendar tool
+ */
+export async function executeAddToCalendar(input: AddToCalendarInput): Promise<ToolResult> {
+  try {
+    console.log('[TOOL-EXECUTION] Executing add_to_calendar:', input)
+    const result = await window.api?.bedrock.addToCalendar(input)
+
+    if (result?.success) {
+      return {
+        success: true,
+        message: result.message || 'Calendar event created successfully'
+      }
+    } else {
+      return {
+        success: false,
+        message: 'Failed to create calendar event',
+        error: result?.error
+      }
+    }
+  } catch (error) {
+    console.error('[TOOL-EXECUTION] Error executing add_to_calendar:', error)
+    return {
+      success: false,
+      message: 'Error creating calendar event',
+      error: error instanceof Error ? error.message : String(error)
+    }
+  }
+}
+
+/**
+ * Execute a tool by name with dynamic input
+ */
+export async function executeTool(
+  toolName: string,
+  input: Record<string, unknown>
+): Promise<ToolResult> {
+  switch (toolName) {
+    case 'add_to_calendar':
+      return executeAddToCalendar(input as AddToCalendarInput)
+    default:
+      return {
+        success: false,
+        message: `Unknown tool: ${toolName}`,
+        error: 'Tool not implemented'
+      }
+  }
+}

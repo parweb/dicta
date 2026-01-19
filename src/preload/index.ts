@@ -85,6 +85,19 @@ const api = {
       error?: string;
     }> => ipcRenderer.invoke('credentials:delete-bedrock')
   },
+  // Bedrock tools
+  bedrock: {
+    addToCalendar: (params: {
+      title: string;
+      startTime: string;
+      endTime?: string;
+      description?: string;
+    }): Promise<{
+      success: boolean;
+      message?: string;
+      error?: string;
+    }> => ipcRenderer.invoke('bedrock:add-to-calendar', params)
+  },
   // Update management
   updates: {
     getCurrentVersion: (): Promise<{
