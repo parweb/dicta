@@ -37,6 +37,9 @@ export default function ConversationTimeline({
   const itemCount = timestamps.length
   if (itemCount === 0) return null
 
+  // Stable reference for "now" timestamp
+  const nowRef = useRef(Date.now())
+
   // Handle thumb drag
   const handleThumbMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -96,20 +99,34 @@ export default function ConversationTimeline({
     return scrollProgress * (100 - (thumbHeight / trackHeight) * 100)
   }, [scrollProgress, thumbHeight, trackHeight])
 
-  // Calculate temporal positions and remarkable points - memoized
+  // Calculate temporal positions with logarithmic scale - memoized
   const timelinePoints = useMemo(() => {
     if (itemCount === 0) return []
 
+    const now = nowRef.current
     const minTimestamp = timestamps[0]
     const maxTimestamp = timestamps[timestamps.length - 1]
     const timeRange = maxTimestamp - minTimestamp
 
-    // First pass: calculate all positions and gaps
+    // Logarithmic scale function: more density for recent, less for old
+    const getLogPosition = (timestamp: number) => {
+      if (itemCount === 1 || timeRange === 0) return 50
+
+      // Age from now in milliseconds (inverted: recent = small, old = large)
+      const age = now - timestamp
+      const maxAge = now - minTimestamp
+
+      // Add 1 day offset to avoid log(0), use natural log
+      const logAge = Math.log(age + 86400000) // 1 day in ms
+      const logMaxAge = Math.log(maxAge + 86400000)
+
+      // Normalize to 0-100 (inverted so recent is at top/bottom depending on sort)
+      return ((logAge - Math.log(86400000)) / (logMaxAge - Math.log(86400000))) * 100
+    }
+
+    // First pass: calculate all positions and gaps with logarithmic scale
     const allPoints = timestamps.map((timestamp, index) => {
-      const position =
-        itemCount === 1 || timeRange === 0
-          ? 50
-          : ((timestamp - minTimestamp) / timeRange) * 100
+      const position = getLogPosition(timestamp)
 
       // Calculate gap from previous item
       const gap = index > 0 ? timestamp - timestamps[index - 1] : 0
@@ -160,18 +177,52 @@ export default function ConversationTimeline({
       })
     }
 
-    // Return final points with remarkable flag
-    return allPoints.map((point) => ({
-      position: point.position,
-      timestamp: point.timestamp,
-      isRemarkable: remarkableIndices.has(point.index)
-    }))
+    // PERFORMANCE: Sample points intelligently for large datasets
+    const MAX_RENDERED_POINTS = 200
+    const sampledIndices = new Set<number>()
+
+    // Always include remarkable points
+    remarkableIndices.forEach((idx) => sampledIndices.add(idx))
+
+    // If we have more points than max, sample the rest with logarithmic density
+    if (itemCount > MAX_RENDERED_POINTS) {
+      const remainingSlots = MAX_RENDERED_POINTS - remarkableIndices.size
+
+      // Sample with higher density for recent items (lower log position = more recent)
+      // Use exponential sampling: more samples for lower positions
+      for (let i = 0; i < remainingSlots; i++) {
+        // Generate biased random index (favoring recent items)
+        const randomValue = Math.random()
+        // Square the random value to bias towards lower values (recent)
+        const biasedValue = randomValue * randomValue
+        const sampledIndex = Math.floor(biasedValue * itemCount)
+
+        // Ensure we don't sample remarkable points again
+        if (!remarkableIndices.has(sampledIndex)) {
+          sampledIndices.add(sampledIndex)
+        }
+      }
+    } else {
+      // Small dataset: include all points
+      allPoints.forEach((point) => sampledIndices.add(point.index))
+    }
+
+    // Return only sampled points with flags
+    return allPoints
+      .filter((point) => sampledIndices.has(point.index))
+      .map((point) => ({
+        index: point.index, // Keep original index for navigation
+        position: point.position,
+        timestamp: point.timestamp,
+        isRemarkable: remarkableIndices.has(point.index)
+      }))
   }, [timestamps, itemCount])
 
-  // Calculate activity bars (density visualization) - memoized
+  // Calculate activity bars with logarithmic scale (optimized for large datasets) - memoized
   const activityBars = useMemo(() => {
     if (itemCount === 0) return []
 
+    const now = nowRef.current
     const minTimestamp = timestamps[0]
     const maxTimestamp = timestamps[timestamps.length - 1]
     const timeRange = maxTimestamp - minTimestamp
@@ -179,33 +230,53 @@ export default function ConversationTimeline({
     if (timeRange === 0) return []
 
     const activitySegments = 20 // Number of segments to divide timeline into
-    const segmentDuration = timeRange / activitySegments
 
-    return Array.from({ length: activitySegments }).map((_, segmentIndex) => {
-      const segmentStartTime = minTimestamp + segmentIndex * segmentDuration
-      const segmentEndTime = segmentStartTime + segmentDuration
+    // PERFORMANCE: For large datasets, sample timestamps instead of counting all
+    const sampleSize = Math.min(itemCount, 5000) // Sample max 5000 items
+    const sampleStep = Math.max(1, Math.floor(itemCount / sampleSize))
 
-      // Count items in this time segment
+    // Create logarithmic segments based on age from now
+    const maxAge = now - minTimestamp
+    const segments = Array.from({ length: activitySegments }).map((_, segmentIndex) => {
+      // Logarithmic segment boundaries
+      const segmentStartLog = (segmentIndex / activitySegments) * Math.log(maxAge + 86400000)
+      const segmentEndLog = ((segmentIndex + 1) / activitySegments) * Math.log(maxAge + 86400000)
+
+      const segmentStartAge = Math.exp(segmentStartLog) - 86400000
+      const segmentEndAge = Math.exp(segmentEndLog) - 86400000
+
+      const segmentStartTime = now - segmentEndAge // Inverted
+      const segmentEndTime = now - segmentStartAge
+
+      // Count sampled items in this segment
       let count = 0
-      for (let i = 0; i < itemCount; i++) {
+      for (let i = 0; i < itemCount; i += sampleStep) {
         if (timestamps[i] >= segmentStartTime && timestamps[i] < segmentEndTime) {
           count++
         }
       }
 
-      // Normalize to 0-1 range
-      const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
-      const intensity = Math.min(1, count / maxItemsPerSegment)
+      // Normalize count based on sample
+      const adjustedCount = count * sampleStep
 
-      // Position is temporal, not linear
-      const segmentMiddleTime = segmentStartTime + segmentDuration / 2
-      const position = ((segmentMiddleTime - minTimestamp) / timeRange) * 100
+      // Calculate logarithmic position (same as points)
+      const segmentMiddleAge = (segmentStartAge + segmentEndAge) / 2
+      const segmentMiddleTime = now - segmentMiddleAge
+      const logAge = Math.log(segmentMiddleAge + 86400000)
+      const logMaxAge = Math.log(maxAge + 86400000)
+      const position = ((logAge - Math.log(86400000)) / (logMaxAge - Math.log(86400000))) * 100
+
+      // Normalize intensity
+      const maxItemsPerSegment = Math.ceil(itemCount / activitySegments) * 1.5
+      const intensity = Math.min(1, adjustedCount / maxItemsPerSegment)
 
       return {
         position,
         intensity
       }
     })
+
+    return segments
   }, [timestamps, itemCount])
 
   return (
@@ -333,19 +404,20 @@ export default function ConversationTimeline({
       />
 
       {/* Navigation points */}
-      {timelinePoints.map((point, index) => {
-        const isCurrent = index === currentIndex
+      {timelinePoints.map((point, mapIndex) => {
+        const pointIndex = point.index // Use real index from data
+        const isCurrent = pointIndex === currentIndex
         const isRemarkable = point.isRemarkable
-        const isHovered = hoveredIndex === index
+        const isHovered = hoveredIndex === pointIndex
 
         // Format date for label and tooltip
         const dateLabel = format(point.timestamp, 'd MMM', { locale: fr })
         const dateTime = format(point.timestamp, 'dd/MM/yyyy HH:mm', { locale: fr })
-        const textPreview = texts && texts[index] ? texts[index].slice(0, 60) + (texts[index].length > 60 ? '...' : '') : ''
+        const textPreview = texts && texts[pointIndex] ? texts[pointIndex].slice(0, 60) + (texts[pointIndex].length > 60 ? '...' : '') : ''
 
         return (
           <div
-            key={index}
+            key={`point-${pointIndex}`}
             style={{
               position: 'absolute',
               top: `${point.position}%`,
@@ -358,10 +430,10 @@ export default function ConversationTimeline({
             }}
             onClick={(e) => {
               e.stopPropagation()
-              onNavigate?.(index)
+              onNavigate?.(pointIndex)
             }}
             onMouseDown={(e) => e.stopPropagation()}
-            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseEnter={() => setHoveredIndex(pointIndex)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
             {/* Tooltip */}
