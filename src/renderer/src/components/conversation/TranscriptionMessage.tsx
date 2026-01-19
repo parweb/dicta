@@ -41,8 +41,9 @@ export default function TranscriptionMessage({
         backgroundColor: colors.background.secondary + '20',
         border: `1px solid ${colors.border.primary}`,
         borderRadius: '8px',
-        marginBottom: spacing.md
-      }}
+        marginBottom: spacing.md,
+        WebkitAppRegion: 'no-drag'
+      } as React.CSSProperties}
     >
       {/* Audio Waveform Section */}
       {audioAmplitudes.length > 0 && (

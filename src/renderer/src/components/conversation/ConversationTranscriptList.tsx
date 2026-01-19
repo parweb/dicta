@@ -49,8 +49,9 @@ export default function ConversationTranscriptList({
       style={{
         flex: 1,
         overflowY: 'auto',
-        padding: spacing.lg
-      }}
+        padding: spacing.lg,
+        WebkitAppRegion: 'no-drag'
+      } as React.CSSProperties}
     >
       {transcriptions.length === 0 ? (
         <div
