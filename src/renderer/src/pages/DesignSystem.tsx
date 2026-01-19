@@ -1,6 +1,6 @@
 import { Palette, Type, Ruler, Circle, Square, Sparkles } from 'lucide-react';
 
-import { useTheme } from '../lib/theme-context';
+import { useTheme } from '@/lib/theme-context';
 
 const DesignSystem = () => {
   // Use theme from context for live preview

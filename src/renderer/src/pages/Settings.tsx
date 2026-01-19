@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Palette, Key, Download, Cloud } from 'lucide-react';
 
-import ThemeConfigurator from '../components/design-system/ThemeConfigurator';
-import BedrockSettings from '../components/settings/BedrockSettings';
-import ModelSettings from '../components/settings/ModelSettings';
-import UpdateSettings from '../components/settings/UpdateSettings';
-import { useTheme } from '../lib/theme-context';
+import ThemeConfigurator from '@/components/design-system/ThemeConfigurator';
+import BedrockSettings from '@/components/settings/BedrockSettings';
+import ModelSettings from '@/components/settings/ModelSettings';
+import UpdateSettings from '@/components/settings/UpdateSettings';
+import { useTheme } from '@/lib/theme-context';
 import DesignSystem from './DesignSystem';
 
 interface SettingsProps {

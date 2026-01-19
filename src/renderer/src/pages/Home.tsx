@@ -1,25 +1,25 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  lazy,
-  Suspense
-} from 'react';
 import { AlertCircle } from 'lucide-react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 
-import BedrockAgentDrawer from '../components/bedrock/BedrockAgentDrawer';
-import HomeContent from '../components/home/HomeContent';
-import ProxyStatusIndicators from '../components/home/ProxyStatusIndicators';
-import Layout from '../components/Layout';
-import { Button } from '../components/ui/button';
-import { useApiKey } from '../lib/api-key-context';
-import { useTheme } from '../lib/theme-context';
-import { useAudioRecorder } from '../hooks/useAudioRecorder';
-import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { useTranscriptionAPI } from '../hooks/useTranscriptionAPI';
-import { useTranscriptionNavigation } from '../hooks/useTranscriptionNavigation';
-import type { Transcription } from '../lib/history';
+import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
+import HomeContent from '@/components/home/HomeContent';
+import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
+import Layout from '@/components/Layout';
+import { Button } from '@/components/ui/button';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
+import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
+import { useApiKey } from '@/lib/api-key-context';
+import type { Transcription } from '@/lib/history';
+import { useTheme } from '@/lib/theme-context';
 
 // Lazy load Statistics and Settings pages to reduce initial bundle size
 const Statistics = lazy(() => import('./Statistics'));
