@@ -314,17 +314,76 @@ app.whenReady().then(() => {
   // Load all transcriptions from history
   ipcMain.handle('history:load-all', () => {
     try {
-      if (!existsSync(historyDir)) {
-        return { success: true, transcriptions: [] };
+      // TEMP: Generate fake data for testing timeline
+      const FAKE_DATA_MODE = true;
+
+      // Load real transcriptions from files first
+      let realTranscriptions = [];
+      if (existsSync(historyDir)) {
+        const files = readdirSync(historyDir).filter(f => f.endsWith('.json'));
+        realTranscriptions = files.map(file => {
+          const content = readFileSync(join(historyDir, file), 'utf-8');
+          return JSON.parse(content);
+        });
       }
-      const files = readdirSync(historyDir).filter(f => f.endsWith('.json'));
-      const transcriptions = files.map(file => {
-        const content = readFileSync(join(historyDir, file), 'utf-8');
-        return JSON.parse(content);
-      });
-      // Sort by timestamp descending (newest first)
-      transcriptions.sort((a, b) => b.timestamp - a.timestamp);
-      return { success: true, transcriptions };
+
+      if (FAKE_DATA_MODE && realTranscriptions.length > 0) {
+        // Extrapolate real data over 10 years
+        const now = Date.now();
+        const years = 10;
+        const tenYearsAgo = now - (years * 365 * 24 * 60 * 60 * 1000);
+        const transcriptions = [];
+
+        // Target: generate ~8000 transcriptions over 10 years
+        const targetCount = 100*365*years;
+        const duplications = Math.ceil(targetCount / realTranscriptions.length);
+
+        for (let duplicationIndex = 0; duplicationIndex < duplications; duplicationIndex++) {
+          realTranscriptions.forEach((originalTranscription, index) => {
+            // Distribute duplications across 10 years with clustering
+            let timestamp;
+            const clusterRandom = Math.random();
+
+            if (clusterRandom < 0.2) {
+              // 20% - Recent activity (last 2 weeks)
+              timestamp = now - Math.random() * (14 * 24 * 60 * 60 * 1000);
+            } else if (clusterRandom < 0.35) {
+              // 15% - Last 3 months
+              timestamp = now - Math.random() * (90 * 24 * 60 * 60 * 1000);
+            } else if (clusterRandom < 0.5) {
+              // 15% - Last year
+              timestamp = now - Math.random() * (365 * 24 * 60 * 60 * 1000);
+            } else if (clusterRandom < 0.7) {
+              // 20% - Years 1-3
+              timestamp = now - Math.random() * (3 * 365 * 24 * 60 * 60 * 1000);
+            } else {
+              // 30% - Spread over years 3-10
+              timestamp = tenYearsAgo + Math.random() * (7 * 365 * 24 * 60 * 60 * 1000);
+            }
+
+            // Add some randomness to create temporal gaps
+            if (Math.random() > 0.85) {
+              // 15% chance to add a significant gap (1-30 days)
+              timestamp -= Math.random() * (30 * 24 * 60 * 60 * 1000);
+            }
+
+            transcriptions.push({
+              ...originalTranscription,
+              id: `extrapolated-${duplicationIndex}-${index}-${timestamp}`,
+              timestamp: Math.floor(timestamp)
+            });
+          });
+        }
+
+        // Sort by timestamp descending (newest first)
+        transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+        console.log(`[FAKE-DATA] Generated ${transcriptions.length} transcriptions over 10 years from ${realTranscriptions.length} real ones`);
+        return { success: true, transcriptions };
+      }
+
+      // Normal mode: return real transcriptions
+      realTranscriptions.sort((a, b) => b.timestamp - a.timestamp);
+      return { success: true, transcriptions: realTranscriptions };
     } catch (error) {
       console.error('Error loading transcriptions:', error);
       return { success: false, error: String(error), transcriptions: [] };
