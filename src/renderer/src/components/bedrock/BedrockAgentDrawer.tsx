@@ -55,11 +55,14 @@ export default function BedrockAgentDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
-        style={{
-          backgroundColor: colors.background.primary,
-          border: `1px solid ${colors.border.primary}`,
-          maxHeight: '80vh'
-        }}
+        style={
+          {
+            backgroundColor: colors.background.primary,
+            border: `1px solid ${colors.border.primary}`,
+            maxHeight: '80vh',
+            WebkitAppRegion: 'no-drag'
+          } as React.CSSProperties
+        }
       >
         {/* Header */}
         <DrawerHeader
