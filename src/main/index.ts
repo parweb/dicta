@@ -324,8 +324,8 @@ app.whenReady().then(() => {
         });
       }
 
-      // Sort by timestamp descending (newest first)
-      transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+      // Sort by timestamp ascending (oldest first, newest at bottom)
+      transcriptions.sort((a, b) => a.timestamp - b.timestamp);
       return { success: true, transcriptions };
     } catch (error) {
       console.error('Error loading transcriptions:', error);

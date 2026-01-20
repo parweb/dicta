@@ -28,8 +28,8 @@ export function useTranscriptionNavigation(): UseTranscriptionNavigationReturn {
       const result = await window.api?.history.loadAll();
       if (result?.success && result.transcriptions) {
         const transcriptions = result.transcriptions as Transcription[];
-        // Sort by timestamp (most recent first)
-        transcriptions.sort((a, b) => b.timestamp - a.timestamp);
+        // Sort by timestamp (oldest first, most recent at bottom)
+        transcriptions.sort((a, b) => a.timestamp - b.timestamp);
         setAllTranscriptions(transcriptions);
       }
     } catch (error) {
@@ -53,14 +53,14 @@ export function useTranscriptionNavigation(): UseTranscriptionNavigationReturn {
         );
         if (currentIndex !== -1) {
           if (direction === 'next') {
-            // Next = more recent (lower index, since sorted desc by timestamp)
-            targetIndex = Math.max(0, currentIndex - 1);
-          } else {
-            // Previous = older (higher index)
+            // Next = more recent (higher index, since sorted asc by timestamp)
             targetIndex = Math.min(
               allTranscriptions.length - 1,
               currentIndex + 1
             );
+          } else {
+            // Previous = older (lower index)
+            targetIndex = Math.max(0, currentIndex - 1);
           }
         }
       }
