@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import TranscriptionMessage from './TranscriptionMessage';
+import RecordingPlaceholder from './RecordingPlaceholder';
 import SimpleScrollbar from './SimpleScrollbar';
 import type { Transcription } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
@@ -17,6 +18,8 @@ interface TimelineTranscriptListProps {
   currentTranscriptionId?: string | null;
   activeActionsTranscriptionId?: string | null;
   actionsFollowUpTranscript?: string;
+  isRecording?: boolean;
+  realtimeAmplitudes?: number[];
   onCopyTranscript?: (transcription: Transcription) => void;
   onOpenActions?: (transcription: Transcription) => void;
   onCloseActions?: () => void;
@@ -30,6 +33,8 @@ export default function TimelineTranscriptList({
   currentTranscriptionId,
   activeActionsTranscriptionId,
   actionsFollowUpTranscript,
+  isRecording = false,
+  realtimeAmplitudes = [],
   onCopyTranscript,
   onOpenActions,
   onCloseActions,
@@ -194,6 +199,22 @@ export default function TimelineTranscriptList({
                 </div>
               );
             })}
+
+            {/* Recording placeholder at the end */}
+            {isRecording && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualizer.getTotalSize()}px)`,
+                  padding: '16px 0'
+                }}
+              >
+                <RecordingPlaceholder amplitudes={realtimeAmplitudes} />
+              </div>
+            )}
           </div>
         )}
       </div>

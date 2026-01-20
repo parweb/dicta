@@ -10,10 +10,12 @@ import {
 
 import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
 import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
+import RecordButton from '@/components/home/RecordButton';
 import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { useRealtimeAudioVisualizer } from '@/hooks/useRealtimeAudioVisualizer';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useNavigationStore } from '@/hooks/useNavigationStore';
 import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
@@ -60,8 +62,12 @@ const HomePage = () => {
   const {
     isRecording,
     startRecording: startAudioRecording,
-    stopRecording: stopAudioRecording
+    stopRecording: stopAudioRecording,
+    mediaStream
   } = useAudioRecorder();
+
+  // Real-time audio visualization
+  const realtimeAmplitudes = useRealtimeAudioVisualizer(mediaStream, isRecording);
 
   const {
     allTranscriptions,
@@ -290,6 +296,8 @@ const HomePage = () => {
               currentTranscriptionId={currentTranscriptionId}
               activeActionsTranscriptionId={activeActionsTranscriptionId}
               actionsFollowUpTranscript={actionsFollowUpTranscript}
+              isRecording={isRecording}
+              realtimeAmplitudes={realtimeAmplitudes}
               onCopyTranscript={handleCopyTranscript}
               onOpenActions={handleOpenActions}
               onCloseActions={handleCloseActions}
@@ -297,6 +305,30 @@ const HomePage = () => {
               onFollowUpFocusChange={handleFollowUpFocusChange}
               onBedrockHistoryChange={handleBedrockHistoryChange}
             />
+
+            {/* Hidden RecordButton for functionality - visuals handled by RecordingPlaceholder */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                padding: '40px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                opacity: 0,
+                pointerEvents: 'none',
+                zIndex: -1
+              }}
+            >
+              <RecordButton
+                isRecording={isRecording}
+                isLoading={isLoading}
+                onMouseDown={startRecording}
+                onMouseUp={stopRecording}
+              />
+            </div>
           </div>
         )}
       </AnimatedView>
