@@ -25,7 +25,7 @@ export function useApiKeyStore() {
   const loadApiKey = useCallback(async () => {
     setIsLoading(true)
     try {
-      const result = await window.api?.credentials.load()
+      const result = await window.api?.credentials.loadApiKey()
       if (result?.success && result.apiKey) {
         setApiKey(result.apiKey)
         console.log('[API KEY STORE] API key loaded successfully')
@@ -45,7 +45,7 @@ export function useApiKeyStore() {
   const saveApiKey = useCallback(
     async (key: string): Promise<{ success: boolean; error?: string }> => {
       try {
-        const result = await window.api?.credentials.save(key)
+        const result = await window.api?.credentials.saveApiKey(key)
         if (result?.success) {
           setApiKey(key)
           console.log('[API KEY STORE] API key saved successfully')
@@ -69,7 +69,7 @@ export function useApiKeyStore() {
     error?: string
   }> => {
     try {
-      const result = await window.api?.credentials.delete()
+      const result = await window.api?.credentials.deleteApiKey()
       if (result?.success) {
         setApiKey(null)
         console.log('[API KEY STORE] API key deleted successfully')
