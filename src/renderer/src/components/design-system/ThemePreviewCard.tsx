@@ -30,7 +30,7 @@ interface ThemePreviewCardProps {
  * - Scale and shadow effects
  */
 export default function ThemePreviewCard({
-  preset,
+  preset: _preset,
   metadata,
   theme: previewTheme,
   isActive,
