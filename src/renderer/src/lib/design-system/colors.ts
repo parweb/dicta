@@ -60,6 +60,14 @@ export const colors = {
       backgroundHover: `rgba(${accentColor.rgb}, 0.15)`,
       backgroundActive: `rgba(${accentColor.rgb}, 0.2)`
     },
+    purple: {
+      primary: '#a78bfa', // Purple for AI/Bedrock actions (violet-400)
+      light: '#c4b5fd', // Light purple (violet-300)
+      dark: '#7c3aed', // Dark purple (violet-600)
+      background: 'rgba(139, 92, 246, 0.1)', // Purple tint background
+      backgroundHover: 'rgba(139, 92, 246, 0.15)',
+      border: 'rgba(139, 92, 246, 0.3)' // Purple border
+    },
     green: {
       primary: '#4ade80', // Success green (green-400)
       button: '#4CAF50' // Record button green

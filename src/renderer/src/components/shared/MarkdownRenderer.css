@@ -1,12 +1,13 @@
 /* Voice Terminal - Markdown Renderer Styles */
+/* Uses design system CSS variables for consistent theming */
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 .markdown-renderer {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   line-height: 1.6;
-  color: #e2e8f0;
+  color: var(--color-text-primary);
 }
 
 /* Headings */
@@ -21,16 +22,25 @@
   letter-spacing: 0.3px;
   margin-top: 24px;
   margin-bottom: 12px;
-  color: #f9fafb;
+  color: var(--color-text-primary);
   line-height: 1.3;
 }
 
-.md-h1 { font-size: 24px; border-bottom: 2px solid rgba(6, 182, 212, 0.3); padding-bottom: 8px; }
-.md-h2 { font-size: 20px; border-bottom: 1px solid rgba(6, 182, 212, 0.2); padding-bottom: 6px; }
-.md-h3 { font-size: 18px; color: #06b6d4; }
-.md-h4 { font-size: 16px; color: #06b6d4; }
-.md-h5 { font-size: 14px; color: #06b6d4; }
-.md-h6 { font-size: 14px; color: #94a3b8; font-weight: 600; }
+.md-h1 {
+  font-size: 24px;
+  border-bottom: 2px solid var(--color-border-accent);
+  padding-bottom: 8px;
+}
+.md-h2 {
+  font-size: 20px;
+  border-bottom: 1px solid var(--color-border-accent);
+  opacity: 0.7;
+  padding-bottom: 6px;
+}
+.md-h3 { font-size: 18px; color: var(--color-accent-primary); }
+.md-h4 { font-size: 16px; color: var(--color-accent-primary); }
+.md-h5 { font-size: 14px; color: var(--color-accent-primary); }
+.md-h6 { font-size: 14px; color: var(--color-text-tertiary); font-weight: 600; }
 
 /* First heading no top margin */
 .markdown-renderer > :first-child {
@@ -40,7 +50,7 @@
 /* Paragraphs */
 .md-p {
   margin: 12px 0;
-  color: #e2e8f0;
+  color: var(--color-text-secondary);
 }
 
 .md-p:first-child {
@@ -56,37 +66,39 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   padding: 2px 6px;
-  background: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: 4px;
-  color: #67e8f9;
+  background: var(--color-accent-bg);
+  border: 1px solid var(--color-border-accent);
+  opacity: 0.7;
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-light);
   font-weight: 500;
 }
 
 /* Code blocks */
 .code-block-wrapper {
   margin: 16px 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(71, 85, 105, 0.4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-primary);
 }
 
 .code-language {
-  padding: 8px 12px;
-  background: rgba(6, 182, 212, 0.15);
-  border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-accent-bg);
+  border-bottom: 1px solid var(--color-border-accent);
+  opacity: 0.7;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #06b6d4;
+  color: var(--color-accent-primary);
 }
 
 .code-block {
   margin: 0;
-  padding: 16px;
+  padding: var(--spacing-lg);
   overflow-x: auto;
   background: transparent;
 }
@@ -95,7 +107,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   line-height: 1.5;
-  color: #e2e8f0;
+  color: var(--color-text-secondary);
   white-space: pre;
 }
 
@@ -105,16 +117,17 @@
 }
 
 .code-block::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.4);
+  background: var(--color-bg-secondary);
 }
 
 .code-block::-webkit-scrollbar-thumb {
-  background: rgba(6, 182, 212, 0.3);
-  border-radius: 4px;
+  background: var(--color-border-accent);
+  opacity: 0.5;
+  border-radius: var(--radius-sm);
 }
 
 .code-block::-webkit-scrollbar-thumb:hover {
-  background: rgba(6, 182, 212, 0.5);
+  opacity: 0.8;
 }
 
 /* Lists */
@@ -122,7 +135,7 @@
 .md-ol {
   margin: 12px 0;
   padding-left: 24px;
-  color: #e2e8f0;
+  color: var(--color-text-secondary);
 }
 
 .md-li {
@@ -139,7 +152,7 @@
 }
 
 .md-li::marker {
-  color: #06b6d4;
+  color: var(--color-accent-primary);
 }
 
 /* Nested lists */
@@ -152,25 +165,26 @@
 
 /* Links */
 .md-link {
-  color: #06b6d4;
+  color: var(--color-accent-primary);
   text-decoration: none;
-  border-bottom: 1px solid rgba(6, 182, 212, 0.3);
+  border-bottom: 1px solid var(--color-border-accent);
+  opacity: 0.5;
   transition: all 0.2s ease;
   font-weight: 500;
 }
 
 .md-link:hover {
-  color: #67e8f9;
-  border-bottom-color: rgba(6, 182, 212, 0.6);
+  color: var(--color-accent-light);
+  opacity: 1;
 }
 
 /* Blockquotes */
 .md-blockquote {
   margin: 16px 0;
-  padding: 12px 16px;
-  border-left: 4px solid #06b6d4;
-  background: rgba(6, 182, 212, 0.08);
-  color: #cbd5e1;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-left: 4px solid var(--color-accent-primary);
+  background: var(--color-accent-bg);
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -183,32 +197,33 @@
   width: 100%;
   margin: 16px 0;
   border-collapse: collapse;
-  border: 1px solid rgba(71, 85, 105, 0.4);
-  border-radius: 8px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
   overflow: hidden;
   font-size: 13px;
 }
 
 .md-thead {
-  background: rgba(6, 182, 212, 0.15);
+  background: var(--color-accent-bg);
 }
 
 .md-th {
-  padding: 10px 12px;
+  padding: var(--spacing-sm) var(--spacing-md);
   text-align: left;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #06b6d4;
-  border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+  color: var(--color-accent-primary);
+  border-bottom: 2px solid var(--color-border-accent);
+  opacity: 0.7;
 }
 
 .md-td {
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(71, 85, 105, 0.2);
-  color: #e2e8f0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-primary);
+  color: var(--color-text-secondary);
 }
 
 .md-tr:last-child .md-td {
@@ -216,36 +231,37 @@
 }
 
 .md-tbody .md-tr:hover {
-  background: rgba(6, 182, 212, 0.05);
+  background: var(--color-accent-bg);
+  opacity: 0.3;
 }
 
 /* Horizontal rule */
 .md-hr {
   margin: 24px 0;
   border: none;
-  border-top: 1px solid rgba(71, 85, 105, 0.4);
+  border-top: 1px solid var(--color-border-primary);
 }
 
 /* Strong/Bold */
 .md-strong {
   font-weight: 600;
-  color: #f9fafb;
+  color: var(--color-text-primary);
 }
 
 /* Emphasis/Italic */
 .md-em {
   font-style: italic;
-  color: #cbd5e1;
+  color: var(--color-text-secondary);
 }
 
 /* Task lists (GFM) */
 .markdown-renderer input[type="checkbox"] {
   margin-right: 8px;
-  accent-color: #06b6d4;
+  accent-color: var(--color-accent-primary);
 }
 
 /* Strikethrough (GFM) */
 .markdown-renderer del {
-  color: #64748b;
-  text-decoration-color: #64748b;
+  color: var(--color-text-disabled);
+  text-decoration-color: var(--color-text-disabled);
 }
