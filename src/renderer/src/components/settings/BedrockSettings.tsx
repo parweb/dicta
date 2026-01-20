@@ -4,7 +4,7 @@ import { useTheme } from '../../lib/theme-context'
 import { DEFAULT_MODEL_ID } from '../../lib/bedrock/constants'
 import CredentialsViewMode from './bedrock/CredentialsViewMode'
 import CredentialsEditForm from './bedrock/CredentialsEditForm'
-import DeleteConfirmModal from './bedrock/DeleteConfirmModal'
+import DeleteConfirmModal from './shared/DeleteConfirmModal'
 
 export default function BedrockSettings() {
   const { theme } = useTheme()
@@ -120,7 +120,12 @@ export default function BedrockSettings() {
 
       {/* Delete Modal */}
       {showDeleteConfirm && (
-        <DeleteConfirmModal onConfirm={handleDelete} onCancel={() => setShowDeleteConfirm(false)} />
+        <DeleteConfirmModal
+          title="Supprimer la configuration ?"
+          message="L'agent Bedrock sera désactivé."
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
       )}
     </div>
   )

@@ -2,11 +2,18 @@ import { useTheme } from '@/lib/theme-context'
 import { Button } from '@/components/ui/button'
 
 interface DeleteConfirmModalProps {
+  title: string
+  message: string
   onConfirm: () => void
   onCancel: () => void
 }
 
-export default function DeleteConfirmModal({ onConfirm, onCancel }: DeleteConfirmModalProps) {
+export default function DeleteConfirmModal({
+  title,
+  message,
+  onConfirm,
+  onCancel
+}: DeleteConfirmModalProps) {
   const { theme } = useTheme()
   const { colors, spacing, typography } = theme
 
@@ -47,7 +54,7 @@ export default function DeleteConfirmModal({ onConfirm, onCancel }: DeleteConfir
             marginBottom: spacing.md
           }}
         >
-          Supprimer la configuration ?
+          {title}
         </h3>
         <p
           style={{
@@ -57,7 +64,7 @@ export default function DeleteConfirmModal({ onConfirm, onCancel }: DeleteConfir
             marginBottom: spacing.lg
           }}
         >
-          L'agent Bedrock sera désactivé.
+          {message}
         </p>
         <div style={{ display: 'flex', gap: spacing.sm }}>
           <Button variant="destructive" size="sm" onClick={onConfirm} className="flex-1">
