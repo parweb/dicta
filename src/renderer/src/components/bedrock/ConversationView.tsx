@@ -10,6 +10,7 @@ import { useThemeStore } from '@/hooks/useThemeStore'
 import type { BedrockMessage } from '../../lib/bedrock/types'
 import ToolExecutionStatus from './ToolExecutionStatus'
 import type { ToolExecution } from '../../lib/bedrock/types'
+import MarkdownRenderer from '../shared/MarkdownRenderer'
 
 interface ConversationViewProps {
   messages: BedrockMessage[]
@@ -100,15 +101,10 @@ export default function ConversationView({
                   ? colors.background.secondary + '40'
                   : colors.background.secondary + '20',
                 border: `1px solid ${colors.border.primary}`,
-                borderRadius: '8px',
-                fontSize: typography.fontSize.sm,
-                lineHeight: typography.lineHeight.relaxed,
-                color: colors.text.primary,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word'
+                borderRadius: '8px'
               }}
             >
-              {text}
+              <MarkdownRenderer content={text} />
             </div>
           </div>
         )

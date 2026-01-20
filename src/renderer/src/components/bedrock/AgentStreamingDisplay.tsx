@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react'
 import { useThemeStore } from '@/hooks/useThemeStore'
 import type { AgentState } from '../../hooks/useBedrockAgent'
 import ToolExecutionStatus from './ToolExecutionStatus'
+import MarkdownRenderer from '../shared/MarkdownRenderer'
 
 interface AgentStreamingDisplayProps {
   state: AgentState
@@ -43,16 +44,28 @@ export default function AgentStreamingDisplay({ state }: AgentStreamingDisplayPr
             backgroundColor: colors.background.secondary + '20',
             border: `1px solid ${colors.border.primary}`,
             borderRadius: '2px',
-            fontSize: typography.fontSize.base,
-            lineHeight: typography.lineHeight.relaxed,
-            color: colors.text.primary,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
             maxHeight: '400px',
             overflowY: 'auto'
           }}
         >
-          {state.response || (
+          {state.response ? (
+            <>
+              <MarkdownRenderer content={state.response} />
+              {/* Typing cursor effect when streaming */}
+              {state.isStreaming && (
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '2px',
+                    height: '1em',
+                    backgroundColor: colors.text.primary,
+                    marginLeft: '2px',
+                    animation: 'blink 1s infinite'
+                  }}
+                />
+              )}
+            </>
+          ) : (
             <div
               style={{
                 display: 'flex',
@@ -64,20 +77,6 @@ export default function AgentStreamingDisplay({ state }: AgentStreamingDisplayPr
               <Loader2 size={16} className="animate-spin" />
               <span>L'agent réfléchit...</span>
             </div>
-          )}
-
-          {/* Typing cursor effect when streaming */}
-          {state.isStreaming && state.response && (
-            <span
-              style={{
-                display: 'inline-block',
-                width: '2px',
-                height: '1em',
-                backgroundColor: colors.text.primary,
-                marginLeft: '2px',
-                animation: 'blink 1s infinite'
-              }}
-            />
           )}
         </div>
       )}
