@@ -3,8 +3,8 @@
  * Displays transcription with terminal-inspired aesthetic
  */
 
-import { memo } from 'react';
-import { Copy, Sparkles, Loader2 } from 'lucide-react';
+import { memo, ReactNode } from 'react';
+import { Copy, Sparkles } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
 import BedrockAgentInline from '../bedrock/BedrockAgentInline';
@@ -13,14 +13,15 @@ import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TranscriptionMessage.css';
 
 interface TranscriptionMessageProps {
-  text: string;
+  textContent: ReactNode; // Can be text, loader, or null
+  transcriptText?: string; // Plain text for Bedrock context (optional)
   audioAmplitudes?: number[];
   audioDuration?: number;
   timestamp: number;
+  waveformColor?: string;
+  waveformMaxBars?: number;
   isSelected?: boolean;
   showActions?: boolean;
-  isRecording?: boolean;
-  isLoading?: boolean;
   onCopy?: () => void;
   onOpenActions?: () => void;
   onCloseActions?: () => void;
@@ -32,14 +33,15 @@ interface TranscriptionMessageProps {
 }
 
 const TranscriptionMessage = memo(function TranscriptionMessage({
-  text,
+  textContent,
+  transcriptText,
   audioAmplitudes = [],
   audioDuration,
   timestamp,
+  waveformColor,
+  waveformMaxBars = 60,
   isSelected = false,
   showActions = false,
-  isRecording = false,
-  isLoading = false,
   onCopy,
   onOpenActions,
   onCloseActions,
@@ -106,31 +108,26 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
             amplitudes={audioAmplitudes}
             height={48}
             showDuration={false}
-            maxBars={(isRecording || isLoading) ? 200 : 60}
-            color={(isRecording || isLoading) ? '#ef4444' : undefined}
+            maxBars={waveformMaxBars}
+            color={waveformColor}
           />
         </div>
       )}
 
-      {/* Transcription text or loader */}
-      <div className="message-content">
-        {isLoading ? (
-          <div className="message-loader">
-            <Loader2 size={16} className="loader-spin" />
-            <span className="loader-text">Transcription en cours...</span>
-          </div>
-        ) : text ? (
-          <p className="message-text">{text}</p>
-        ) : null}
-      </div>
+      {/* Transcription text content (can be text, loader, or null) */}
+      {textContent && (
+        <div className="message-content">
+          {textContent}
+        </div>
+      )}
 
       {/* Terminal-style border accent */}
       <div className="message-accent" />
 
       {/* Bedrock Agent Inline - shown when actions active OR when history exists */}
-      {(showActions || bedrockHistory) && (
+      {(showActions || bedrockHistory) && transcriptText && (
         <BedrockAgentInline
-          transcriptContext={text}
+          transcriptContext={transcriptText}
           onClose={showActions ? () => onCloseActions?.() : undefined}
           newTranscript={newFollowUpTranscript}
           onTranscriptConsumed={onFollowUpConsumed}

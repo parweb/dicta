@@ -59,6 +59,15 @@ export default function TimelineTranscriptList({
   const lastTranscriptionCountRef = useRef(transcriptions.length);
   const [shouldShowPlaceholder, setShouldShowPlaceholder] = useState(false);
 
+  // Virtualize the list for performance
+  const virtualizer = useVirtualizer({
+    count: transcriptions.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 180,
+    overscan: 5,
+    measureElement: (el) => el?.getBoundingClientRect().height ?? 180
+  });
+
   // Show placeholder when recording or loading starts
   useEffect(() => {
     if (isRecording || isLoading) {
@@ -127,15 +136,6 @@ export default function TimelineTranscriptList({
     };
   }, [shouldShowPlaceholder, isRecording, isLoading, recordingDuration, realtimeAmplitudes, savedAmplitudes]);
 
-  // Virtualize the list for performance
-  const virtualizer = useVirtualizer({
-    count: transcriptions.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 180,
-    overscan: 5,
-    measureElement: (el) => el?.getBoundingClientRect().height ?? 180
-  });
-
   // Auto-scroll to bottom when new transcriptions added
   useEffect(() => {
     if (transcriptions.length > 0) {
@@ -162,9 +162,9 @@ export default function TimelineTranscriptList({
     }
   }, [shouldShowPlaceholder]);
 
-  // Continuous scroll during recording as content grows
+  // Continuous scroll during recording/loading as content grows
   useEffect(() => {
-    if (!isRecording || !parentRef.current) return;
+    if (!shouldShowPlaceholder || !parentRef.current) return;
 
     const scrollToBottom = () => {
       if (parentRef.current) {
@@ -172,9 +172,9 @@ export default function TimelineTranscriptList({
       }
     };
 
-    // Scroll every time amplitudes change (content grows)
+    // Scroll every time amplitudes change (content grows) or when transitioning to loading
     scrollToBottom();
-  }, [isRecording, realtimeAmplitudes.length]);
+  }, [shouldShowPlaceholder, isRecording, isLoading, realtimeAmplitudes.length, savedAmplitudes.length]);
 
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
@@ -290,7 +290,8 @@ export default function TimelineTranscriptList({
                   }}
                 >
                   <TranscriptionMessage
-                    text={transcription.text}
+                    textContent={<p className="message-text">{transcription.text}</p>}
+                    transcriptText={transcription.text}
                     audioAmplitudes={transcription.audioAmplitudes}
                     audioDuration={transcription.durationMs}
                     timestamp={transcription.timestamp}
@@ -322,14 +323,32 @@ export default function TimelineTranscriptList({
                 }}
               >
                 <TranscriptionMessage
-                  text={temporaryTranscription.text}
+                  textContent={
+                    isLoading ? (
+                      <div className="message-loader">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          className="loader-spin"
+                        >
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                        </svg>
+                        <span className="loader-text">Transcription en cours...</span>
+                      </div>
+                    ) : null
+                  }
+                  transcriptText={undefined}
                   audioAmplitudes={temporaryTranscription.audioAmplitudes}
                   audioDuration={temporaryTranscription.durationMs}
                   timestamp={temporaryTranscription.timestamp}
+                  waveformColor={(isRecording || isLoading) ? '#ef4444' : undefined}
+                  waveformMaxBars={(isRecording || isLoading) ? 200 : 60}
                   isSelected={false}
                   showActions={false}
-                  isRecording={isRecording}
-                  isLoading={isLoading}
                 />
               </div>
             )}
