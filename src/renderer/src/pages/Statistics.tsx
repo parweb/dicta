@@ -6,18 +6,39 @@ import {
   spacing
 } from '@/lib/design-system';
 import type { Transcription } from '@/lib/history';
-import { calculateStatistics, type UsageStatistics } from '@/lib/statistics';
-import { useEffect, useState } from 'react';
+import { calculateStatistics } from '@/lib/statistics';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const Statistics = () => {
-  const [stats, setStats] = useState<UsageStatistics | null>(null);
   const [transcriptions, setTranscriptions] = useState<Transcription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Memoize expensive statistics calculation
+  const stats = useMemo(() => {
+    if (transcriptions.length === 0) return null;
+    return calculateStatistics(transcriptions);
+  }, [transcriptions]);
+
+  // Memoize load statistics function
+  const loadStatistics = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await window.api?.history.loadAll();
+      if (result?.success && result.transcriptions) {
+        const trans = result.transcriptions as Transcription[];
+        setTranscriptions(trans);
+      }
+    } catch (error) {
+      console.error('Error loading statistics:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadStatistics();
-  }, []);
+  }, [loadStatistics]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -40,23 +61,6 @@ const Statistics = () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [isDropdownOpen]);
-
-  const loadStatistics = async () => {
-    setIsLoading(true);
-    try {
-      const result = await window.api?.history.loadAll();
-      if (result?.success && result.transcriptions) {
-        const trans = result.transcriptions as Transcription[];
-        setTranscriptions(trans);
-        const statistics = calculateStatistics(trans);
-        setStats(statistics);
-      }
-    } catch (error) {
-      console.error('Error loading statistics:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
 
 
