@@ -17,7 +17,7 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { useNavigation } from '@/hooks/useNavigation';
+import { useNavigationStore } from '@/hooks/useNavigationStore';
 import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
 import { useApiKeyStore } from '@/hooks/useApiKeyStore';
@@ -37,7 +37,7 @@ const HomePage = () => {
   const hasRedirectedRef = useRef(false);
 
   // Use navigation hook
-  const { currentView, settingsTab, navigateTo } = useNavigation();
+  const { currentView, settingsTab, navigateTo } = useNavigationStore();
 
   // Use theme and API key hooks
   const { theme } = useThemeStore();
