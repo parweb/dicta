@@ -39,6 +39,14 @@ export const darkTheme: ThemeConfig = {
         backgroundHover: isDev ? 'rgba(239, 68, 68, 0.15)' : 'rgba(14, 165, 233, 0.15)',
         backgroundActive: isDev ? 'rgba(239, 68, 68, 0.2)' : 'rgba(14, 165, 233, 0.2)'
       },
+      purple: {
+        primary: '#a78bfa',
+        light: '#c4b5fd',
+        dark: '#7c3aed',
+        background: 'rgba(139, 92, 246, 0.1)',
+        backgroundHover: 'rgba(139, 92, 246, 0.15)',
+        border: 'rgba(139, 92, 246, 0.3)'
+      },
       green: {
         primary: '#4ade80',
         button: '#4CAF50'
