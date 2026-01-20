@@ -199,8 +199,14 @@ export default function BedrockAgentInline({
                 value={followUpPrompt}
                 onChange={(e) => setFollowUpPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
-                onFocus={() => onFollowUpFocusChange?.(true)}
-                onBlur={() => onFollowUpFocusChange?.(false)}
+                onFocus={() => {
+                  console.log('[BEDROCK-INLINE] Follow-up field focused');
+                  onFollowUpFocusChange?.(true);
+                }}
+                onBlur={() => {
+                  console.log('[BEDROCK-INLINE] Follow-up field blurred');
+                  onFollowUpFocusChange?.(false);
+                }}
                 placeholder="Continuer la conversation..."
                 disabled={!hasCredentials}
                 className="followup-input"

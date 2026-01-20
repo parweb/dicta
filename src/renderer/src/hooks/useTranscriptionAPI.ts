@@ -19,7 +19,8 @@ export interface UseTranscriptionAPIReturn {
   transcribeAudio: (
     blob: Blob,
     durationMs?: number,
-    audioAmplitudes?: number[]
+    audioAmplitudes?: number[],
+    skipHistorySave?: boolean
   ) => Promise<TranscriptionResult>
   proxyStatuses: Record<string, ProxyStatus>
   isLoading: boolean
@@ -59,7 +60,8 @@ export function useTranscriptionAPI(
     async (
       blob: Blob,
       durationMs?: number,
-      audioAmplitudes?: number[]
+      audioAmplitudes?: number[],
+      skipHistorySave?: boolean
     ): Promise<TranscriptionResult> => {
       return transcribeAudioUtil(
         blob,
@@ -68,7 +70,8 @@ export function useTranscriptionAPI(
         setProxyStatuses,
         onHistoryUpdate,
         durationMs,
-        audioAmplitudes
+        audioAmplitudes,
+        skipHistorySave
       )
     },
     [apiKey, onHistoryUpdate]

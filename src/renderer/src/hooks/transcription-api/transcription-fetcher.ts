@@ -68,7 +68,8 @@ export async function transcribeAudio(
   setProxyStatuses: React.Dispatch<React.SetStateAction<Record<string, ProxyStatus>>>,
   onHistoryUpdate?: () => Promise<void>,
   durationMs?: number,
-  audioAmplitudes?: number[]
+  audioAmplitudes?: number[],
+  skipHistorySave?: boolean
 ): Promise<TranscriptionResult> {
   console.log('[TRANSCRIPTION] Starting transcription...')
   console.log('[TRANSCRIPTION] API key present:', !!apiKey)
@@ -121,8 +122,11 @@ export async function transcribeAudio(
     // Copy to clipboard
     await navigator.clipboard.writeText(data.text)
 
-    // Save to history
-    const savedTranscription = await saveToHistory(data.text, onHistoryUpdate, durationMs, audioAmplitudes)
+    // Save to history (unless skip requested)
+    let savedTranscription
+    if (!skipHistorySave) {
+      savedTranscription = await saveToHistory(data.text, onHistoryUpdate, durationMs, audioAmplitudes)
+    }
 
     setIsLoading(false)
     return {

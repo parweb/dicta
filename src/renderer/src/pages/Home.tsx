@@ -37,6 +37,18 @@ const HomePage = () => {
   const [isFollowUpFocused, setIsFollowUpFocused] = useState(false);
 
   const hasRedirectedRef = useRef(false);
+  // Use ref to always read the current value (avoid stale closure)
+  const isFollowUpFocusedRef = useRef(isFollowUpFocused);
+  const activeActionsTranscriptionIdRef = useRef(activeActionsTranscriptionId);
+
+  // Sync refs with state
+  useEffect(() => {
+    isFollowUpFocusedRef.current = isFollowUpFocused;
+  }, [isFollowUpFocused]);
+
+  useEffect(() => {
+    activeActionsTranscriptionIdRef.current = activeActionsTranscriptionId;
+  }, [activeActionsTranscriptionId]);
 
   // Use navigation hook
   const { currentView, settingsTab, navigateTo } = useNavigationStore();
@@ -68,7 +80,8 @@ const HomePage = () => {
     console.log('[HOME] ========== STARTING RECORDING ==========');
 
     // Switch to home view and close sidebar when starting recording (unless actions are open)
-    if (!activeActionsTranscriptionId) {
+    // ✅ Use ref to get current value
+    if (!activeActionsTranscriptionIdRef.current) {
       navigateTo('home');
       setIsHistoryOpen(false);
     }
@@ -80,17 +93,29 @@ const HomePage = () => {
       const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
       console.log('[HOME] Audio analyzed, duration:', durationMs, 'ms');
 
+      // Check if we should skip history save (follow-up mode)
+      // ✅ Read from refs to get current values (not stale closure values)
+      const currentActiveActionsId = activeActionsTranscriptionIdRef.current;
+      const currentIsFollowUpFocused = isFollowUpFocusedRef.current;
+      const shouldSkipHistorySave = currentActiveActionsId && currentIsFollowUpFocused;
+      console.log('[HOME] Skip history save:', shouldSkipHistorySave, '(activeActions:', currentActiveActionsId, ', focused:', currentIsFollowUpFocused, ')');
+
       // Transcribe and get the result
       console.log('[HOME] Starting transcription...');
-      const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
+      const result = await transcribeAudio(audioBlob, durationMs, amplitudes, shouldSkipHistorySave);
       console.log('[HOME] Transcription result:', result);
 
       if (result.text) {
         // If actions are open AND follow-up field has focus, send transcription as follow-up
-        if (activeActionsTranscriptionId && isFollowUpFocused) {
+        // ✅ Read from refs again in case they changed during transcription
+        const finalActiveActionsId = activeActionsTranscriptionIdRef.current;
+        const finalIsFollowUpFocused = isFollowUpFocusedRef.current;
+        console.log('[HOME] Checking routing - activeActionsTranscriptionId:', finalActiveActionsId, 'isFollowUpFocused:', finalIsFollowUpFocused);
+        if (finalActiveActionsId && finalIsFollowUpFocused) {
           console.log('[HOME] Follow-up field has focus, sending transcription to follow-up');
           setActionsFollowUpTranscript(result.text);
         } else {
+          console.log('[HOME] Creating new transcription (activeActionsId:', finalActiveActionsId, ', focused:', finalIsFollowUpFocused, ')');
           // Normal flow: transcription saved and list will auto-update
           setTranscript(result.text);
           // Select the newly created transcription
@@ -104,8 +129,9 @@ const HomePage = () => {
     startAudioRecording,
     analyzeAudio,
     transcribeAudio,
-    activeActionsTranscriptionId,
-    isFollowUpFocused,
+    // ❌ Removed from deps since we use refs now
+    // activeActionsTranscriptionId,
+    // isFollowUpFocused,
     navigateTo,
     setCurrentTranscriptionId
   ]);
@@ -157,6 +183,11 @@ const HomePage = () => {
     },
     [reloadTranscriptions]
   );
+
+  const handleFollowUpFocusChange = useCallback((isFocused: boolean) => {
+    console.log('[HOME] Follow-up focus changed:', isFocused);
+    setIsFollowUpFocused(isFocused);
+  }, []);
 
   const handleSelectTranscription = useCallback(
     (transcription: Transcription) => {
@@ -264,7 +295,7 @@ const HomePage = () => {
               onOpenActions={handleOpenActions}
               onCloseActions={handleCloseActions}
               onFollowUpConsumed={() => setActionsFollowUpTranscript(undefined)}
-              onFollowUpFocusChange={setIsFollowUpFocused}
+              onFollowUpFocusChange={handleFollowUpFocusChange}
               onBedrockHistoryChange={handleBedrockHistoryChange}
             />
 
