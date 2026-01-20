@@ -111,7 +111,7 @@ export default function TimelineRow({
 
               return (
                 <div
-                  key={t.id}
+                  key={`${t.id}-${idx}`}
                   style={{
                     position: 'absolute',
                     left: `${position}%`,
