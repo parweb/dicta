@@ -7,6 +7,7 @@ interface AudioWaveformProps {
   showDuration?: boolean;
   height?: number;
   maxBars?: number; // Maximum number of bars to display (for responsive)
+  color?: string; // Optional custom color for bars
 }
 
 const AudioWaveform = ({
@@ -14,7 +15,8 @@ const AudioWaveform = ({
   duration,
   showDuration = true,
   height = 60,
-  maxBars
+  maxBars,
+  color
 }: AudioWaveformProps) => {
   const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius } = theme;
@@ -98,7 +100,7 @@ const AudioWaveform = ({
               style={{
                 flex: 1,
                 height: `${Math.max(2, normalizedHeight)}%`,
-                backgroundColor: colors.accent.primary.primary,
+                backgroundColor: color || colors.accent.primary.primary,
                 opacity,
                 borderRadius: borderRadius.xs,
                 minWidth: '1px'
