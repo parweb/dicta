@@ -82,15 +82,18 @@ export default function BedrockAgentInline({
   // Notify history changes when state updates
   useEffect(() => {
     if (state.isComplete && onHistoryChange && conversationMessages.length > 0) {
+      console.log('[BEDROCK-INLINE] State complete, saving history')
       const history = getHistory()
       onHistoryChange(history)
     }
-  }, [state.isComplete, conversationMessages, onHistoryChange, getHistory])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.isComplete, conversationMessages.length, onHistoryChange])
 
   // Handle close
   const handleClose = () => {
     // Save history before closing
     if (onHistoryChange && conversationMessages.length > 0) {
+      console.log('[BEDROCK-INLINE] Closing, saving history')
       const history = getHistory()
       onHistoryChange(history)
     }

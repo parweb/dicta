@@ -301,7 +301,8 @@ app.whenReady().then(() => {
       if (!existsSync(historyDir)) {
         mkdirSync(historyDir, { recursive: true });
       }
-      const filename = `${Date.now()}.json`;
+      // Use transcription ID as filename to allow updates
+      const filename = `${transcription.id}.json`;
       const filepath = join(historyDir, filename);
       writeFileSync(filepath, JSON.stringify(transcription, null, 2));
       return { success: true, filename };
