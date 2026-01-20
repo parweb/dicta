@@ -67,6 +67,18 @@ export default function TimelineTranscriptList({
     }
   }, [transcriptions.length, virtualizer]);
 
+  // Auto-scroll to bottom when recording starts (to show placeholder)
+  useEffect(() => {
+    if (isRecording && parentRef.current) {
+      // Small delay to ensure placeholder is rendered
+      setTimeout(() => {
+        if (parentRef.current) {
+          parentRef.current.scrollTop = parentRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, [isRecording]);
+
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
     const handleScroll = () => {
@@ -136,7 +148,7 @@ export default function TimelineTranscriptList({
           paddingRight: transcriptions.length > 0 ? '72px' : '20px'
         }}
       >
-        {transcriptions.length === 0 ? (
+        {transcriptions.length === 0 && !isRecording ? (
           <div className="timeline-empty-state">
             <div className="empty-icon">
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -157,7 +169,7 @@ export default function TimelineTranscriptList({
         ) : (
           <div
             style={{
-              height: `${virtualizer.getTotalSize()}px`,
+              height: `${Math.max(virtualizer.getTotalSize(), isRecording ? 200 : 0)}px`,
               width: '100%',
               position: 'relative'
             }}
