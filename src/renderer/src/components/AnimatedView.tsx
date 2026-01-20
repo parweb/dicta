@@ -36,8 +36,6 @@ const panelVariants = {
 }
 
 export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
-  const { theme } = useTheme()
-
   // Home view: no animation, just stays in place
   if (viewKey === 'home') {
     return (
@@ -57,29 +55,45 @@ export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
     )
   }
 
-  // Statistics/Settings: slide up/down panel
+  // This should not be used directly for overlay panels anymore
+  // Use OverlayPanels component instead
+  return null
+}
+
+// Separate component for overlay panels with proper AnimatePresence
+interface OverlayPanelsProps {
+  currentView: 'home' | 'statistics' | 'settings'
+  children: ReactNode
+}
+
+export function OverlayPanels({ currentView, children }: OverlayPanelsProps) {
+  const { theme } = useTheme()
+  const showPanel = currentView !== 'home'
+
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={viewKey}
-        variants={panelVariants}
-        initial="initial"
-        animate="enter"
-        exit="exit"
-        style={{
-          width: '100%',
-          height: '100%',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 10, // Overlay above home
-          backgroundColor: theme.colors.background.primary // Opaque background from design system
-        }}
-      >
-        {children}
-      </motion.div>
+      {showPanel && (
+        <motion.div
+          key={currentView}
+          variants={panelVariants}
+          initial="initial"
+          animate="enter"
+          exit="exit"
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 10, // Overlay above home
+            backgroundColor: theme.colors.background.primary // Opaque background from design system
+          }}
+        >
+          {children}
+        </motion.div>
+      )}
     </AnimatePresence>
   )
 }

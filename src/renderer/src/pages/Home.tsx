@@ -8,7 +8,7 @@ import {
   useState
 } from 'react';
 
-import AnimatedView from '@/components/AnimatedView';
+import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
 import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
 import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
 import RecordButton from '@/components/home/RecordButton';
@@ -262,18 +262,12 @@ const HomePage = () => {
       </AnimatedView>
 
       {/* Overlay panels - Statistics and Settings */}
-      <Suspense fallback={null}>
-        {currentView === 'statistics' && (
-          <AnimatedView viewKey="statistics">
-            <Statistics />
-          </AnimatedView>
-        )}
-        {currentView === 'settings' && (
-          <AnimatedView viewKey="settings">
-            <Settings defaultTab={settingsTab} />
-          </AnimatedView>
-        )}
-      </Suspense>
+      <OverlayPanels currentView={currentView}>
+        <Suspense fallback={null}>
+          {currentView === 'statistics' && <Statistics />}
+          {currentView === 'settings' && <Settings defaultTab={settingsTab} />}
+        </Suspense>
+      </OverlayPanels>
 
       {/* Bedrock Agent Drawer */}
       <BedrockAgentDrawer
