@@ -72,19 +72,16 @@ export default function TimelineTranscriptList({
       setShouldShowPlaceholder(false);
       lastTranscriptionCountRef.current = transcriptions.length;
 
-      // Scroll to the new transcription
-      if (parentRef.current) {
-        requestAnimationFrame(() => {
-          if (parentRef.current) {
-            parentRef.current.scrollTo({
-              top: parentRef.current.scrollHeight,
-              behavior: 'smooth'
-            });
-          }
+      // Scroll to the new transcription using virtualizer
+      const newIndex = transcriptions.length - 1;
+      requestAnimationFrame(() => {
+        virtualizer.scrollToIndex(newIndex, {
+          align: 'end',
+          behavior: 'smooth'
         });
-      }
+      });
     }
-  }, [transcriptions.length]);
+  }, [transcriptions.length, virtualizer]);
 
   // Reset start time when recording starts
   useEffect(() => {
