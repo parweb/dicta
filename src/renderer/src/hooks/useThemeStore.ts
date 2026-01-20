@@ -17,6 +17,10 @@ import {
 import { darkTheme, type PresetName } from '@/lib/theme-presets'
 import { mergeTheme } from '@/lib/theme-utils'
 
+// Global ref to prevent multiple simultaneous saves
+let globalSaveTimer: NodeJS.Timeout | null = null
+let lastSaveTime = 0
+
 export function useThemeStore() {
   const theme = useAtomValue(themeAtom)
   const [baseConfig, setBaseConfig] = useAtom(baseThemeConfigAtom)
@@ -63,6 +67,13 @@ export function useThemeStore() {
         return { success: false, error: 'Theme configuration is undefined' }
       }
 
+      // Prevent multiple saves within 5 seconds
+      const now = Date.now()
+      if (now - lastSaveTime < 5000) {
+        console.log('[THEME STORE] Skipping save (too soon after last save)')
+        return { success: true }
+      }
+
       // Validate before saving
       const validation = validateTheme(config)
       if (!validation.success) {
@@ -71,6 +82,7 @@ export function useThemeStore() {
       }
 
       try {
+        lastSaveTime = now
         const result = await window.api?.theme.save(config)
         if (result?.success) {
           console.log('[THEME STORE] Theme saved successfully')
@@ -108,17 +120,18 @@ export function useThemeStore() {
       return
     }
 
-    if (saveTimerRef.current) {
-      clearTimeout(saveTimerRef.current)
+    if (globalSaveTimer) {
+      clearTimeout(globalSaveTimer)
     }
 
-    saveTimerRef.current = setTimeout(() => {
+    globalSaveTimer = setTimeout(() => {
       saveTheme()
     }, 2000) // Save 2 seconds after last change
 
     return () => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current)
+      if (globalSaveTimer) {
+        clearTimeout(globalSaveTimer)
+        globalSaveTimer = null
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
