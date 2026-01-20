@@ -32,6 +32,14 @@ export const lightTheme: ThemeConfig = {
         backgroundHover: 'rgba(14, 165, 233, 0.12)',
         backgroundActive: 'rgba(14, 165, 233, 0.16)'
       },
+      purple: {
+        primary: '#8b5cf6',
+        light: '#a78bfa',
+        dark: '#6d28d9',
+        background: 'rgba(139, 92, 246, 0.08)',
+        backgroundHover: 'rgba(139, 92, 246, 0.12)',
+        border: 'rgba(139, 92, 246, 0.25)'
+      },
       green: {
         primary: '#22c55e',
         button: '#16a34a'

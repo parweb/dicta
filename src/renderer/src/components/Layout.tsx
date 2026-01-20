@@ -62,7 +62,7 @@ const Layout = ({
           <button
             onClick={onHistoryToggle}
             style={{
-              background: 'transparent',
+              backgroundColor: 'transparent',
               border: 'none',
               cursor: 'pointer',
               padding: spacing.sm,
@@ -80,7 +80,7 @@ const Layout = ({
           <button
             onClick={() => onViewChange('statistics')}
             style={{
-              background: currentView === 'statistics' ? colors.text.primary : 'transparent',
+              backgroundColor: currentView === 'statistics' ? colors.text.primary : 'transparent',
               border: 'none',
               cursor: 'pointer',
               padding: spacing.sm,
@@ -105,7 +105,7 @@ const Layout = ({
           <button
             onClick={() => onViewChange('settings')}
             style={{
-              background: currentView === 'settings' ? colors.text.primary : 'transparent',
+              backgroundColor: currentView === 'settings' ? colors.text.primary : 'transparent',
               border: 'none',
               cursor: 'pointer',
               padding: spacing.sm,

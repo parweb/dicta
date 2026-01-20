@@ -32,6 +32,14 @@ export const highContrastTheme: ThemeConfig = {
         backgroundHover: 'rgba(0, 212, 255, 0.25)',
         backgroundActive: 'rgba(0, 212, 255, 0.35)'
       },
+      purple: {
+        primary: '#cc99ff',
+        light: '#e6ccff',
+        dark: '#9966ff',
+        background: 'rgba(204, 153, 255, 0.15)',
+        backgroundHover: 'rgba(204, 153, 255, 0.25)',
+        border: 'rgba(204, 153, 255, 0.4)'
+      },
       green: {
         primary: '#00ff00',
         button: '#00cc00'
