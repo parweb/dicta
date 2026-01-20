@@ -241,12 +241,14 @@ const HomePage = () => {
             {/* Fixed Record Button at Bottom */}
             <div
               style={{
-                padding: theme.spacing.xl,
+                padding: '40px',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 backgroundColor: theme.colors.background.primary,
-                borderTop: `1px solid ${theme.colors.border.primary}`
+                borderTop: `1px solid ${theme.colors.border.primary}`,
+                position: 'relative',
+                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.8) 50%, rgba(15, 23, 42, 1) 100%)'
               }}
             >
               <RecordButton
