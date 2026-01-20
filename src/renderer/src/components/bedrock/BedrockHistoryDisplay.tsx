@@ -1,15 +1,16 @@
 /**
  * Bedrock History Display Variants
- * Different UI approaches to display Bedrock conversation history
+ * Different UI approaches to show visual indicators that Bedrock actions were executed
+ * These are compact indicators that encourage users to click "Actions" to see full history
  */
 
-import { Calendar, FileText, Mail, Search, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { Calendar, FileText, Mail, Search, Sparkles } from 'lucide-react'
 import type { BedrockConversationHistory } from '@/lib/history'
 
 interface BedrockHistoryDisplayProps {
   history: BedrockConversationHistory
   variant: string
+  onClick?: () => void
 }
 
 const getToolIcon = (toolName: string) => {
@@ -42,133 +43,87 @@ const getToolLabel = (toolName: string) => {
   }
 }
 
-export default function BedrockHistoryDisplay({ history, variant }: BedrockHistoryDisplayProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export default function BedrockHistoryDisplay({ history, variant, onClick }: BedrockHistoryDisplayProps) {
   const toolsCount = history.toolsExecuted.length
   const uniqueTools = Array.from(new Set(history.toolsExecuted.map((t) => t.name)))
 
-  // Variant 1: Simple Accordion
+  // Variant 1: Simple Badge
   if (variant === 'accordion') {
     return (
-      <div className="mt-2 border border-slate-700 rounded-md overflow-hidden">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full flex items-center justify-between px-3 py-2 bg-slate-800 hover:bg-slate-750 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-blue-400" />
-            <span className="text-sm text-slate-300">{toolsCount} action(s) exécutée(s)</span>
-          </div>
-          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-        {isExpanded && (
-          <div className="p-3 bg-slate-900 space-y-2">
-            {history.toolsExecuted.map((tool, idx) => {
-              const Icon = getToolIcon(tool.name)
-              return (
-                <div key={idx} className="flex items-start gap-2 text-sm">
-                  <Icon size={14} className="text-blue-400 mt-0.5" />
-                  <div className="flex-1">
-                    <div className="text-slate-300 font-medium">{getToolLabel(tool.name)}</div>
-                    {tool.result && <div className="text-slate-500 text-xs mt-1">{tool.result}</div>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+      <button
+        onClick={onClick}
+        className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md text-sm text-blue-400 transition-colors"
+      >
+        <Sparkles size={14} />
+        <span>{toolsCount} action(s) exécutée(s)</span>
+        <span className="text-xs text-slate-500">• Cliquer pour voir</span>
+      </button>
     )
   }
 
-  // Variant 2: Badge with Tooltip
+  // Variant 2: Compact Badge
   if (variant === 'badge') {
     return (
-      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-xs text-blue-400 hover:bg-blue-500/20 transition-colors cursor-pointer group relative">
+      <button
+        onClick={onClick}
+        className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-xs text-blue-400 hover:bg-blue-500/20 transition-colors"
+      >
         <Sparkles size={12} />
         <span>{toolsCount} action(s)</span>
-        <div className="absolute top-full left-0 mt-2 p-3 bg-slate-800 border border-slate-700 rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all w-64 z-10">
-          {history.toolsExecuted.map((tool, idx) => {
-            const Icon = getToolIcon(tool.name)
+      </button>
+    )
+  }
+
+  // Variant 3: Icon Timeline Strip
+  if (variant === 'timeline') {
+    return (
+      <button
+        onClick={onClick}
+        className="mt-2 flex items-center gap-2 hover:opacity-80 transition-opacity"
+      >
+        <div className="flex items-center gap-1">
+          {uniqueTools.slice(0, 4).map((toolName, idx) => {
+            const Icon = getToolIcon(toolName)
             return (
-              <div key={idx} className="flex items-center gap-2 text-sm mb-2 last:mb-0">
-                <Icon size={14} className="text-blue-400" />
-                <span className="text-slate-300">{getToolLabel(tool.name)}</span>
+              <div
+                key={idx}
+                className="w-6 h-6 rounded bg-blue-500/20 border border-blue-500/40 flex items-center justify-center"
+              >
+                <Icon size={12} className="text-blue-400" />
               </div>
             )
           })}
+          {toolsCount > 4 && (
+            <span className="text-xs text-slate-500">+{toolsCount - 4}</span>
+          )}
         </div>
-      </div>
+        <span className="text-xs text-slate-400">{toolsCount} action(s)</span>
+      </button>
     )
   }
 
-  // Variant 3: Mini Timeline
-  if (variant === 'timeline') {
-    return (
-      <div className="mt-2 pl-3 border-l-2 border-blue-500/30 space-y-2">
-        {history.toolsExecuted.map((tool, idx) => {
-          const Icon = getToolIcon(tool.name)
-          return (
-            <div key={idx} className="flex items-start gap-2 text-sm -ml-[9px]">
-              <div className="w-4 h-4 rounded-full bg-blue-500/20 border-2 border-blue-500 flex items-center justify-center flex-shrink-0">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-              </div>
-              <div className="flex items-center gap-2 pt-0.5">
-                <Icon size={14} className="text-blue-400" />
-                <span className="text-slate-300">{getToolLabel(tool.name)}</span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    )
-  }
-
-  // Variant 4: Collapsible Card
+  // Variant 4: Card Badge
   if (variant === 'card') {
     return (
-      <div className="mt-2">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-full text-left p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg hover:bg-blue-500/10 transition-colors"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles size={16} className="text-blue-400" />
-              <span className="text-sm font-medium text-slate-300">Actions IA</span>
-              <span className="text-xs text-slate-500">({toolsCount})</span>
-            </div>
-            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </div>
-        </button>
-        {isExpanded && (
-          <div className="mt-1 p-3 bg-slate-900 border border-slate-700 rounded-lg space-y-2">
-            {history.toolsExecuted.map((tool, idx) => {
-              const Icon = getToolIcon(tool.name)
-              return (
-                <div key={idx} className="flex items-start gap-3 p-2 bg-slate-800 rounded">
-                  <Icon size={16} className="text-blue-400 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-slate-300 font-medium">
-                      {getToolLabel(tool.name)}
-                    </div>
-                    {tool.result && (
-                      <div className="text-xs text-slate-500 mt-1 truncate">{tool.result}</div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
+      <button
+        onClick={onClick}
+        className="mt-2 w-full text-left p-2.5 bg-blue-500/5 border border-blue-500/20 rounded-lg hover:bg-blue-500/10 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <Sparkles size={14} className="text-blue-400" />
+          <span className="text-sm text-slate-300">{toolsCount} action(s) exécutée(s)</span>
+        </div>
+      </button>
     )
   }
 
-  // Variant 5: Stacked Icons with Counter
+  // Variant 5: Stacked Icons
   if (variant === 'stacked') {
     return (
-      <div className="mt-2 flex items-center gap-2">
+      <button
+        onClick={onClick}
+        className="mt-2 flex items-center gap-2 hover:opacity-80 transition-opacity"
+      >
         <div className="flex -space-x-2">
           {uniqueTools.slice(0, 3).map((toolName, idx) => {
             const Icon = getToolIcon(toolName)
@@ -187,160 +142,124 @@ export default function BedrockHistoryDisplay({ history, variant }: BedrockHisto
             </div>
           )}
         </div>
-        <span className="text-xs text-slate-500">
-          {toolsCount} action(s) exécutée(s)
-        </span>
-      </div>
+        <span className="text-xs text-slate-500">{toolsCount} action(s)</span>
+      </button>
     )
   }
 
-  // Variant 6: Progress Bar Style
+  // Variant 6: Progress Indicator
   if (variant === 'progress') {
     return (
-      <div className="mt-2">
+      <button
+        onClick={onClick}
+        className="mt-2 w-full hover:opacity-80 transition-opacity"
+      >
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-slate-400">Actions IA</span>
           <span className="text-xs text-blue-400">{toolsCount} exécutée(s)</span>
         </div>
         <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" />
+          <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500" style={{ width: '100%' }} />
         </div>
-        {isExpanded && (
-          <div className="mt-2 space-y-1">
-            {history.toolsExecuted.map((tool, idx) => (
-              <div key={idx} className="text-xs text-slate-500 flex items-center gap-1.5">
-                <div className="w-1 h-1 rounded-full bg-blue-400" />
-                {getToolLabel(tool.name)}
-              </div>
-            ))}
-          </div>
-        )}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="mt-1 text-xs text-blue-400 hover:text-blue-300"
-        >
-          {isExpanded ? 'Masquer' : 'Voir détails'}
-        </button>
-      </div>
+      </button>
     )
   }
 
-  // Variant 7: Compact List
+  // Variant 7: Compact Inline List
   if (variant === 'compact') {
     return (
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <button
+        onClick={onClick}
+        className="mt-2 flex flex-wrap items-center gap-1.5 hover:opacity-80 transition-opacity"
+      >
         <Sparkles size={12} className="text-blue-400" />
-        {history.toolsExecuted.map((tool, idx) => {
-          const Icon = getToolIcon(tool.name)
+        {uniqueTools.slice(0, 4).map((toolName, idx) => {
+          const Icon = getToolIcon(toolName)
           return (
             <div
               key={idx}
               className="flex items-center gap-1 px-1.5 py-0.5 bg-slate-800 rounded text-xs text-slate-400"
             >
               <Icon size={10} />
-              {getToolLabel(tool.name)}
+              {getToolLabel(toolName)}
             </div>
           )
         })}
-      </div>
+        {toolsCount > 4 && (
+          <span className="text-xs text-slate-500">+{toolsCount - 4}</span>
+        )}
+      </button>
     )
   }
 
-  // Variant 8: Sidebar Style (inline mini version)
+  // Variant 8: Sidebar Accent
   if (variant === 'sidebar') {
     return (
-      <div className="mt-2 flex gap-2">
+      <button
+        onClick={onClick}
+        className="mt-2 flex gap-2 w-full hover:opacity-80 transition-opacity"
+      >
         <div className="w-1 bg-blue-500 rounded-full" />
-        <div className="flex-1 space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 text-xs text-slate-400 mb-1">
             <Sparkles size={12} />
-            <span>Actions exécutées</span>
+            <span>{toolsCount} actions exécutées</span>
           </div>
-          {history.toolsExecuted.map((tool, idx) => {
-            const Icon = getToolIcon(tool.name)
-            return (
-              <div key={idx} className="flex items-center gap-2 text-xs text-slate-500">
-                <Icon size={12} className="text-blue-400" />
-                <span>{getToolLabel(tool.name)}</span>
-              </div>
-            )
-          })}
+          <div className="flex flex-wrap gap-1">
+            {uniqueTools.slice(0, 3).map((toolName, idx) => {
+              const Icon = getToolIcon(toolName)
+              return (
+                <div key={idx} className="flex items-center gap-1 text-xs text-slate-500">
+                  <Icon size={10} className="text-blue-400" />
+                  {getToolLabel(toolName)}
+                </div>
+              )
+            })}
+          </div>
         </div>
-      </div>
+      </button>
     )
   }
 
-  // Variant 9: Modal Preview (just the trigger)
+  // Variant 9: Prominent Button
   if (variant === 'modal') {
     return (
-      <div className="mt-2">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md text-sm text-blue-400 transition-colors flex items-center gap-2"
-        >
-          <Sparkles size={14} />
-          Voir les {toolsCount} action(s)
-        </button>
-        {isExpanded && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 max-w-md w-full mx-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-slate-200">Actions IA</h3>
-                <button
-                  onClick={() => setIsExpanded(false)}
-                  className="text-slate-500 hover:text-slate-300"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="space-y-3">
-                {history.toolsExecuted.map((tool, idx) => {
-                  const Icon = getToolIcon(tool.name)
-                  return (
-                    <div key={idx} className="flex items-start gap-3 p-3 bg-slate-800 rounded">
-                      <Icon size={18} className="text-blue-400 mt-0.5" />
-                      <div className="flex-1">
-                        <div className="text-sm text-slate-300 font-medium">
-                          {getToolLabel(tool.name)}
-                        </div>
-                        {tool.result && (
-                          <div className="text-xs text-slate-500 mt-1">{tool.result}</div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      <button
+        onClick={onClick}
+        className="mt-2 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-md text-sm text-blue-400 transition-colors flex items-center gap-2 w-full justify-center"
+      >
+        <Sparkles size={14} />
+        <span>Voir les {toolsCount} action(s) exécutée(s)</span>
+      </button>
     )
   }
 
   // Variant 10: Chips/Tags
   if (variant === 'chips') {
     return (
-      <div className="mt-2">
+      <button
+        onClick={onClick}
+        className="mt-2 w-full text-left hover:opacity-80 transition-opacity"
+      >
         <div className="text-xs text-slate-400 mb-1.5 flex items-center gap-1">
           <Sparkles size={11} />
-          Actions IA
+          Actions IA ({toolsCount})
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {history.toolsExecuted.map((tool, idx) => {
-            const Icon = getToolIcon(tool.name)
+          {uniqueTools.slice(0, 5).map((toolName, idx) => {
+            const Icon = getToolIcon(toolName)
             return (
               <div
                 key={idx}
                 className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/30 rounded-full text-xs text-blue-400"
               >
                 <Icon size={11} />
-                {getToolLabel(tool.name)}
+                {getToolLabel(toolName)}
               </div>
             )
           })}
         </div>
-      </div>
+      </button>
     )
   }
 

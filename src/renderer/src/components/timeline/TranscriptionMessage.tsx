@@ -113,10 +113,14 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
         <p className="message-text">{text}</p>
       </div>
 
-      {/* Bedrock History Display (when not showing active actions) */}
+      {/* Bedrock History Indicator (when not showing active actions) */}
       {!showActions && bedrockHistory && bedrockHistory.toolsExecuted.length > 0 && (
         <div style={{ padding: '0 16px' }}>
-          <BedrockHistoryDisplay history={bedrockHistory} variant={historyDisplayVariant} />
+          <BedrockHistoryDisplay
+            history={bedrockHistory}
+            variant={historyDisplayVariant}
+            onClick={onOpenActions}
+          />
         </div>
       )}
 
