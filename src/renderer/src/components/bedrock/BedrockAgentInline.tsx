@@ -131,22 +131,25 @@ export default function BedrockAgentInline({
   return (
     <div className="bedrock-agent-inline">
       {/* Header */}
-      <div className="agent-header">
+      <div
+        className="agent-header"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        style={{ cursor: 'pointer' }}
+      >
         <div className="agent-title">
           <Sparkles size={16} className="agent-icon" />
           <span>Actions IA</span>
         </div>
         <div className="agent-controls">
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="control-button"
-            title={isCollapsed ? 'Développer' : 'Réduire'}
-          >
+          <span className="control-button">
             {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-          </button>
+          </span>
           {onClose && (
             <button
-              onClick={handleClose}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleClose()
+              }}
               className="control-button"
               title="Fermer"
             >
