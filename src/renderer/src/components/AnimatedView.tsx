@@ -73,7 +73,8 @@ export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 10 // Overlay above home
+          zIndex: 10, // Overlay above home
+          backgroundColor: '#0f172a' // Opaque background to hide home view
         }}
       >
         {children}
