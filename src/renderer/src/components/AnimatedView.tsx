@@ -7,6 +7,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { ReactNode } from 'react'
+import { useTheme } from '@/lib/theme-context'
 
 interface AnimatedViewProps {
   children: ReactNode
@@ -35,7 +36,7 @@ const panelVariants = {
 }
 
 export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
-  const isOverlayView = viewKey === 'statistics' || viewKey === 'settings'
+  const { theme } = useTheme()
 
   // Home view: no animation, just stays in place
   if (viewKey === 'home') {
@@ -74,7 +75,7 @@ export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
           right: 0,
           bottom: 0,
           zIndex: 10, // Overlay above home
-          backgroundColor: '#0f172a' // Opaque background to hide home view
+          backgroundColor: theme.colors.background.primary // Opaque background from design system
         }}
       >
         {children}
