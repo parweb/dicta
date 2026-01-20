@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { Transcription } from '../../lib/history'
 import HeatmapGrid, { type HourlyCell } from './enhanced-chart/HeatmapGrid'
 import HoverTooltip from './enhanced-chart/HoverTooltip'
@@ -11,7 +11,7 @@ interface EnhancedHybridChartProps {
 }
 
 const EnhancedHybridChart = ({ transcriptions }: EnhancedHybridChartProps) => {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
   const [selectedCell, setSelectedCell] = useState<HourlyCell | null>(null)
   const [hoveredCell, setHoveredCell] = useState<HourlyCell | null>(null)

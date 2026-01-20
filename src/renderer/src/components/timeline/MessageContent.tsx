@@ -4,14 +4,14 @@
  */
 
 import { memo } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface MessageContentProps {
   text: string
 }
 
 const MessageContent = memo(function MessageContent({ text }: MessageContentProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, typography } = theme
 
   return (

@@ -1,7 +1,7 @@
 import { useState, memo } from 'react';
 
 import AudioWaveform from '../AudioWaveform';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { formatRelativeTime, type Transcription } from '../../lib/history';
 import { formatDuration } from '../../lib/statistics';
 
@@ -13,7 +13,7 @@ interface TranscriptionCardProps {
 
 const TranscriptionCard = memo(
   ({ transcription, isActive, onClick }: TranscriptionCardProps) => {
-    const { theme } = useTheme();
+    const { theme } = useThemeStore();
     const { colors, spacing, typography, borderRadius } = theme;
     const [isHovered, setIsHovered] = useState(false);
 

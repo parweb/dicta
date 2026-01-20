@@ -4,11 +4,11 @@ import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 import { useUpdate } from '../../lib/update-context';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { Button } from '../ui/button';
 
 export default function UpdateSettings() {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography } = theme;
   const {
     currentVersion,

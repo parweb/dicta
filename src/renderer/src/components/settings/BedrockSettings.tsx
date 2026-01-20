@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useBedrock } from '../../contexts/BedrockContext'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { DEFAULT_MODEL_ID } from '../../lib/bedrock/constants'
 import CredentialsViewMode from './bedrock/CredentialsViewMode'
 import CredentialsEditForm from './bedrock/CredentialsEditForm'
 import DeleteConfirmModal from './shared/DeleteConfirmModal'
 
 export default function BedrockSettings() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const { hasCredentials, saveCredentials, deleteCredentials, credentials } = useBedrock()
 

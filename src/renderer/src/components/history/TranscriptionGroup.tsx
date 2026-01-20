@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
 import TranscriptionCard from './TranscriptionCard';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import type { Transcription } from '../../lib/history';
 
 interface TranscriptionGroupProps {
@@ -18,7 +18,7 @@ const TranscriptionGroup = memo(
     currentTranscript,
     onSelectTranscription
   }: TranscriptionGroupProps) => {
-    const { theme } = useTheme();
+    const { theme } = useThemeStore();
     const { colors, spacing, typography } = theme;
 
     return (

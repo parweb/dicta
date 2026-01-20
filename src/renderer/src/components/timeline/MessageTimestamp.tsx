@@ -6,14 +6,14 @@
 import { memo, useMemo } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface MessageTimestampProps {
   timestamp: number
 }
 
 const MessageTimestamp = memo(function MessageTimestamp({ timestamp }: MessageTimestampProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, typography } = theme
 
   const formattedTime = useMemo(() => {

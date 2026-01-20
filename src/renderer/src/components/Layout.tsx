@@ -2,7 +2,7 @@ import { BarChart3, History, Settings } from 'lucide-react';
 import { ReactNode, useMemo } from 'react';
 
 import type { Transcription } from '../lib/history';
-import { useTheme } from '../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
@@ -26,7 +26,7 @@ const Layout = ({
   currentTranscript,
   onSelectTranscription
 }: LayoutProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, components } = theme;
 
   // Memoize button styles that depend on currentView

@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import MessageTimestamp from './MessageTimestamp'
 import MessageActions from './MessageActions'
 
@@ -19,7 +19,7 @@ const MessageHeader = memo(function MessageHeader({
   onCopy,
   onOpenActions
 }: MessageHeaderProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
 
   return (

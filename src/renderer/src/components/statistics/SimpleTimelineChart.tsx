@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import type { Transcription } from '../../lib/history';
 
 interface SimpleTimelineChartProps {
@@ -8,7 +8,7 @@ interface SimpleTimelineChartProps {
 }
 
 const SimpleTimelineChart = ({ transcriptions }: SimpleTimelineChartProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius } = theme;
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });

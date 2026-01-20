@@ -17,7 +17,7 @@ import EmptyState from './shared/EmptyState';
 import LoadingState from './shared/LoadingState';
 import Overlay from './shared/Overlay';
 import { useHistoryData } from '../hooks/useHistoryData';
-import { useTheme } from '../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { getDayLabel, type Transcription } from '../lib/history';
 
 interface HistorySidebarProps {
@@ -38,7 +38,7 @@ const HistorySidebar = memo(
     onSelectTranscription,
     currentTranscript
   }: HistorySidebarProps) => {
-    const { theme } = useTheme();
+    const { theme } = useThemeStore();
     const { components, spacing, colors, typography, borderRadius } = theme;
     const { transcriptions, isLoading, loadHistory } = useHistoryData();
     const [searchQuery, setSearchQuery] = useState('');

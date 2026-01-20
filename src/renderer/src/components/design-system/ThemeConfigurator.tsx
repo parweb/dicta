@@ -1,4 +1,4 @@
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import ExportImportButtons from './ExportImportButtons';
 import JsonEditor from './JsonEditor';
@@ -6,7 +6,7 @@ import PresetSelector from './PresetSelector';
 import VisualEditor from './VisualEditor';
 
 export default function ThemeConfigurator() {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography } = theme;
 
   return (

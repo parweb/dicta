@@ -1,6 +1,6 @@
 import { Search, X } from 'lucide-react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface SearchInputProps {
   value: string;
@@ -15,7 +15,7 @@ const SearchInput = ({
   placeholder = 'Rechercher...',
   style
 }: SearchInputProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius } = theme;
 
   return (

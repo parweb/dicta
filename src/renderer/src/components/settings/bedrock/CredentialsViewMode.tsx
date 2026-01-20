@@ -1,5 +1,5 @@
 import { Cloud } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { Button } from '@/components/ui/button'
 import type { BedrockCredentials } from '@/contexts/BedrockContext'
 
@@ -14,7 +14,7 @@ export default function CredentialsViewMode({
   onEdit,
   onDelete
 }: CredentialsViewModeProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

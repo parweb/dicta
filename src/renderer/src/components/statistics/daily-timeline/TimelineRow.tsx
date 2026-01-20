@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { Transcription } from '../../../lib/history'
 import HourRuler from './HourRuler'
 
@@ -23,7 +23,7 @@ export default function TimelineRow({
   onMouseEnter,
   onMouseLeave
 }: TimelineRowProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   const cellAvgDuration =

@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react';
 
 import AudioWaveform from '../AudioWaveform';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface TranscriptionDisplayProps {
   transcript: string;
@@ -22,7 +22,7 @@ const TranscriptionDisplay = ({
   onCopyTranscript,
   onOpenActions
 }: TranscriptionDisplayProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius, components } = theme;
 
   return (

@@ -5,7 +5,7 @@
 
 import { memo } from 'react'
 import { Copy, Sparkles } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import IconButton from '../ui/IconButton'
 
 interface MessageActionsProps {
@@ -17,7 +17,7 @@ const MessageActions = memo(function MessageActions({
   onCopy,
   onOpenActions
 }: MessageActionsProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing, colors } = theme
 
   return (

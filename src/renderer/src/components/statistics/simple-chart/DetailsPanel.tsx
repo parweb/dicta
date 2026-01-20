@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { HourlyCell } from '../enhanced-chart/HeatmapGrid'
 
 interface DetailsPanelProps {
@@ -7,7 +7,7 @@ interface DetailsPanelProps {
 }
 
 export default function DetailsPanel({ cell, onClose }: DetailsPanelProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   return (

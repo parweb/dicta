@@ -3,11 +3,11 @@ import {
   PRESET_THEMES,
   type PresetName
 } from '../../lib/theme-presets';
-import { useTheme, useThemeConfig } from '../../lib/theme-context';
+import { useThemeStore, useThemeStoreConfig } from '@/hooks/useThemeStore';
 
 export default function PresetSelector() {
-  const { theme } = useTheme();
-  const { activePreset, replaceTheme, setActivePreset } = useThemeConfig();
+  const { theme } = useThemeStore();
+  const { activePreset, replaceTheme, setActivePreset } = useThemeStoreConfig();
 
   const handlePresetClick = (presetName: PresetName) => {
     replaceTheme(PRESET_THEMES[presetName]);

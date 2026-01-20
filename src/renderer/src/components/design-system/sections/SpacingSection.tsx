@@ -1,9 +1,9 @@
 import { Ruler } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import Section from '../layout/Section'
 
 export default function SpacingSection() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   return (

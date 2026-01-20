@@ -6,7 +6,7 @@ import ThemeConfigurator from '@/components/design-system/ThemeConfigurator';
 import BedrockSettings from '@/components/settings/BedrockSettings';
 import ModelSettings from '@/components/settings/ModelSettings';
 import UpdateSettings from '@/components/settings/UpdateSettings';
-import { useTheme, type Theme } from '@/lib/theme-context';
+import { useThemeStore, type Theme } from '@/hooks/useThemeStore';
 import DesignSystem from './DesignSystem';
 
 type TabValue = 'theme' | 'model' | 'bedrock' | 'updates';
@@ -73,7 +73,7 @@ interface SettingsProps {
 }
 
 const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography } = theme;
   const [activeTab, setActiveTab] = useState<TabValue>(defaultTab);
 

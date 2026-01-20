@@ -1,4 +1,4 @@
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { formatCost, formatDuration } from '../../lib/statistics';
 
 interface StatsSummaryCardsProps {
@@ -12,7 +12,7 @@ const StatsSummaryCards = ({
   totalMinutes,
   totalCost
 }: StatsSummaryCardsProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography } = theme;
 
   return (

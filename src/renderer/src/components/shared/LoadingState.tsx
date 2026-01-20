@@ -1,11 +1,11 @@
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface LoadingStateProps {
   message?: string;
 }
 
 const LoadingState = ({ message = 'Chargement...' }: LoadingStateProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing } = theme;
 
   return (

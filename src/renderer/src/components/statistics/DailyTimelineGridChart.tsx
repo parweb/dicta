@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { Transcription } from '../../lib/history'
 import GlobalStatsHeader from './daily-timeline/GlobalStatsHeader'
 import TimelineRow, { type DailyCell } from './daily-timeline/TimelineRow'
@@ -10,7 +10,7 @@ interface DailyTimelineGridChartProps {
 }
 
 const DailyTimelineGridChart = ({ transcriptions }: DailyTimelineGridChartProps) => {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing } = theme
   const [hoveredCell, setHoveredCell] = useState<string | null>(null)
 

@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface SectionProps {
   icon: React.ReactNode
@@ -8,7 +8,7 @@ interface SectionProps {
 }
 
 export default function Section({ icon, title, description, children }: SectionProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

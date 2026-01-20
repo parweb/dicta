@@ -1,11 +1,11 @@
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface OverlayProps {
   onClose: () => void;
 }
 
 const Overlay = ({ onClose }: OverlayProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors } = theme;
 
   return (

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useApiKeyStore } from '../../hooks/useApiKeyStore'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import ApiKeyViewMode from './model/ApiKeyViewMode'
 import ApiKeyEditForm from './model/ApiKeyEditForm'
 import DeleteConfirmModal from './shared/DeleteConfirmModal'
 
 export default function ModelSettings() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const { hasApiKey, saveApiKey, deleteApiKey } = useApiKeyStore()
 

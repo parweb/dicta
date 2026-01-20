@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { Transcription } from '../../lib/history'
 import type { HourlyCell } from './enhanced-chart/HeatmapGrid'
 import SimpleHeatmapGrid from './simple-chart/SimpleHeatmapGrid'
@@ -12,7 +12,7 @@ interface SimpleHybridChartProps {
 }
 
 const SimpleHybridChart = ({ transcriptions }: SimpleHybridChartProps) => {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
   const [selectedCell, setSelectedCell] = useState<HourlyCell | null>(null)
   const [hoveredCell, setHoveredCell] = useState<HourlyCell | null>(null)

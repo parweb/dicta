@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import ColorPaletteSection from '@/components/design-system/sections/ColorPaletteSection'
 import SpacingSection from '@/components/design-system/sections/SpacingSection'
 import TypographySection from '@/components/design-system/sections/TypographySection'
@@ -8,7 +8,7 @@ import ComponentsSection from '@/components/design-system/sections/ComponentsSec
 import ChartsSection from '@/components/design-system/sections/ChartsSection'
 
 const DesignSystem = () => {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
 
   return (

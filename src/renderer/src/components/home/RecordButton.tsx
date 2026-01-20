@@ -1,6 +1,6 @@
 import { Loader2, Mic, MicOff } from 'lucide-react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { getRecordButtonColor } from '../../lib/theme-utils';
 
 interface RecordButtonProps {
@@ -16,7 +16,7 @@ const RecordButton = ({
   onMouseDown,
   onMouseUp
 }: RecordButtonProps) => {
-  const { theme, baseConfig } = useTheme();
+  const { theme, baseConfig } = useThemeStore();
   const { components } = theme;
 
   return (

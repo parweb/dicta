@@ -1,7 +1,7 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 export default function HourRuler() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing } = theme
 
   return (

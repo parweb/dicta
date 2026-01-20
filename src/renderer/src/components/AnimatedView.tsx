@@ -7,7 +7,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { ReactNode } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface AnimatedViewProps {
   children: ReactNode
@@ -67,7 +67,7 @@ interface OverlayPanelsProps {
 }
 
 export function OverlayPanels({ currentView, children }: OverlayPanelsProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const showPanel = currentView !== 'home'
 
   return (

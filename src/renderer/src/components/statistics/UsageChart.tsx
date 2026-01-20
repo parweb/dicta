@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 
 import ChartTooltip from './ChartTooltip';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import type { UsageData } from '../../lib/statistics';
 
 interface UsageChartProps {
@@ -18,7 +18,7 @@ interface UsageChartProps {
 }
 
 const UsageChart = ({ dailyUsage, getBarColor }: UsageChartProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, charts } = theme;
 
   // Custom CSS for Brush - magnifying glass effect with hidden travellers

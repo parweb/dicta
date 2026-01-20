@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import type { Transcription } from '../../lib/history';
 
 interface TimelineGridChartProps {
@@ -16,7 +16,7 @@ interface HourlyCell {
 }
 
 const TimelineGridChart = ({ transcriptions }: TimelineGridChartProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius } = theme;
   const [hoveredCell, setHoveredCell] = useState<string | null>(null);
 

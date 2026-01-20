@@ -1,11 +1,11 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface ColorGridProps {
   children: React.ReactNode
 }
 
 export default function ColorGrid({ children }: ColorGridProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
 
   return (

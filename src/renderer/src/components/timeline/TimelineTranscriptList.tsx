@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import TranscriptionMessage from './TranscriptionMessage'
 import SimpleScrollbar from './SimpleScrollbar'
 import type { Transcription } from '@/lib/history'
@@ -21,7 +21,7 @@ export default function TimelineTranscriptList({
   onCopyTranscript,
   onOpenActions
 }: TimelineTranscriptListProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
   const parentRef = useRef<HTMLDivElement>(null)
   const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1)

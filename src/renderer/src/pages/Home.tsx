@@ -22,7 +22,7 @@ import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
 import { useApiKeyStore } from '@/hooks/useApiKeyStore';
 import type { Transcription } from '@/lib/history';
-import { useTheme } from '@/lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 // Lazy load Statistics and Settings pages to reduce initial bundle size
 const Statistics = lazy(() => import('./Statistics'));
@@ -40,7 +40,7 @@ const HomePage = () => {
   const { currentView, settingsTab, navigateTo } = useNavigation();
 
   // Use theme and API key hooks
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { apiKey, hasApiKey, isLoading: isApiKeyLoading } = useApiKeyStore();
 
   // Use custom hooks

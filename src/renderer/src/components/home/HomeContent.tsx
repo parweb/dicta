@@ -1,7 +1,7 @@
 import AudioPlayerWithRetry from './AudioPlayerWithRetry';
 import RecordButton from './RecordButton';
 import TranscriptionDisplay from './TranscriptionDisplay';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface HomeContentProps {
   isRecording: boolean;
@@ -36,7 +36,7 @@ const HomeContent = ({
   failedAudioBlob,
   onRetry
 }: HomeContentProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { spacing } = theme;
 
   return (

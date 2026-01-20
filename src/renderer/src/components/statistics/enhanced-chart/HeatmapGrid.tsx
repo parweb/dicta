@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 export interface HourlyCell {
   dateKey: string
@@ -25,7 +25,7 @@ export default function HeatmapGrid({
   onCellHover,
   onMouseMove
 }: HeatmapGridProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   const getCellColor = (count: number, isHovered: boolean) => {

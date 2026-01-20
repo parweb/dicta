@@ -4,7 +4,7 @@
  */
 
 import { memo, useState, type ReactNode } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface IconButtonProps {
   icon: ReactNode
@@ -19,7 +19,7 @@ const IconButton = memo(function IconButton({
   label,
   color
 }: IconButtonProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const [isHovered, setIsHovered] = useState(false)
 

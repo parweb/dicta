@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { useScrollbarDrag } from '@/hooks/useScrollbarDrag'
 import ScrollbarTrack from './ScrollbarTrack'
 import ScrollbarThumb from './ScrollbarThumb'
@@ -23,7 +23,7 @@ export default function SimpleScrollbar({
   itemCount,
   currentIndex
 }: SimpleScrollbarProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
   const [isHovering, setIsHovering] = useState(false)
 

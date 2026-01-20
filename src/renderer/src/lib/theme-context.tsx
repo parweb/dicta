@@ -54,10 +54,10 @@ const ThemeConfigContext = createContext<ThemeConfigContextValue | undefined>(
  * Hook to access theme (computed styles only)
  * Use this hook in most components - it won't re-render when config is edited
  */
-export function useTheme(): ThemeContextValue {
+export function useThemeStore(): ThemeContextValue {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useThemeStore must be used within a ThemeProvider');
   }
   return context;
 }
@@ -66,10 +66,10 @@ export function useTheme(): ThemeContextValue {
  * Hook to access theme configuration methods
  * Use this hook only in Settings page for editing theme
  */
-export function useThemeConfig(): ThemeConfigContextValue {
+export function useThemeStoreConfig(): ThemeConfigContextValue {
   const context = useContext(ThemeConfigContext);
   if (!context) {
-    throw new Error('useThemeConfig must be used within a ThemeProvider');
+    throw new Error('useThemeStoreConfig must be used within a ThemeProvider');
   }
   return context;
 }

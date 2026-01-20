@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { Button } from '@/components/ui/button'
 
 interface ApiKeyEditFormProps {
@@ -22,7 +22,7 @@ export default function ApiKeyEditForm({
   onCancel,
   onKeyDown
 }: ApiKeyEditFormProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

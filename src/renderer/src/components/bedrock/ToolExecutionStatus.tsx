@@ -5,7 +5,7 @@
 
 import { Calendar, FileText, Loader2, Mail, Search } from 'lucide-react'
 
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { ToolExecution } from '../../lib/bedrock/types'
 
 interface ToolExecutionStatusProps {
@@ -49,7 +49,7 @@ function getToolDisplayName(toolName: string): string {
 }
 
 export default function ToolExecutionStatus({ tools }: ToolExecutionStatusProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   if (tools.length === 0) {

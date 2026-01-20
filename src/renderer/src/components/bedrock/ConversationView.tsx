@@ -6,7 +6,7 @@
 import { useEffect, useRef } from 'react'
 import { Bot, User } from 'lucide-react'
 
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { BedrockMessage } from '../../lib/bedrock/types'
 import ToolExecutionStatus from './ToolExecutionStatus'
 import type { ToolExecution } from '../../lib/bedrock/types'
@@ -22,7 +22,7 @@ export default function ConversationView({
   toolsExecuted,
   isStreaming
 }: ConversationViewProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const scrollRef = useRef<HTMLDivElement>(null)
 

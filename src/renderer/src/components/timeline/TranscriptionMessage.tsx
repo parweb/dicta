@@ -5,7 +5,7 @@
  */
 
 import { memo } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import MessageWaveform from './MessageWaveform'
 import MessageHeader from './MessageHeader'
 import MessageContent from './MessageContent'
@@ -27,7 +27,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   onCopy,
   onOpenActions
 }: TranscriptionMessageProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing } = theme
 
   return (

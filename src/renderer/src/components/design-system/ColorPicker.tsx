@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface ColorPickerProps {
   label: string;
@@ -15,7 +15,7 @@ export default function ColorPicker({
   onChange,
   description
 }: ColorPickerProps) {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const [inputValue, setInputValue] = useState(value);
 
   // Normalize color value for color input (convert rgba to hex if needed)

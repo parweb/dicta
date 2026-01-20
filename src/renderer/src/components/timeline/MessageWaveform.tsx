@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import AudioWaveform from '../AudioWaveform'
 
 interface MessageWaveformProps {
@@ -16,7 +16,7 @@ const MessageWaveform = memo(function MessageWaveform({
   amplitudes,
   duration
 }: MessageWaveformProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing, typography, colors } = theme
 
   if (amplitudes.length === 0) return null

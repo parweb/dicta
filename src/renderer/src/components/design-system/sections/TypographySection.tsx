@@ -1,10 +1,10 @@
 import { Type } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import Section from '../layout/Section'
 import SubSection from '../layout/SubSection'
 
 export default function TypographySection() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

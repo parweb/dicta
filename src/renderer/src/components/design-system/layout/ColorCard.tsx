@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface ColorCardProps {
   name: string
@@ -6,7 +6,7 @@ interface ColorCardProps {
 }
 
 export default function ColorCard({ name, hex }: ColorCardProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius, borders } = theme
 
   return (

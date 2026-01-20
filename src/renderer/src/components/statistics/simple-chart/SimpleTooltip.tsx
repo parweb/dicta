@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { HourlyCell } from '../enhanced-chart/HeatmapGrid'
 
 interface SimpleTooltipProps {
@@ -7,7 +7,7 @@ interface SimpleTooltipProps {
 }
 
 export default function SimpleTooltip({ cell, mousePosition }: SimpleTooltipProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   return (

@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { HourlyCell } from './HeatmapGrid'
 
 interface HoverTooltipProps {
@@ -7,7 +7,7 @@ interface HoverTooltipProps {
 }
 
 export default function HoverTooltip({ cell, mousePosition }: HoverTooltipProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   const avgDuration =

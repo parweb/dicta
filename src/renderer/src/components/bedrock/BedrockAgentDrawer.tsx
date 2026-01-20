@@ -8,7 +8,7 @@ import { Mic, Sparkles, X } from 'lucide-react'
 
 import { useBedrock } from '../../contexts/BedrockContext'
 import { useBedrockAgent } from '../../hooks/useBedrockAgent'
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { Button } from '../ui/button'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '../ui/drawer'
 import AgentStreamingDisplay from './AgentStreamingDisplay'
@@ -29,7 +29,7 @@ export default function BedrockAgentDrawer({
   newTranscript,
   onTranscriptConsumed
 }: BedrockAgentDrawerProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const { hasCredentials } = useBedrock()
   const { state, conversationMessages, executeAgent, continueConversation, reset } = useBedrockAgent()

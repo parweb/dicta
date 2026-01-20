@@ -1,4 +1,4 @@
-import { useTheme } from '../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { formatDuration } from '../lib/statistics';
 
 interface AudioWaveformProps {
@@ -16,7 +16,7 @@ const AudioWaveform = ({
   height = 60,
   maxBars
 }: AudioWaveformProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing, typography, borderRadius } = theme;
 
   if (amplitudes.length === 0) return null;

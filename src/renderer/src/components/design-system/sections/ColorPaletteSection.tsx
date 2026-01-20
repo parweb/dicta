@@ -1,12 +1,12 @@
 import { Palette } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import Section from '../layout/Section'
 import SubSection from '../layout/SubSection'
 import ColorGrid from '../layout/ColorGrid'
 import ColorCard from '../layout/ColorCard'
 
 export default function ColorPaletteSection() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

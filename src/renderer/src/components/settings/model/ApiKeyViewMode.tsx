@@ -1,5 +1,5 @@
 import { Key } from 'lucide-react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import { Button } from '@/components/ui/button'
 
 interface ApiKeyViewModeProps {
@@ -8,7 +8,7 @@ interface ApiKeyViewModeProps {
 }
 
 export default function ApiKeyViewMode({ onEdit, onDelete }: ApiKeyViewModeProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (

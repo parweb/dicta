@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { HourlyCell } from './HeatmapGrid'
 
 interface DetailModalProps {
@@ -7,7 +7,7 @@ interface DetailModalProps {
 }
 
 export default function DetailModal({ cell, onClose }: DetailModalProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius } = theme
 
   return (

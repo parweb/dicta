@@ -1,10 +1,10 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import ColorsSection from './visual-editor/ColorsSection'
 import SpacingSection from './visual-editor/SpacingSection'
 import TypographySection from './visual-editor/TypographySection'
 
 const VisualEditor = () => {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { spacing } = theme
 
   return (

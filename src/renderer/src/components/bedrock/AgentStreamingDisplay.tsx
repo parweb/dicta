@@ -6,7 +6,7 @@
 import { useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 
-import { useTheme } from '../../lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import type { AgentState } from '../../hooks/useBedrockAgent'
 import ToolExecutionStatus from './ToolExecutionStatus'
 
@@ -15,7 +15,7 @@ interface AgentStreamingDisplayProps {
 }
 
 export default function AgentStreamingDisplay({ state }: AgentStreamingDisplayProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
   const responseRef = useRef<HTMLDivElement>(null)
 

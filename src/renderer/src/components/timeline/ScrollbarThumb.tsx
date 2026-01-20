@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react'
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface ScrollbarThumbProps {
   position: number
@@ -21,7 +21,7 @@ const ScrollbarThumb = memo(function ScrollbarThumb({
   isHovering,
   onMouseDown
 }: ScrollbarThumbProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors } = theme
 
   return (

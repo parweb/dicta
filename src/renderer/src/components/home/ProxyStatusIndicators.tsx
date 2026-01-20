@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 
 import type { ProxyStatus } from '../../hooks/useTranscriptionAPI';
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 import { getStatusColor } from '../../lib/theme-utils';
 
 interface ProxyStatusIndicatorsProps {
@@ -15,7 +15,7 @@ interface ProxyStatusIndicatorProps {
 
 const ProxyStatusIndicator = memo(
   ({ name, status }: ProxyStatusIndicatorProps) => {
-    const { theme, baseConfig } = useTheme();
+    const { theme, baseConfig } = useThemeStore();
     const { spacing, typography, borders, shadows, components } = theme;
 
     return (
@@ -54,7 +54,7 @@ ProxyStatusIndicator.displayName = 'ProxyStatusIndicator';
 
 const ProxyStatusIndicators = memo(
   ({ proxyStatuses }: ProxyStatusIndicatorsProps) => {
-    const { theme } = useTheme();
+    const { theme } = useThemeStore();
     const { spacing, typography, colors } = theme;
 
     const proxyStatusEntries = useMemo(

@@ -1,9 +1,9 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 import Section from '../layout/Section'
 import BarChart3Icon from '../icons/BarChart3Icon'
 
 export default function ChartsSection() {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography, borderRadius, charts } = theme
 
   return (

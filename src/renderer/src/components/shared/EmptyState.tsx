@@ -1,11 +1,11 @@
-import { useTheme } from '../../lib/theme-context';
+import { useThemeStore } from '@/hooks/useThemeStore';
 
 interface EmptyStateProps {
   message: string;
 }
 
 const EmptyState = ({ message }: EmptyStateProps) => {
-  const { theme } = useTheme();
+  const { theme } = useThemeStore();
   const { colors, spacing } = theme;
 
   return (

@@ -1,4 +1,4 @@
-import { useTheme } from '@/lib/theme-context'
+import { useThemeStore } from '@/hooks/useThemeStore'
 
 interface GlobalStatsHeaderProps {
   totalCount: number
@@ -11,7 +11,7 @@ export default function GlobalStatsHeader({
   totalDuration,
   avgDuration
 }: GlobalStatsHeaderProps) {
-  const { theme } = useTheme()
+  const { theme } = useThemeStore()
   const { colors, spacing, typography } = theme
 
   return (
