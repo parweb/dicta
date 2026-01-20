@@ -17,9 +17,12 @@ import {
 import { darkTheme, type PresetName } from '@/lib/theme-presets'
 import { mergeTheme } from '@/lib/theme-utils'
 
-// Global ref to prevent multiple simultaneous saves
-let globalSaveTimer: NodeJS.Timeout | null = null
-let lastSaveTime = 0
+// Global state to prevent multiple simultaneous saves (survives HMR)
+const globalState = {
+  saveTimer: null as NodeJS.Timeout | null,
+  lastSaveTime: 0,
+  isSaving: false
+}
 
 export function useThemeStore() {
   const theme = useAtomValue(themeAtom)
@@ -56,7 +59,7 @@ export function useThemeStore() {
     }
   }, [setBaseConfig, setActivePreset])
 
-  // Save theme to disk (with debounce)
+  // Save theme to disk (with debounce and throttle)
   const saveTheme = useCallback(
     async (themeToSave?: ThemeConfig) => {
       const config = themeToSave || baseConfig
@@ -67,10 +70,16 @@ export function useThemeStore() {
         return { success: false, error: 'Theme configuration is undefined' }
       }
 
-      // Prevent multiple saves within 5 seconds
+      // Prevent multiple saves within 3 seconds
       const now = Date.now()
-      if (now - lastSaveTime < 5000) {
+      if (now - globalState.lastSaveTime < 3000) {
         console.log('[THEME STORE] Skipping save (too soon after last save)')
+        return { success: true }
+      }
+
+      // Prevent concurrent saves
+      if (globalState.isSaving) {
+        console.log('[THEME STORE] Skipping save (save already in progress)')
         return { success: true }
       }
 
@@ -82,7 +91,8 @@ export function useThemeStore() {
       }
 
       try {
-        lastSaveTime = now
+        globalState.isSaving = true
+        globalState.lastSaveTime = now
         const result = await window.api?.theme.save(config)
         if (result?.success) {
           console.log('[THEME STORE] Theme saved successfully')
@@ -95,6 +105,8 @@ export function useThemeStore() {
           success: false,
           error: error instanceof Error ? error.message : 'Unknown error'
         }
+      } finally {
+        globalState.isSaving = false
       }
     },
     [baseConfig]
@@ -120,18 +132,18 @@ export function useThemeStore() {
       return
     }
 
-    if (globalSaveTimer) {
-      clearTimeout(globalSaveTimer)
+    if (globalState.saveTimer) {
+      clearTimeout(globalState.saveTimer)
     }
 
-    globalSaveTimer = setTimeout(() => {
+    globalState.saveTimer = setTimeout(() => {
       saveTheme()
     }, 2000) // Save 2 seconds after last change
 
     return () => {
-      if (globalSaveTimer) {
-        clearTimeout(globalSaveTimer)
-        globalSaveTimer = null
+      if (globalState.saveTimer) {
+        clearTimeout(globalState.saveTimer)
+        globalState.saveTimer = null
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
