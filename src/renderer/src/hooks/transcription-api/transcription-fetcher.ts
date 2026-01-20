@@ -122,10 +122,13 @@ export async function transcribeAudio(
     await navigator.clipboard.writeText(data.text)
 
     // Save to history
-    await saveToHistory(data.text, onHistoryUpdate, durationMs, audioAmplitudes)
+    const savedTranscription = await saveToHistory(data.text, onHistoryUpdate, durationMs, audioAmplitudes)
 
     setIsLoading(false)
-    return { text: data.text }
+    return {
+      text: data.text,
+      id: savedTranscription?.id
+    }
   } catch (error) {
     setIsLoading(false)
     let errorMessage = 'Transcription failed'

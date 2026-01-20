@@ -14,6 +14,7 @@ interface TranscriptionMessageProps {
   audioAmplitudes?: number[];
   audioDuration?: number;
   timestamp: number;
+  isSelected?: boolean;
   onCopy?: () => void;
   onOpenActions?: () => void;
 }
@@ -23,6 +24,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   audioAmplitudes = [],
   audioDuration,
   timestamp,
+  isSelected = false,
   onCopy,
   onOpenActions
 }: TranscriptionMessageProps) {
@@ -40,7 +42,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   const durationSeconds = audioDuration ? Math.round(audioDuration / 1000) : 0;
 
   return (
-    <div className="transcription-message">
+    <div className={`transcription-message ${isSelected ? 'selected' : ''}`}>
       {/* Header with timestamp and actions */}
       <div className="message-header">
         <div className="message-meta">

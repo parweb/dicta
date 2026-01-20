@@ -90,6 +90,10 @@ const HomePage = () => {
         } else {
           // Normal flow: transcription saved and list will auto-update
           setTranscript(result.text);
+          // Select the newly created transcription
+          if (result.id) {
+            setCurrentTranscriptionId(result.id);
+          }
         }
       }
     });
@@ -98,7 +102,8 @@ const HomePage = () => {
     analyzeAudio,
     transcribeAudio,
     isDrawerOpen,
-    navigateTo
+    navigateTo,
+    setCurrentTranscriptionId
   ]);
 
   const stopRecording = useCallback(() => {
@@ -234,6 +239,7 @@ const HomePage = () => {
             {/* Timeline List */}
             <TimelineTranscriptList
               transcriptions={allTranscriptions}
+              currentTranscriptionId={currentTranscriptionId}
               onCopyTranscript={handleCopyTranscript}
               onOpenActions={handleOpenActions}
             />

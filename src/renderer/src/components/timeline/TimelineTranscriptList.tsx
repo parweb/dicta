@@ -13,12 +13,14 @@ import './TimelineTranscriptList.css';
 
 interface TimelineTranscriptListProps {
   transcriptions: Transcription[];
+  currentTranscriptionId?: string | null;
   onCopyTranscript?: (transcription: Transcription) => void;
   onOpenActions?: (transcription: Transcription) => void;
 }
 
 export default function TimelineTranscriptList({
   transcriptions,
+  currentTranscriptionId,
   onCopyTranscript,
   onOpenActions
 }: TimelineTranscriptListProps) {
@@ -144,6 +146,7 @@ export default function TimelineTranscriptList({
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const transcription = transcriptions[virtualItem.index];
+              const isSelected = currentTranscriptionId === transcription.id;
               return (
                 <div
                   key={virtualItem.key}
@@ -163,6 +166,7 @@ export default function TimelineTranscriptList({
                     audioAmplitudes={transcription.audioAmplitudes}
                     audioDuration={transcription.durationMs}
                     timestamp={transcription.timestamp}
+                    isSelected={isSelected}
                     onCopy={() => onCopyTranscript?.(transcription)}
                     onOpenActions={() => onOpenActions?.(transcription)}
                   />

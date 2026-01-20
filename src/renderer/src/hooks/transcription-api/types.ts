@@ -17,6 +17,7 @@ export interface TranscriptionResponse {
 export interface TranscriptionResult {
   text?: string
   error?: string
+  id?: string // ID of the saved transcription
 }
 
 export const PROXY_CONFIGS: ProxyConfig[] = [
