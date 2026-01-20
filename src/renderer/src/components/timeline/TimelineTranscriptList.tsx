@@ -66,11 +66,23 @@ export default function TimelineTranscriptList({
     }
   }, [isRecording, isLoading]);
 
-  // Hide placeholder when new transcription is added
+  // Hide placeholder when new transcription is added and scroll to it
   useEffect(() => {
     if (transcriptions.length > lastTranscriptionCountRef.current) {
       setShouldShowPlaceholder(false);
       lastTranscriptionCountRef.current = transcriptions.length;
+
+      // Scroll to the new transcription
+      if (parentRef.current) {
+        requestAnimationFrame(() => {
+          if (parentRef.current) {
+            parentRef.current.scrollTo({
+              top: parentRef.current.scrollHeight,
+              behavior: 'smooth'
+            });
+          }
+        });
+      }
     }
   }, [transcriptions.length]);
 
