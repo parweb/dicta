@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useTheme } from '@/lib/theme-context'
 import TranscriptionMessage from './TranscriptionMessage'
-import ConversationTimeline from './ConversationTimeline'
+import SimpleScrollbar from './SimpleScrollbar'
 import type { Transcription } from '@/lib/history'
 
 interface ConversationTranscriptListProps {
@@ -27,13 +27,14 @@ export default function ConversationTranscriptList({
   const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1)
   const [scrollProgress, setScrollProgress] = useState(1)
 
-  // Virtualize the list for performance
+  // Virtualize the list for performance - PROPERLY optimized for large datasets
   const virtualizer = useVirtualizer({
     count: transcriptions.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 150, // Estimated height per item
-    overscan: 5, // Render 5 extra items above/below viewport
+    overscan: 5, // OPTIMAL: 5 items buffer for smooth scrolling
     measureElement: (el) => el?.getBoundingClientRect().height ?? 150
+    // Use default observeElementRect - it's optimized and works correctly
   })
 
   // Auto-scroll to bottom when new transcriptions added
@@ -79,7 +80,7 @@ export default function ConversationTranscriptList({
     }
 
     const scrollElement = parentRef.current
-    scrollElement?.addEventListener('scroll', handleScroll)
+    scrollElement?.addEventListener('scroll', handleScroll, { passive: true })
 
     // Initial calculation
     handleScroll()
@@ -113,15 +114,13 @@ export default function ConversationTranscriptList({
         overflow: 'hidden'
       }}
     >
-      {/* Timeline - positioned on right */}
+      {/* Simple Custom Scrollbar */}
       {transcriptions.length > 0 && (
-        <ConversationTimeline
-          timestamps={transcriptions.map((t) => t.timestamp)}
-          texts={transcriptions.map((t) => t.text)}
-          currentIndex={currentIndex}
+        <SimpleScrollbar
           scrollProgress={scrollProgress}
-          onNavigate={handleNavigate}
           onScroll={handleTimelineScroll}
+          itemCount={transcriptions.length}
+          currentIndex={currentIndex}
         />
       )}
 
@@ -139,7 +138,6 @@ export default function ConversationTranscriptList({
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
           // Enable smooth scrolling with GPU acceleration
-          scrollBehavior: 'smooth',
           willChange: 'scroll-position'
         } as React.CSSProperties & { scrollbarWidth?: string; msOverflowStyle?: string }}
       >
@@ -176,7 +174,8 @@ export default function ConversationTranscriptList({
                     top: 0,
                     left: 0,
                     width: '100%',
-                    transform: `translateY(${virtualItem.start}px)`
+                    transform: `translateY(${virtualItem.start}px)`,
+                    willChange: 'transform'
                   }}
                 >
                   <TranscriptionMessage
