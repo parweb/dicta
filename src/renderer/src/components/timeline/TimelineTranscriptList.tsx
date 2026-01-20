@@ -1,6 +1,6 @@
 /**
- * Conversation Transcript List Component
- * Displays transcriptions in a conversation-style layout with virtualization and timeline
+ * Timeline Transcript List Component
+ * Displays transcriptions in a timeline layout with virtualization and scrollbar
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -10,17 +10,17 @@ import TranscriptionMessage from './TranscriptionMessage'
 import SimpleScrollbar from './SimpleScrollbar'
 import type { Transcription } from '@/lib/history'
 
-interface ConversationTranscriptListProps {
+interface TimelineTranscriptListProps {
   transcriptions: Transcription[]
   onCopyTranscript?: (transcription: Transcription) => void
   onOpenActions?: (transcription: Transcription) => void
 }
 
-export default function ConversationTranscriptList({
+export default function TimelineTranscriptList({
   transcriptions,
   onCopyTranscript,
   onOpenActions
-}: ConversationTranscriptListProps) {
+}: TimelineTranscriptListProps) {
   const { theme } = useTheme()
   const { spacing } = theme
   const parentRef = useRef<HTMLDivElement>(null)

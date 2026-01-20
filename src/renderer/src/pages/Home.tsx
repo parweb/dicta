@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
-import ConversationTranscriptList from '@/components/conversation/ConversationTranscriptList';
+import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
 import RecordButton from '@/components/home/RecordButton';
 import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
 import Layout from '@/components/Layout';
@@ -243,8 +243,8 @@ const HomePage = () => {
               paddingTop: theme.spacing['4xl']
             }}
           >
-            {/* Conversation List */}
-            <ConversationTranscriptList
+            {/* Timeline List */}
+            <TimelineTranscriptList
               transcriptions={allTranscriptions}
               onCopyTranscript={handleCopyTranscript}
               onOpenActions={handleOpenActions}
