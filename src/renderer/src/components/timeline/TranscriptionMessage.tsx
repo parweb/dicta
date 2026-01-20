@@ -106,8 +106,8 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
             amplitudes={audioAmplitudes}
             height={48}
             showDuration={false}
-            maxBars={isRecording ? 200 : 60}
-            color={isRecording ? '#ef4444' : undefined}
+            maxBars={(isRecording || isLoading) ? 200 : 60}
+            color={(isRecording || isLoading) ? '#ef4444' : undefined}
           />
         </div>
       )}

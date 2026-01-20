@@ -107,14 +107,31 @@ export default function TimelineTranscriptList({
   // Auto-scroll to bottom when recording starts (to show placeholder)
   useEffect(() => {
     if ((isRecording || isLoading) && parentRef.current) {
-      // Small delay to ensure placeholder is rendered
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
         if (parentRef.current) {
-          parentRef.current.scrollTop = parentRef.current.scrollHeight;
+          parentRef.current.scrollTo({
+            top: parentRef.current.scrollHeight,
+            behavior: 'smooth'
+          });
         }
-      }, 100);
+      });
     }
   }, [isRecording, isLoading]);
+
+  // Continuous scroll during recording as content grows
+  useEffect(() => {
+    if (!isRecording || !parentRef.current) return;
+
+    const scrollToBottom = () => {
+      if (parentRef.current) {
+        parentRef.current.scrollTop = parentRef.current.scrollHeight;
+      }
+    };
+
+    // Scroll every time amplitudes change (content grows)
+    scrollToBottom();
+  }, [isRecording, realtimeAmplitudes.length]);
 
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
