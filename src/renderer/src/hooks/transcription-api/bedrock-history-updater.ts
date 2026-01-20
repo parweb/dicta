@@ -14,35 +14,37 @@ export async function updateTranscriptionWithBedrockHistory(
   onHistoryUpdate?: () => Promise<void>
 ): Promise<void> {
   try {
+    console.log('[BEDROCK-HISTORY-UPDATER] Updating transcription:', transcriptionId)
+
     // Load all transcriptions
-    const allTranscriptions = (await window.api?.history.loadAll()) || []
+    const result = await window.api?.history.loadAll()
+    const allTranscriptions = result?.transcriptions || []
 
-    // Find and update the transcription
-    const updatedTranscriptions = allTranscriptions.map((t: Transcription) => {
-      if (t.id === transcriptionId) {
-        return {
-          ...t,
-          bedrockHistory
-        }
+    console.log('[BEDROCK-HISTORY-UPDATER] Loaded transcriptions:', allTranscriptions.length)
+
+    // Find the transcription to update
+    const transcription = allTranscriptions.find((t: Transcription) => t.id === transcriptionId)
+
+    if (transcription) {
+      console.log('[BEDROCK-HISTORY-UPDATER] Found transcription, updating with bedrockHistory')
+      // Update with bedrock history
+      const updatedTranscription: Transcription = {
+        ...transcription,
+        bedrockHistory
       }
-      return t
-    })
 
-    // Find the updated transcription
-    const updatedTranscription = updatedTranscriptions.find(
-      (t: Transcription) => t.id === transcriptionId
-    )
-
-    if (updatedTranscription) {
       // Save back to history
       await window.api?.history.save(updatedTranscription)
+      console.log('[BEDROCK-HISTORY-UPDATER] Transcription saved successfully')
 
       // Trigger history reload if callback provided
       if (onHistoryUpdate) {
         await onHistoryUpdate()
       }
+    } else {
+      console.warn('[BEDROCK-HISTORY-UPDATER] Transcription not found:', transcriptionId)
     }
   } catch (error) {
-    console.error('Error updating transcription with Bedrock history:', error)
+    console.error('[BEDROCK-HISTORY-UPDATER] Error updating transcription with Bedrock history:', error)
   }
 }
