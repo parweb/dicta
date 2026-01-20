@@ -45,6 +45,7 @@ const AudioWaveform = ({
   return (
     <div
       style={{
+        width: '100%',
         alignSelf: 'stretch'
       }}
     >
@@ -73,6 +74,7 @@ const AudioWaveform = ({
       {/* Waveform visualization */}
       <div
         style={{
+          width: '100%',
           display: 'flex',
           gap: '1px',
           height: `${height}px`,

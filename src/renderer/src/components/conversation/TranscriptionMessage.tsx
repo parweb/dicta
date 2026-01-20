@@ -64,8 +64,10 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
       {audioAmplitudes.length > 0 && (
         <div
           style={{
-            flexShrink: 0,
-            width: '120px',
+            flex: '0 0 auto',
+            minWidth: '200px',
+            maxWidth: '300px',
+            width: '25%',
             display: 'flex',
             flexDirection: 'column',
             gap: spacing.xs
