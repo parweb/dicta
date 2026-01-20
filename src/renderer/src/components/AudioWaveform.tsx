@@ -48,25 +48,16 @@ const AudioWaveform = ({
         alignSelf: 'stretch'
       }}
     >
-      {/* Header with title and optional duration */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: spacing.sm
-        }}
-      >
-        <h4
+      {/* Header with optional duration */}
+      {showDuration && duration !== undefined && (
+        <div
           style={{
-            fontSize: typography.fontSize.xs,
-            color: colors.text.tertiary,
-            margin: 0
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            marginBottom: spacing.sm
           }}
         >
-          Forme d'onde audio:
-        </h4>
-        {showDuration && duration !== undefined && (
           <span
             style={{
               fontSize: typography.fontSize.xs,
@@ -76,8 +67,8 @@ const AudioWaveform = ({
           >
             {formatDuration(duration / 60000)}
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Waveform visualization */}
       <div
