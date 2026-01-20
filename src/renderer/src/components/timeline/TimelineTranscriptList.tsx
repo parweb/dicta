@@ -3,11 +3,10 @@
  * Displays transcriptions in a terminal-inspired layout with virtualization
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import TranscriptionMessage from './TranscriptionMessage';
-import RecordingPlaceholder from './RecordingPlaceholder';
 import SimpleScrollbar from './SimpleScrollbar';
 import type { Transcription } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
@@ -48,6 +47,42 @@ export default function TimelineTranscriptList({
   const parentRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1);
   const [scrollProgress, setScrollProgress] = useState(1);
+
+  // Timer for recording duration
+  const recordingStartTimeRef = useRef<number>(Date.now());
+  const [recordingDuration, setRecordingDuration] = useState(0);
+
+  // Reset start time when recording starts
+  useEffect(() => {
+    if (isRecording) {
+      recordingStartTimeRef.current = Date.now();
+      setRecordingDuration(0);
+    }
+  }, [isRecording]);
+
+  // Update recording duration while recording
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const interval = setInterval(() => {
+      setRecordingDuration(Date.now() - recordingStartTimeRef.current);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  // Create temporary transcription object during recording/loading
+  const temporaryTranscription = useMemo<Transcription | null>(() => {
+    if (!isRecording && !isLoading) return null;
+
+    return {
+      id: 'temp-recording',
+      text: '', // Empty during recording, will show loader during loading
+      timestamp: recordingStartTimeRef.current,
+      durationMs: recordingDuration,
+      audioAmplitudes: realtimeAmplitudes
+    };
+  }, [isRecording, isLoading, recordingDuration, realtimeAmplitudes]);
 
   // Virtualize the list for performance
   const virtualizer = useVirtualizer({
@@ -214,8 +249,8 @@ export default function TimelineTranscriptList({
               );
             })}
 
-            {/* Recording placeholder at the end */}
-            {(isRecording || isLoading) && (
+            {/* Temporary transcription during recording/loading */}
+            {temporaryTranscription && (
               <div
                 style={{
                   position: 'absolute',
@@ -226,8 +261,13 @@ export default function TimelineTranscriptList({
                   padding: '16px 0'
                 }}
               >
-                <RecordingPlaceholder
-                  amplitudes={realtimeAmplitudes}
+                <TranscriptionMessage
+                  text={temporaryTranscription.text}
+                  audioAmplitudes={temporaryTranscription.audioAmplitudes}
+                  audioDuration={temporaryTranscription.durationMs}
+                  timestamp={temporaryTranscription.timestamp}
+                  isSelected={false}
+                  showActions={false}
                   isRecording={isRecording}
                   isLoading={isLoading}
                 />

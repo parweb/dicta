@@ -184,6 +184,31 @@
   letter-spacing: 0.01em;
 }
 
+.message-loader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-tertiary);
+}
+
+.loader-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-text {
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
 /* Grain texture overlay */
 .transcription-message::before {
   content: '';

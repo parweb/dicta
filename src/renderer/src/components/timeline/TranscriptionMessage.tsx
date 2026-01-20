@@ -4,7 +4,7 @@
  */
 
 import { memo } from 'react';
-import { Copy, Sparkles } from 'lucide-react';
+import { Copy, Sparkles, Loader2 } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
 import BedrockAgentInline from '../bedrock/BedrockAgentInline';
@@ -19,6 +19,8 @@ interface TranscriptionMessageProps {
   timestamp: number;
   isSelected?: boolean;
   showActions?: boolean;
+  isRecording?: boolean;
+  isLoading?: boolean;
   onCopy?: () => void;
   onOpenActions?: () => void;
   onCloseActions?: () => void;
@@ -36,6 +38,8 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   timestamp,
   isSelected = false,
   showActions = false,
+  isRecording = false,
+  isLoading = false,
   onCopy,
   onOpenActions,
   onCloseActions,
@@ -102,14 +106,22 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
             amplitudes={audioAmplitudes}
             height={48}
             showDuration={false}
-            maxBars={60}
+            maxBars={isRecording ? 200 : 60}
+            color={isRecording ? '#ef4444' : undefined}
           />
         </div>
       )}
 
-      {/* Transcription text */}
+      {/* Transcription text or loader */}
       <div className="message-content">
-        <p className="message-text">{text}</p>
+        {isLoading ? (
+          <div className="message-loader">
+            <Loader2 size={16} className="loader-spin" />
+            <span className="loader-text">Transcription en cours...</span>
+          </div>
+        ) : text ? (
+          <p className="message-text">{text}</p>
+        ) : null}
       </div>
 
       {/* Terminal-style border accent */}
