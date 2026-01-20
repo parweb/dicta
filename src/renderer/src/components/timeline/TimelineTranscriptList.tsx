@@ -1,19 +1,20 @@
 /**
- * Timeline Transcript List Component
- * Displays transcriptions in a timeline layout with virtualization and scrollbar
+ * Timeline Transcript List Component - Voice Terminal Style
+ * Displays transcriptions in a terminal-inspired layout with virtualization
  */
 
-import { useEffect, useRef, useState } from 'react'
-import { useVirtualizer } from '@tanstack/react-virtual'
-import { useThemeStore } from '@/hooks/useThemeStore'
-import TranscriptionMessage from './TranscriptionMessage'
-import SimpleScrollbar from './SimpleScrollbar'
-import type { Transcription } from '@/lib/history'
+import { useEffect, useRef, useState } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useThemeStore } from '@/hooks/useThemeStore';
+import TranscriptionMessage from './TranscriptionMessage';
+import SimpleScrollbar from './SimpleScrollbar';
+import type { Transcription } from '@/lib/history';
+import './TimelineTranscriptList.css';
 
 interface TimelineTranscriptListProps {
-  transcriptions: Transcription[]
-  onCopyTranscript?: (transcription: Transcription) => void
-  onOpenActions?: (transcription: Transcription) => void
+  transcriptions: Transcription[];
+  onCopyTranscript?: (transcription: Transcription) => void;
+  onOpenActions?: (transcription: Transcription) => void;
 }
 
 export default function TimelineTranscriptList({
@@ -21,99 +22,82 @@ export default function TimelineTranscriptList({
   onCopyTranscript,
   onOpenActions
 }: TimelineTranscriptListProps) {
-  const { theme } = useThemeStore()
-  const { spacing } = theme
-  const parentRef = useRef<HTMLDivElement>(null)
-  const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1)
-  const [scrollProgress, setScrollProgress] = useState(1)
+  const { theme } = useThemeStore();
+  const parentRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1);
+  const [scrollProgress, setScrollProgress] = useState(1);
 
-  // Virtualize the list for performance - PROPERLY optimized for large datasets
+  // Virtualize the list for performance
   const virtualizer = useVirtualizer({
     count: transcriptions.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 150, // Estimated height per item
-    overscan: 5, // OPTIMAL: 5 items buffer for smooth scrolling
-    measureElement: (el) => el?.getBoundingClientRect().height ?? 150
-    // Use default observeElementRect - it's optimized and works correctly
-  })
+    estimateSize: () => 180,
+    overscan: 5,
+    measureElement: (el) => el?.getBoundingClientRect().height ?? 180
+  });
 
   // Auto-scroll to bottom when new transcriptions added
   useEffect(() => {
     if (transcriptions.length > 0) {
-      setCurrentIndex(transcriptions.length - 1)
+      setCurrentIndex(transcriptions.length - 1);
       virtualizer.scrollToIndex(transcriptions.length - 1, {
         align: 'end',
         behavior: 'auto'
-      })
+      });
     }
-  }, [transcriptions.length, virtualizer])
+  }, [transcriptions.length, virtualizer]);
 
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
     const handleScroll = () => {
-      const scrollElement = parentRef.current
-      if (!scrollElement) return
+      const scrollElement = parentRef.current;
+      if (!scrollElement) return;
 
       // Calculate scroll progress
-      const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight
-      const progress = maxScroll > 0 ? scrollElement.scrollTop / maxScroll : 0
-      setScrollProgress(progress)
+      const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight;
+      const progress = maxScroll > 0 ? scrollElement.scrollTop / maxScroll : 0;
+      setScrollProgress(progress);
 
       // Find the item closest to the middle of the viewport
-      const items = virtualizer.getVirtualItems()
+      const items = virtualizer.getVirtualItems();
       if (items.length > 0) {
-        const viewportMiddle = scrollElement.scrollTop + scrollElement.clientHeight / 2
-        let closestIndex = 0
-        let closestDistance = Infinity
+        const viewportMiddle = scrollElement.scrollTop + scrollElement.clientHeight / 2;
+        let closestIndex = 0;
+        let closestDistance = Infinity;
 
         items.forEach((item) => {
-          const itemMiddle = item.start + item.size / 2
-          const distance = Math.abs(itemMiddle - viewportMiddle)
+          const itemMiddle = item.start + item.size / 2;
+          const distance = Math.abs(itemMiddle - viewportMiddle);
           if (distance < closestDistance) {
-            closestDistance = distance
-            closestIndex = item.index
+            closestDistance = distance;
+            closestIndex = item.index;
           }
-        })
+        });
 
-        setCurrentIndex(closestIndex)
+        setCurrentIndex(closestIndex);
       }
-    }
+    };
 
-    const scrollElement = parentRef.current
-    scrollElement?.addEventListener('scroll', handleScroll, { passive: true })
+    const scrollElement = parentRef.current;
+    scrollElement?.addEventListener('scroll', handleScroll, { passive: true });
 
     // Initial calculation
-    handleScroll()
+    handleScroll();
 
-    return () => scrollElement?.removeEventListener('scroll', handleScroll)
-  }, [virtualizer])
-
-  // Navigate to specific index
-  const handleNavigate = (index: number) => {
-    setCurrentIndex(index)
-    virtualizer.scrollToIndex(index, {
-      align: 'center',
-      behavior: 'smooth'
-    })
-  }
+    return () => scrollElement?.removeEventListener('scroll', handleScroll);
+  }, [virtualizer]);
 
   // Handle scroll from timeline drag
   const handleTimelineScroll = (progress: number) => {
-    const scrollElement = parentRef.current
-    if (!scrollElement) return
+    const scrollElement = parentRef.current;
+    if (!scrollElement) return;
 
-    const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight
-    scrollElement.scrollTop = progress * maxScroll
-  }
+    const maxScroll = scrollElement.scrollHeight - scrollElement.clientHeight;
+    scrollElement.scrollTop = progress * maxScroll;
+  };
 
   return (
-    <div
-      style={{
-        flex: 1,
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-    >
+    <div className="timeline-transcript-list">
       {/* Simple Custom Scrollbar */}
       {transcriptions.length > 0 && (
         <SimpleScrollbar
@@ -127,32 +111,28 @@ export default function TimelineTranscriptList({
       {/* Scrollable content */}
       <div
         ref={parentRef}
+        className="timeline-scroll-container"
         style={{
-          height: '100%',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          padding: spacing.lg,
-          paddingRight: transcriptions.length > 0 ? '72px' : spacing.lg, // Extra padding for timeline
-          WebkitAppRegion: 'no-drag',
-          // Hide native scrollbar
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          // Enable smooth scrolling with GPU acceleration
-          willChange: 'scroll-position'
-        } as React.CSSProperties & { scrollbarWidth?: string; msOverflowStyle?: string }}
+          paddingRight: transcriptions.length > 0 ? '72px' : '20px'
+        }}
       >
         {transcriptions.length === 0 ? (
-          <div
-            style={{
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: theme.colors.text.tertiary,
-              fontSize: theme.typography.fontSize.sm
-            }}
-          >
-            Aucune transcription. Appuyez sur X pour commencer à enregistrer.
+          <div className="timeline-empty-state">
+            <div className="empty-icon">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="12" y1="19" x2="12" y2="22" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <h3 className="empty-title">Prêt à transcrire</h3>
+            <p className="empty-description">
+              Maintenez la touche <kbd className="kbd-key">X</kbd> enfoncée pour commencer l'enregistrement
+            </p>
+            <div className="empty-hint">
+              <span className="hint-dot" />
+              <span>Ou utilisez le raccourci global <kbd className="kbd-key">⌘</kbd> + <kbd className="kbd-key">⇧</kbd> + <kbd className="kbd-key">X</kbd></span>
+            </div>
           </div>
         ) : (
           <div
@@ -163,7 +143,7 @@ export default function TimelineTranscriptList({
             }}
           >
             {virtualizer.getVirtualItems().map((virtualItem) => {
-              const transcription = transcriptions[virtualItem.index]
+              const transcription = transcriptions[virtualItem.index];
               return (
                 <div
                   key={virtualItem.key}
@@ -187,11 +167,11 @@ export default function TimelineTranscriptList({
                     onOpenActions={() => onOpenActions?.(transcription)}
                   />
                 </div>
-              )
+              );
             })}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
