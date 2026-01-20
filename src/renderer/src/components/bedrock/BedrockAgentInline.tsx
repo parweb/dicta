@@ -7,11 +7,12 @@ import { useEffect, useState, useRef } from 'react'
 import { Mic, Sparkles, X, ChevronDown, ChevronUp } from 'lucide-react'
 
 import { useBedrock } from '../../contexts/BedrockContext'
-import { useBedrockAgent } from '../../hooks/useBedrockAgent'
+import { useBedrockAgent, type ConversationHistory } from '../../hooks/useBedrockAgent'
 import { useThemeStore } from '@/hooks/useThemeStore'
 import { Button } from '../ui/button'
 import AgentStreamingDisplay from './AgentStreamingDisplay'
 import ConversationView from './ConversationView'
+import type { BedrockConversationHistory } from '@/lib/history'
 import './BedrockAgentInline.css'
 
 interface BedrockAgentInlineProps {
@@ -19,25 +20,52 @@ interface BedrockAgentInlineProps {
   onClose: () => void
   newTranscript?: string
   onTranscriptConsumed?: () => void
+  initialHistory?: BedrockConversationHistory
+  onHistoryChange?: (history: ConversationHistory) => void
 }
 
 export default function BedrockAgentInline({
   transcriptContext,
   onClose,
   newTranscript,
-  onTranscriptConsumed
+  onTranscriptConsumed,
+  initialHistory,
+  onHistoryChange
 }: BedrockAgentInlineProps) {
   const { theme } = useThemeStore()
   const { hasCredentials } = useBedrock()
-  const { state, conversationMessages, executeAgent, continueConversation, reset } = useBedrockAgent()
+  const {
+    state,
+    conversationMessages,
+    executeAgent,
+    continueConversation,
+    loadHistory,
+    getHistory,
+    reset
+  } = useBedrockAgent()
 
   const [followUpPrompt, setFollowUpPrompt] = useState('')
   const [isCollapsed, setIsCollapsed] = useState(false)
   const followUpInputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-execute when component mounts with transcript
+  // Load initial history if provided (restoring previous conversation)
   useEffect(() => {
-    if (transcriptContext && hasCredentials && !state.isStreaming && !state.response && !state.error) {
+    if (initialHistory) {
+      console.log('[BEDROCK-INLINE] Loading history:', initialHistory)
+      loadHistory(initialHistory)
+    }
+  }, [initialHistory, loadHistory])
+
+  // Auto-execute when component mounts with transcript (only if no initial history)
+  useEffect(() => {
+    if (
+      !initialHistory &&
+      transcriptContext &&
+      hasCredentials &&
+      !state.isStreaming &&
+      !state.response &&
+      !state.error
+    ) {
       executeAgent(transcriptContext)
     }
   }, []) // Only on mount
@@ -51,8 +79,21 @@ export default function BedrockAgentInline({
     }
   }, [newTranscript, state.isComplete, state.isStreaming, onTranscriptConsumed])
 
+  // Notify history changes when state updates
+  useEffect(() => {
+    if (state.isComplete && onHistoryChange && conversationMessages.length > 0) {
+      const history = getHistory()
+      onHistoryChange(history)
+    }
+  }, [state.isComplete, conversationMessages, onHistoryChange, getHistory])
+
   // Handle close
   const handleClose = () => {
+    // Save history before closing
+    if (onHistoryChange && conversationMessages.length > 0) {
+      const history = getHistory()
+      onHistoryChange(history)
+    }
     reset()
     setFollowUpPrompt('')
     onClose()

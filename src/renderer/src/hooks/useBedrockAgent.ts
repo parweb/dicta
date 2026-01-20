@@ -11,10 +11,14 @@ import { getAllTools } from '../lib/bedrock/tools'
 import type { BedrockMessage, BedrockToolConfig } from '../lib/bedrock/types'
 import { runAgenticLoop } from './bedrock-agent/agentic-loop'
 import { buildInitialMessage, buildSystemPrompt } from './bedrock-agent/request-builder'
-import type { AgentState, UseBedrockAgentReturn } from './bedrock-agent/types'
+import type {
+  AgentState,
+  ConversationHistory,
+  UseBedrockAgentReturn
+} from './bedrock-agent/types'
 
 // Re-export types for convenience
-export type { AgentState, UseBedrockAgentReturn } from './bedrock-agent/types'
+export type { AgentState, ConversationHistory, UseBedrockAgentReturn } from './bedrock-agent/types'
 
 /**
  * Hook for executing Bedrock agent with tools
@@ -191,11 +195,47 @@ export function useBedrockAgent(): UseBedrockAgentReturn {
     [hasCredentials, credentials, conversationMessages, systemPrompt, toolConfig]
   )
 
+  /**
+   * Load conversation history (for restoring previous conversations)
+   */
+  const loadHistory = useCallback((history: ConversationHistory) => {
+    setConversationMessages(history.messages)
+    setSystemPrompt(history.systemPrompt)
+    setState({
+      isStreaming: false,
+      response: history.lastResponse,
+      toolsExecuted: history.toolsExecuted,
+      error: null,
+      isComplete: true,
+      isConversationMode: true
+    })
+    // Recreate tool config
+    setToolConfig({
+      tools: getAllTools(),
+      toolChoice: { auto: {} }
+    })
+  }, [])
+
+  /**
+   * Get current conversation history (for saving)
+   */
+  const getHistory = useCallback((): ConversationHistory => {
+    return {
+      messages: conversationMessages,
+      systemPrompt,
+      lastResponse: state.response,
+      toolsExecuted: state.toolsExecuted
+    }
+  }, [conversationMessages, systemPrompt, state.response, state.toolsExecuted])
+
   return {
     state,
     conversationMessages,
+    systemPrompt,
     executeAgent,
     continueConversation,
+    loadHistory,
+    getHistory,
     reset
   }
 }

@@ -9,6 +9,7 @@ import { useThemeStore } from '@/hooks/useThemeStore';
 import TranscriptionMessage from './TranscriptionMessage';
 import SimpleScrollbar from './SimpleScrollbar';
 import type { Transcription } from '@/lib/history';
+import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TimelineTranscriptList.css';
 
 interface TimelineTranscriptListProps {
@@ -20,6 +21,7 @@ interface TimelineTranscriptListProps {
   onOpenActions?: (transcription: Transcription) => void;
   onCloseActions?: () => void;
   onFollowUpConsumed?: () => void;
+  onBedrockHistoryChange?: (transcriptionId: string, history: ConversationHistory) => void;
 }
 
 export default function TimelineTranscriptList({
@@ -30,7 +32,8 @@ export default function TimelineTranscriptList({
   onCopyTranscript,
   onOpenActions,
   onCloseActions,
-  onFollowUpConsumed
+  onFollowUpConsumed,
+  onBedrockHistoryChange
 }: TimelineTranscriptListProps) {
   const { theme } = useThemeStore();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -182,6 +185,8 @@ export default function TimelineTranscriptList({
                     onOpenActions={() => onOpenActions?.(transcription)}
                     onCloseActions={onCloseActions}
                     onFollowUpConsumed={onFollowUpConsumed}
+                    bedrockHistory={transcription.bedrockHistory}
+                    onBedrockHistoryChange={(history) => onBedrockHistoryChange?.(transcription.id, history)}
                   />
                 </div>
               );

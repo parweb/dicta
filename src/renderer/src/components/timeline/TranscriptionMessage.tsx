@@ -8,6 +8,8 @@ import { Copy, Sparkles } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
 import BedrockAgentInline from '../bedrock/BedrockAgentInline';
+import type { BedrockConversationHistory } from '@/lib/history';
+import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TranscriptionMessage.css';
 
 interface TranscriptionMessageProps {
@@ -22,6 +24,8 @@ interface TranscriptionMessageProps {
   onCloseActions?: () => void;
   newFollowUpTranscript?: string;
   onFollowUpConsumed?: () => void;
+  bedrockHistory?: BedrockConversationHistory;
+  onBedrockHistoryChange?: (history: ConversationHistory) => void;
 }
 
 const TranscriptionMessage = memo(function TranscriptionMessage({
@@ -35,7 +39,9 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   onOpenActions,
   onCloseActions,
   newFollowUpTranscript,
-  onFollowUpConsumed
+  onFollowUpConsumed,
+  bedrockHistory,
+  onBedrockHistoryChange
 }: TranscriptionMessageProps) {
   const { theme } = useThemeStore();
 
@@ -114,6 +120,8 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
           onClose={() => onCloseActions?.()}
           newTranscript={newFollowUpTranscript}
           onTranscriptConsumed={onFollowUpConsumed}
+          initialHistory={bedrockHistory}
+          onHistoryChange={onBedrockHistoryChange}
         />
       )}
     </div>

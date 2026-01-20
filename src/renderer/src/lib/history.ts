@@ -1,5 +1,20 @@
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import type { BedrockMessage } from './bedrock/types';
+
+export interface BedrockConversationHistory {
+  messages: BedrockMessage[];
+  systemPrompt: string;
+  lastResponse: string;
+  toolsExecuted: Array<{
+    id: string;
+    name: string;
+    input: Record<string, unknown>;
+    status: 'pending' | 'running' | 'success' | 'error';
+    result?: string;
+    error?: string;
+  }>;
+}
 
 export interface Transcription {
   id: string;
@@ -7,6 +22,7 @@ export interface Transcription {
   timestamp: number;
   durationMs?: number; // Duration of the audio recording in milliseconds
   audioAmplitudes?: number[]; // Audio waveform amplitude data for visualization
+  bedrockHistory?: BedrockConversationHistory; // Bedrock agent conversation history
 }
 
 export interface TranscriptionsByDay {

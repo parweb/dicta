@@ -22,6 +22,8 @@ import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
 import { useApiKeyStore } from '@/hooks/useApiKeyStore';
 import type { Transcription } from '@/lib/history';
 import { useThemeStore } from '@/hooks/useThemeStore';
+import { updateTranscriptionWithBedrockHistory } from '@/hooks/transcription-api/bedrock-history-updater';
+import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 
 // Lazy load Statistics and Settings pages to reduce initial bundle size
 const Statistics = lazy(() => import('./Statistics'));
@@ -145,6 +147,14 @@ const HomePage = () => {
     setActionsFollowUpTranscript(undefined);
   }, []);
 
+  const handleBedrockHistoryChange = useCallback(
+    async (transcriptionId: string, history: ConversationHistory) => {
+      console.log('[HOME] Saving Bedrock history for transcription:', transcriptionId);
+      await updateTranscriptionWithBedrockHistory(transcriptionId, history, reloadTranscriptions);
+    },
+    [reloadTranscriptions]
+  );
+
   const handleSelectTranscription = useCallback(
     (transcription: Transcription) => {
       setTranscript(transcription.text);
@@ -251,6 +261,7 @@ const HomePage = () => {
               onOpenActions={handleOpenActions}
               onCloseActions={handleCloseActions}
               onFollowUpConsumed={() => setActionsFollowUpTranscript(undefined)}
+              onBedrockHistoryChange={handleBedrockHistoryChange}
             />
 
             {/* Fixed Record Button at Bottom */}
