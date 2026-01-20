@@ -32,42 +32,49 @@ export function useRealtimeAudioVisualizer(
       return;
     }
 
+    console.log('[VISUALIZER] Starting audio visualization, mediaStream:', mediaStream);
+
     // Setup Web Audio API
     const audioContext = new AudioContext();
     audioContextRef.current = audioContext;
 
     const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256; // Small FFT for better performance
-    analyser.smoothingTimeConstant = 0.8;
+    analyser.fftSize = 512; // Increased for better resolution
+    analyser.smoothingTimeConstant = 0.5; // Less smoothing for more reactive display
     analyserRef.current = analyser;
 
     const source = audioContext.createMediaStreamSource(mediaStream);
     source.connect(analyser);
 
-    // Buffer for frequency data
+    // Buffer for time domain data (actual waveform)
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
+
+    console.log('[VISUALIZER] Analyser setup complete, bufferLength:', bufferLength);
 
     // Update amplitudes in real-time
     const updateAmplitudes = () => {
       if (!analyserRef.current) return;
 
-      analyser.getByteFrequencyData(dataArray);
+      analyser.getByteTimeDomainData(dataArray);
 
-      // Calculate RMS amplitude from frequency data
+      // Calculate RMS amplitude from time domain data
       let sum = 0;
       for (let i = 0; i < bufferLength; i++) {
-        const normalized = dataArray[i] / 255; // Normalize to 0-1
+        const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
         sum += normalized * normalized;
       }
       const rms = Math.sqrt(sum / bufferLength);
 
-      // Add new amplitude to array (keep last 100 values for smooth animation)
-      setAmplitudes(prev => {
-        const newAmplitudes = [...prev, rms];
-        // Keep only last 100 values to avoid memory issues
-        return newAmplitudes.slice(-100);
-      });
+      // Only update if amplitude is significant (avoid showing noise)
+      if (rms > 0.01) {
+        // Add new amplitude to array (keep last 50 values for smooth animation)
+        setAmplitudes(prev => {
+          const newAmplitudes = [...prev, rms];
+          // Keep only last 50 values to avoid memory issues
+          return newAmplitudes.slice(-50);
+        });
+      }
 
       animationFrameRef.current = requestAnimationFrame(updateAmplitudes);
     };
@@ -76,6 +83,7 @@ export function useRealtimeAudioVisualizer(
 
     // Cleanup on unmount or when recording stops
     return () => {
+      console.log('[VISUALIZER] Cleanup');
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

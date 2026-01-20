@@ -11,9 +11,9 @@ export interface UseAudioRecorderReturn {
 
 export function useAudioRecorder(): UseAudioRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
-  const mediaStream = useRef<MediaStream | null>(null);
   const onAudioReadyCallback = useRef<
     ((audioBlob: Blob) => Promise<void>) | null
   >(null);
@@ -32,11 +32,11 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   // Cleanup media stream on unmount
   useEffect(() => {
     return () => {
-      if (mediaStream.current) {
-        mediaStream.current.getTracks().forEach(track => track.stop());
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [mediaStream]);
 
   const startRecording = useCallback(
     async (onAudioReady: (audioBlob: Blob) => Promise<void>) => {
@@ -48,7 +48,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true
         });
-        mediaStream.current = stream;
+        setMediaStream(stream);
 
         const recorder = new MediaRecorder(stream);
         mediaRecorder.current = recorder;
@@ -70,11 +70,8 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
             await onAudioReadyCallback.current(audioBlob);
           }
 
-          // Cleanup stream
-          if (mediaStream.current) {
-            mediaStream.current.getTracks().forEach(track => track.stop());
-            mediaStream.current = null;
-          }
+          // Cleanup stream (will be done by state update)
+          setMediaStream(null);
         };
 
         recorder.start();
@@ -98,6 +95,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     isRecording,
     startRecording,
     stopRecording,
-    mediaStream: mediaStream.current
+    mediaStream
   };
 }

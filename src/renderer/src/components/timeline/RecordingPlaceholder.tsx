@@ -13,12 +13,16 @@ interface RecordingPlaceholderProps {
 export default function RecordingPlaceholder({ amplitudes }: RecordingPlaceholderProps) {
   const { theme } = useThemeStore();
 
+  console.log('[RECORDING_PLACEHOLDER] Amplitudes received:', amplitudes.length, 'values');
+
   // Pad amplitudes to always show at least 50 bars for better visual
   const displayAmplitudes = amplitudes.length > 0
-    ? amplitudes.slice(-50) // Show last 50 values
-    : Array(50).fill(0.1); // Initial state with minimal amplitude
+    ? [...amplitudes, ...Array(Math.max(0, 50 - amplitudes.length)).fill(0.05)]
+    : Array(50).fill(0.05); // Initial state with minimal amplitude
 
   const maxAmplitude = Math.max(...displayAmplitudes, 0.1);
+
+  console.log('[RECORDING_PLACEHOLDER] Displaying', displayAmplitudes.length, 'bars, max amplitude:', maxAmplitude);
 
   return (
     <div className="recording-placeholder">
