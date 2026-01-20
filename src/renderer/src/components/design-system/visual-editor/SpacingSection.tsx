@@ -42,7 +42,7 @@ export default function SpacingSection() {
               style={{
                 height: '24px',
                 width: spacing[size],
-                backgroundColor: colors.accent.blue.primary,
+                backgroundColor: colors.accent.primary.primary,
                 borderRadius: theme.borderRadius.sm,
                 transition: 'width 0.2s'
               }}
@@ -58,7 +58,7 @@ export default function SpacingSection() {
               }}
               style={{
                 flex: 1,
-                accentColor: colors.accent.blue.primary
+                accentColor: colors.accent.primary.primary
               }}
             />
             <div

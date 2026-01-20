@@ -41,11 +41,11 @@ export default function UpdateSettings() {
       case 'checking':
         return <RefreshCw size={16} color={colors.text.tertiary} className="animate-spin" />;
       case 'downloading':
-        return <Download size={16} color={colors.accent.blue.primary} />;
+        return <Download size={16} color={colors.accent.primary.primary} />;
       case 'ready':
-        return <CheckCircle2 size={16} color={colors.accent.green.primary} />;
+        return <CheckCircle2 size={16} color={colors.accent.success.primary} />;
       case 'up-to-date':
-        return <CheckCircle2 size={16} color={colors.accent.green.primary} />;
+        return <CheckCircle2 size={16} color={colors.accent.success.primary} />;
       case 'error':
         return <AlertCircle size={16} color={colors.state.error} />;
       default:
@@ -56,10 +56,10 @@ export default function UpdateSettings() {
   const getStatusColor = () => {
     switch (updateInfo.status) {
       case 'downloading':
-        return colors.accent.blue.primary;
+        return colors.accent.primary.primary;
       case 'ready':
       case 'up-to-date':
-        return colors.accent.green.primary;
+        return colors.accent.success.primary;
       case 'error':
         return colors.state.error;
       default:
@@ -164,7 +164,7 @@ export default function UpdateSettings() {
                     style={{
                       width: `${progress.percent}%`,
                       height: '100%',
-                      backgroundColor: colors.accent.blue.primary,
+                      backgroundColor: colors.accent.primary.primary,
                       transition: 'width 0.3s ease'
                     }}
                   />

@@ -65,9 +65,9 @@ export default function ColorPaletteSection() {
               Bleu
             </h5>
             <ColorGrid>
-              <ColorCard name="Primary" hex={colors.accent.blue.primary} />
-              <ColorCard name="Light" hex={colors.accent.blue.light} />
-              <ColorCard name="Dark" hex={colors.accent.blue.dark} />
+              <ColorCard name="Primary" hex={colors.accent.primary.primary} />
+              <ColorCard name="Light" hex={colors.accent.primary.light} />
+              <ColorCard name="Dark" hex={colors.accent.primary.dark} />
             </ColorGrid>
           </div>
           <div>
@@ -82,12 +82,12 @@ export default function ColorPaletteSection() {
               Autres accents
             </h5>
             <ColorGrid>
-              <ColorCard name="Green Primary" hex={colors.accent.green.primary} />
-              <ColorCard name="Green Button" hex={colors.accent.green.button} />
-              <ColorCard name="Red Primary" hex={colors.accent.red.primary} />
-              <ColorCard name="Red Button" hex={colors.accent.red.button} />
-              <ColorCard name="Yellow Primary" hex={colors.accent.yellow.primary} />
-              <ColorCard name="Yellow Light" hex={colors.accent.yellow.light} />
+              <ColorCard name="Green Primary" hex={colors.accent.success.primary} />
+              <ColorCard name="Green Button" hex={colors.accent.success.button} />
+              <ColorCard name="Red Primary" hex={colors.accent.error.primary} />
+              <ColorCard name="Red Button" hex={colors.accent.error.button} />
+              <ColorCard name="Yellow Primary" hex={colors.accent.warning.primary} />
+              <ColorCard name="Yellow Light" hex={colors.accent.warning.light} />
             </ColorGrid>
           </div>
         </div>

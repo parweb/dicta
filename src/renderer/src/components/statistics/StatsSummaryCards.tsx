@@ -82,7 +82,7 @@ const StatsSummaryCards = ({
         <div
           style={{
             fontSize: typography.fontSize.base,
-            color: colors.accent.blue.light,
+            color: colors.accent.primary.light,
             marginBottom: spacing.sm
           }}
         >
@@ -92,7 +92,7 @@ const StatsSummaryCards = ({
           style={{
             fontSize: typography.fontSize['2xl'],
             fontWeight: typography.fontWeight.bold,
-            color: colors.accent.blue.primary
+            color: colors.accent.primary.primary
           }}
         >
           {formatCost(totalCost)}

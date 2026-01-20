@@ -95,7 +95,7 @@ const TranscriptionDisplay = ({
               alignItems: 'center',
               gap: spacing.sm,
               padding: `${spacing.sm}px ${spacing.md}px`,
-              backgroundColor: colors.accent.blue.primary,
+              backgroundColor: colors.accent.primary.primary,
               color: colors.text.primary,
               border: 'none',
               borderRadius: borderRadius.sm,

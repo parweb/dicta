@@ -23,7 +23,7 @@ export function getRecordButtonColor(
   isLoading: boolean,
   theme: ThemeConfig
 ): string {
-  if (isRecording) return theme.colors.accent.red.button
-  if (isLoading) return theme.colors.accent.gray.primary
-  return theme.colors.accent.green.button
+  if (isRecording) return theme.colors.accent.error.button
+  if (isLoading) return theme.colors.accent.muted.primary
+  return theme.colors.accent.success.button
 }

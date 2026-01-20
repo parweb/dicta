@@ -62,17 +62,17 @@ export default function ColorsSection() {
         <ColorGrid>
           <ColorPicker
             label="Bleu"
-            value={colors.accent.blue.primary}
+            value={colors.accent.primary.primary}
             onChange={(value) => setTheme({ colors: { accent: { blue: { primary: value } } } })}
           />
           <ColorPicker
             label="Vert (Enregistrer)"
-            value={colors.accent.green.button}
+            value={colors.accent.success.button}
             onChange={(value) => setTheme({ colors: { accent: { green: { button: value } } } })}
           />
           <ColorPicker
             label="Rouge (En cours)"
-            value={colors.accent.red.button}
+            value={colors.accent.error.button}
             onChange={(value) => setTheme({ colors: { accent: { red: { button: value } } } })}
           />
         </ColorGrid>

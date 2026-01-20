@@ -31,7 +31,7 @@ export const darkTheme: ThemeConfig = {
       accent: isDev ? '#ef4444' : '#0ea5e9'
     },
     accent: {
-      blue: {
+      primary: {
         primary: isDev ? '#ef4444' : '#0ea5e9',
         light: isDev ? '#f87171' : '#38bdf8',
         dark: isDev ? '#7f1d1d' : '#0c4a6e',
@@ -39,7 +39,7 @@ export const darkTheme: ThemeConfig = {
         backgroundHover: isDev ? 'rgba(239, 68, 68, 0.15)' : 'rgba(14, 165, 233, 0.15)',
         backgroundActive: isDev ? 'rgba(239, 68, 68, 0.2)' : 'rgba(14, 165, 233, 0.2)'
       },
-      purple: {
+      secondary: {
         primary: '#a78bfa',
         light: '#c4b5fd',
         dark: '#7c3aed',
@@ -47,20 +47,20 @@ export const darkTheme: ThemeConfig = {
         backgroundHover: 'rgba(139, 92, 246, 0.15)',
         border: 'rgba(139, 92, 246, 0.3)'
       },
-      green: {
+      success: {
         primary: '#4ade80',
         button: '#4CAF50'
       },
-      red: {
+      error: {
         primary: '#ef4444',
         button: '#ff4444'
       },
-      yellow: {
+      warning: {
         primary: '#eab308',
         light: '#fef08a',
         background: 'rgba(234, 179, 8, 0.1)'
       },
-      gray: {
+      muted: {
         primary: '#9ca3af',
         light: '#d1d5db'
       }

@@ -26,7 +26,7 @@ export default function ComponentsSection() {
             style={{
               ...components.button.base,
               padding: `${spacing.md} ${spacing.xl}`,
-              backgroundColor: colors.accent.blue.primary,
+              backgroundColor: colors.accent.primary.primary,
               color: colors.text.primary,
               borderRadius: borderRadius.md,
               fontSize: typography.fontSize.base,
@@ -39,7 +39,7 @@ export default function ComponentsSection() {
             style={{
               ...components.button.base,
               padding: `${spacing.md} ${spacing.xl}`,
-              backgroundColor: colors.accent.green.button,
+              backgroundColor: colors.accent.success.button,
               color: colors.text.primary,
               borderRadius: borderRadius.md,
               fontSize: typography.fontSize.base,
@@ -52,7 +52,7 @@ export default function ComponentsSection() {
             style={{
               ...components.button.base,
               padding: `${spacing.md} ${spacing.xl}`,
-              backgroundColor: colors.accent.red.button,
+              backgroundColor: colors.accent.error.button,
               color: colors.text.primary,
               borderRadius: borderRadius.md,
               fontSize: typography.fontSize.base,

@@ -77,7 +77,7 @@ export default function DetailsPanel({ cell, onClose }: DetailsPanelProps) {
         <div
           style={{
             fontSize: typography.fontSize.lg,
-            color: colors.accent.blue.primary,
+            color: colors.accent.primary.primary,
             fontWeight: typography.fontWeight.bold
           }}
         >

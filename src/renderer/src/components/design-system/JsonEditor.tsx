@@ -203,14 +203,14 @@ export default function JsonEditor() {
       <div
         style={{
           padding: theme.spacing.md,
-          backgroundColor: theme.colors.accent.blue.background,
-          border: `1px solid ${theme.colors.accent.blue.primary}`,
+          backgroundColor: theme.colors.accent.primary.background,
+          border: `1px solid ${theme.colors.accent.primary.primary}`,
           borderRadius: theme.borderRadius.sm,
           fontSize: theme.typography.fontSize.xs,
           color: theme.colors.text.secondary
         }}
       >
-        <strong style={{ color: theme.colors.accent.blue.primary }}>
+        <strong style={{ color: theme.colors.accent.primary.primary }}>
           Astuce:
         </strong>{' '}
         Utilisez Ctrl+Z pour annuler les modifications. Le thème est

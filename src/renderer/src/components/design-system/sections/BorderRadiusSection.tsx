@@ -33,7 +33,7 @@ export default function BorderRadiusSection() {
               style={{
                 width: '80px',
                 height: '80px',
-                backgroundColor: colors.accent.blue.primary,
+                backgroundColor: colors.accent.primary.primary,
                 borderRadius: value === '50%' ? value : value
               }}
             />

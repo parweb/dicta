@@ -44,7 +44,7 @@ const ChartTooltip = ({ active, payload }: ChartTooltipProps) => {
       <div
         style={{
           fontSize: typography.fontSize.lg,
-          color: colors.accent.blue.primary,
+          color: colors.accent.primary.primary,
           fontWeight: typography.fontWeight.bold,
           marginTop: spacing.xs
         }}

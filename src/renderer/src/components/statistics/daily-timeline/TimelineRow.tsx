@@ -119,7 +119,7 @@ export default function TimelineRow({
                     transform: 'translate(-50%, -50%)',
                     width: `${size}px`,
                     height: `${size}px`,
-                    backgroundColor: colors.accent.blue.primary,
+                    backgroundColor: colors.accent.primary.primary,
                     borderRadius: '50%',
                     border: 'none',
                     boxShadow: isHovered

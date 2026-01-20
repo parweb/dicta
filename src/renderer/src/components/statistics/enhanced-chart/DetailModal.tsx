@@ -132,7 +132,7 @@ export default function DetailModal({ cell, onClose }: DetailModalProps) {
                     transform: 'translate(-50%, -50%)',
                     width: `${size}px`,
                     height: `${size}px`,
-                    backgroundColor: colors.accent.blue.primary,
+                    backgroundColor: colors.accent.primary.primary,
                     borderRadius: '50%',
                     border: `1px solid ${colors.background.primary}`,
                     cursor: 'pointer',

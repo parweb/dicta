@@ -79,7 +79,7 @@ export default function ConversationView({
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                backgroundColor: isUser ? colors.accent.blue.primary : colors.accent.green.primary,
+                backgroundColor: isUser ? colors.accent.primary.primary : colors.accent.success.primary,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -125,7 +125,7 @@ export default function ConversationView({
               width: '32px',
               height: '32px',
               borderRadius: '50%',
-              backgroundColor: colors.accent.green.primary,
+              backgroundColor: colors.accent.success.primary,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'

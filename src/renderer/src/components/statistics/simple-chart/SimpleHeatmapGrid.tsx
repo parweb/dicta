@@ -22,7 +22,7 @@ export default function SimpleHeatmapGrid({
   const { colors, spacing, typography, borderRadius } = theme
 
   const getCellColor = (count: number, isSelected: boolean) => {
-    if (isSelected) return colors.accent.blue.primary
+    if (isSelected) return colors.accent.primary.primary
     if (count === 0) return colors.background.tertiary
     const intensity = count / maxCount
     return `rgba(14, 165, 233, ${0.2 + intensity * 0.8})`
@@ -122,7 +122,7 @@ export default function SimpleHeatmapGrid({
                       borderRadius: borderRadius.xs,
                       cursor: cell.count > 0 ? 'pointer' : 'default',
                       border: isSelected
-                        ? `2px solid ${colors.accent.blue.light}`
+                        ? `2px solid ${colors.accent.primary.light}`
                         : `1px solid ${colors.border.primary}`,
                       transform: isSelected ? 'scale(1.1)' : 'scale(1)',
                       transition: 'all 0.2s'

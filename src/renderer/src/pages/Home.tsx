@@ -197,7 +197,7 @@ const HomePage = () => {
                 ...theme.components.card.base,
                 padding: theme.spacing.md,
                 backgroundColor: '#ffffff',
-                borderLeft: `4px solid ${theme.colors.accent.yellow}`,
+                borderLeft: `4px solid ${theme.colors.accent.warning}`,
                 maxWidth: '500px',
                 WebkitAppRegion: 'no-drag'
               } as React.CSSProperties}

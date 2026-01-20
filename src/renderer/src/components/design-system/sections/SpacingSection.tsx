@@ -42,7 +42,7 @@ export default function SpacingSection() {
               style={{
                 height: '24px',
                 width: value,
-                backgroundColor: colors.accent.blue.primary,
+                backgroundColor: colors.accent.primary.primary,
                 borderRadius: borderRadius.sm
               }}
             />

@@ -127,12 +127,12 @@ const SimpleActivityStreamChart = ({
             <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="5%"
-                stopColor={colors.accent.blue.primary}
+                stopColor={colors.accent.primary.primary}
                 stopOpacity={0.8}
               />
               <stop
                 offset="95%"
-                stopColor={colors.accent.blue.primary}
+                stopColor={colors.accent.primary.primary}
                 stopOpacity={0.1}
               />
             </linearGradient>
@@ -153,12 +153,12 @@ const SimpleActivityStreamChart = ({
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ stroke: colors.accent.blue.primary, strokeWidth: 1 }}
+            cursor={{ stroke: colors.accent.primary.primary, strokeWidth: 1 }}
           />
           <Area
             type="monotone"
             dataKey="count"
-            stroke={colors.accent.blue.primary}
+            stroke={colors.accent.primary.primary}
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorCount)"
@@ -180,7 +180,7 @@ const SimpleActivityStreamChart = ({
           <span style={{ color: colors.text.tertiary }}>Pic: </span>
           <span
             style={{
-              color: colors.accent.blue.primary,
+              color: colors.accent.primary.primary,
               fontWeight: typography.fontWeight.semibold
             }}
           >

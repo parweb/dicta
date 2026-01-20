@@ -138,13 +138,13 @@
 }
 
 .action-bedrock {
-  color: var(--color-purple-primary);
+  color: var(--color-secondary-primary);
 }
 
 .action-bedrock:hover {
-  color: var(--color-purple-light);
-  border-color: var(--color-purple-border);
-  box-shadow: 0 4px 12px var(--color-purple-bg);
+  color: var(--color-secondary-light);
+  border-color: var(--color-secondary-border);
+  box-shadow: 0 4px 12px var(--color-secondary-bg);
 }
 
 .action-copy:hover {

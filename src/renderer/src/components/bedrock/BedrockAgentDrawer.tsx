@@ -99,7 +99,7 @@ export default function BedrockAgentDrawer({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-            <Sparkles size={20} color={colors.accent.blue.primary} />
+            <Sparkles size={20} color={colors.accent.primary.primary} />
             <DrawerTitle
               style={{
                 fontSize: typography.fontSize.lg,
@@ -160,8 +160,8 @@ export default function BedrockAgentDrawer({
               <div
                 style={{
                   padding: spacing.lg,
-                  backgroundColor: colors.accent.yellow + '10',
-                  border: `1px solid ${colors.accent.yellow}40`,
+                  backgroundColor: colors.accent.warning + '10',
+                  border: `1px solid ${colors.accent.warning}40`,
                   borderRadius: '2px',
                   fontSize: typography.fontSize.sm,
                   color: colors.text.secondary

@@ -30,7 +30,7 @@ const MessageActions = memo(function MessageActions({
           icon={<Sparkles size={14} />}
           label="Actions"
           onClick={onOpenActions}
-          color={colors.accent.blue.primary}
+          color={colors.accent.primary.primary}
         />
       )}
     </div>

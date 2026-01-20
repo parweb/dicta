@@ -18,9 +18,9 @@ export function getStatusColor(
  * Get recording button color based on state
  */
 export function getRecordButtonColor(isRecording: boolean, isLoading: boolean): string {
-  if (isRecording) return colors.accent.red.button
-  if (isLoading) return colors.accent.gray.primary
-  return colors.accent.green.button
+  if (isRecording) return colors.accent.error.button
+  if (isLoading) return colors.accent.muted.primary
+  return colors.accent.success.button
 }
 
 /**

@@ -24,7 +24,7 @@ export const lightTheme: ThemeConfig = {
       accent: '#0ea5e9'
     },
     accent: {
-      blue: {
+      primary: {
         primary: '#0ea5e9',
         light: '#38bdf8',
         dark: '#0369a1',
@@ -32,7 +32,7 @@ export const lightTheme: ThemeConfig = {
         backgroundHover: 'rgba(14, 165, 233, 0.12)',
         backgroundActive: 'rgba(14, 165, 233, 0.16)'
       },
-      purple: {
+      secondary: {
         primary: '#8b5cf6',
         light: '#a78bfa',
         dark: '#6d28d9',
@@ -40,20 +40,20 @@ export const lightTheme: ThemeConfig = {
         backgroundHover: 'rgba(139, 92, 246, 0.12)',
         border: 'rgba(139, 92, 246, 0.25)'
       },
-      green: {
+      success: {
         primary: '#22c55e',
         button: '#16a34a'
       },
-      red: {
+      error: {
         primary: '#ef4444',
         button: '#dc2626'
       },
-      yellow: {
+      warning: {
         primary: '#eab308',
         light: '#fde047',
         background: 'rgba(234, 179, 8, 0.08)'
       },
-      gray: {
+      muted: {
         primary: '#6b7280',
         light: '#9ca3af'
       }

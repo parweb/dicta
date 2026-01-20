@@ -47,7 +47,7 @@ export default function SimpleTooltip({ cell, mousePosition }: SimpleTooltipProp
         <div
           style={{
             fontSize: typography.fontSize.xs,
-            color: colors.accent.blue.primary,
+            color: colors.accent.primary.primary,
             marginTop: spacing.xs
           }}
         >

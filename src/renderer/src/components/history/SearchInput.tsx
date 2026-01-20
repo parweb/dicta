@@ -58,7 +58,7 @@ const SearchInput = ({
           boxSizing: 'border-box'
         }}
         onFocus={e => {
-          e.currentTarget.style.borderColor = colors.accent.blue.primary;
+          e.currentTarget.style.borderColor = colors.accent.primary.primary;
           e.currentTarget.style.backgroundColor = colors.background.secondary;
         }}
         onBlur={e => {

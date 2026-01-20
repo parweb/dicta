@@ -19,7 +19,7 @@ const ScrollbarTrack = memo(function ScrollbarTrack() {
         bottom: 0,
         width: '3px',
         transform: 'translateX(-50%)',
-        backgroundColor: colors.accent.blue.primary + '40',
+        backgroundColor: colors.accent.primary.primary + '40',
         borderRadius: '2px'
       }}
     />

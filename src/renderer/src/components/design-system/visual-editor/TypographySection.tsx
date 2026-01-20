@@ -59,7 +59,7 @@ export default function TypographySection() {
               }}
               style={{
                 width: '200px',
-                accentColor: colors.accent.blue.primary
+                accentColor: colors.accent.primary.primary
               }}
             />
             <div

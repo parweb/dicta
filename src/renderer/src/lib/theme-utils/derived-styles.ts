@@ -27,12 +27,12 @@ export function computeDerivedStyles(theme: ThemeConfig) {
     },
     charts: {
       bar: {
-        fill: theme.colors.accent.blue.primary,
-        rgb: hexToRgb(theme.colors.accent.blue.primary) || '59, 130, 246'
+        fill: theme.colors.accent.primary.primary,
+        rgb: hexToRgb(theme.colors.accent.primary.primary) || '59, 130, 246'
       },
       brush: {
-        stroke: addAlpha(theme.colors.accent.blue.primary, 0.6),
-        fill: addAlpha(theme.colors.accent.blue.primary, 0.08)
+        stroke: addAlpha(theme.colors.accent.primary.primary, 0.6),
+        fill: addAlpha(theme.colors.accent.primary.primary, 0.08)
       }
     },
     components: {

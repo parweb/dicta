@@ -118,7 +118,7 @@ export default function HoverTooltip({ cell, mousePosition }: HoverTooltipProps)
                   transform: 'translate(-50%, -50%)',
                   width: `${size}px`,
                   height: `${size}px`,
-                  backgroundColor: colors.accent.blue.primary,
+                  backgroundColor: colors.accent.primary.primary,
                   borderRadius: '50%',
                   border: `2px solid ${colors.background.primary}`,
                   boxShadow: '0 2px 8px rgba(14, 165, 233, 0.4)',
@@ -182,7 +182,7 @@ export default function HoverTooltip({ cell, mousePosition }: HoverTooltipProps)
         <span>Durée moy.</span>
         <span
           style={{
-            color: colors.accent.blue.primary,
+            color: colors.accent.primary.primary,
             fontWeight: typography.fontWeight.medium
           }}
         >

@@ -54,7 +54,7 @@ export default function PresetSelector() {
                 gap: theme.spacing.sm,
                 padding: theme.spacing.lg,
                 backgroundColor: isActive
-                  ? theme.colors.accent.blue.background
+                  ? theme.colors.accent.primary.background
                   : theme.colors.background.secondary,
                 border: `2px solid ${isActive ? theme.colors.border.accent : theme.colors.border.primary}`,
                 borderRadius: theme.borderRadius.md,
@@ -98,7 +98,7 @@ export default function PresetSelector() {
                     fontSize: theme.typography.fontSize.sm,
                     fontWeight: theme.typography.fontWeight.semibold,
                     color: isActive
-                      ? theme.colors.accent.blue.primary
+                      ? theme.colors.accent.primary.primary
                       : theme.colors.text.primary,
                     marginBottom: theme.spacing.xs
                   }}
@@ -125,14 +125,14 @@ export default function PresetSelector() {
         <div
           style={{
             padding: theme.spacing.md,
-            backgroundColor: theme.colors.accent.yellow.background,
-            border: `1px solid ${theme.colors.accent.yellow.primary}`,
+            backgroundColor: theme.colors.accent.warning.background,
+            border: `1px solid ${theme.colors.accent.warning.primary}`,
             borderRadius: theme.borderRadius.sm,
             fontSize: theme.typography.fontSize.sm,
             color: theme.colors.text.secondary
           }}
         >
-          <strong style={{ color: theme.colors.accent.yellow.primary }}>
+          <strong style={{ color: theme.colors.accent.warning.primary }}>
             Thème personnalisé actif
           </strong>{' '}
           - Les modifications que vous apportez créent un thème personnalisé.

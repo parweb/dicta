@@ -104,7 +104,7 @@ export const themeSchema = z.object({
       accent: colorSchema
     }),
     accent: z.object({
-      blue: z.object({
+      primary: z.object({
         primary: colorSchema,
         light: colorSchema,
         dark: colorSchema,
@@ -112,20 +112,28 @@ export const themeSchema = z.object({
         backgroundHover: colorSchema,
         backgroundActive: colorSchema
       }),
-      green: z.object({
+      secondary: z.object({
+        primary: colorSchema,
+        light: colorSchema,
+        dark: colorSchema,
+        background: colorSchema,
+        backgroundHover: colorSchema,
+        border: colorSchema
+      }),
+      success: z.object({
         primary: colorSchema,
         button: colorSchema
       }),
-      red: z.object({
+      error: z.object({
         primary: colorSchema,
         button: colorSchema
       }),
-      yellow: z.object({
+      warning: z.object({
         primary: colorSchema,
         light: colorSchema,
         background: colorSchema
       }),
-      gray: z.object({
+      muted: z.object({
         primary: colorSchema,
         light: colorSchema
       })

@@ -25,7 +25,7 @@ const TranscriptionCard = memo(
         style={{
           padding: spacing.md,
           backgroundColor: isActive
-            ? colors.accent.blue.backgroundHover
+            ? colors.accent.primary.backgroundHover
             : isHovered
               ? colors.background.secondary
               : colors.background.primary,

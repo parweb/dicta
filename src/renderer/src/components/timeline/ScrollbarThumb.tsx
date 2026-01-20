@@ -35,17 +35,17 @@ const ScrollbarThumb = memo(function ScrollbarThumb({
         height: `${height}px`,
         transform: 'translateX(-50%)',
         background: isDragging
-          ? `linear-gradient(135deg, ${colors.accent.blue.primary} 0%, ${colors.accent.blue.light} 50%, ${colors.accent.blue.primary} 100%)`
-          : `linear-gradient(135deg, ${colors.accent.blue.primary}E0 0%, ${colors.accent.blue.light}C0 100%)`,
+          ? `linear-gradient(135deg, ${colors.accent.primary.primary} 0%, ${colors.accent.primary.light} 50%, ${colors.accent.primary.primary} 100%)`
+          : `linear-gradient(135deg, ${colors.accent.primary.primary}E0 0%, ${colors.accent.primary.light}C0 100%)`,
         borderRadius: '8px',
         transition: isDragging ? 'none' : 'width 0.2s, box-shadow 0.2s',
         cursor: isDragging ? 'grabbing' : 'grab',
         boxShadow: isDragging
-          ? `0 0 20px ${colors.accent.blue.primary}E0`
+          ? `0 0 20px ${colors.accent.primary.primary}E0`
           : isHovering
-          ? `0 0 12px ${colors.accent.blue.primary}80`
-          : `0 0 8px ${colors.accent.blue.primary}60`,
-        border: `1px solid ${colors.accent.blue.light}40`
+          ? `0 0 12px ${colors.accent.primary.primary}80`
+          : `0 0 8px ${colors.accent.primary.primary}60`,
+        border: `1px solid ${colors.accent.primary.light}40`
       }}
     />
   )

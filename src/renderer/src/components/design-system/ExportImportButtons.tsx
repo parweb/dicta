@@ -95,7 +95,7 @@ export default function ExportImportButtons() {
             alignItems: 'center',
             gap: theme.spacing.sm,
             padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
-            backgroundColor: theme.colors.accent.blue.primary,
+            backgroundColor: theme.colors.accent.primary.primary,
             color: theme.colors.text.primary,
             border: 'none',
             borderRadius: theme.borderRadius.sm,
@@ -106,11 +106,11 @@ export default function ExportImportButtons() {
           }}
           onMouseEnter={e => {
             e.currentTarget.style.backgroundColor =
-              theme.colors.accent.blue.light;
+              theme.colors.accent.primary.light;
           }}
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor =
-              theme.colors.accent.blue.primary;
+              theme.colors.accent.primary.primary;
           }}
         >
           <Download size={16} />
@@ -158,7 +158,7 @@ export default function ExportImportButtons() {
             gap: theme.spacing.sm,
             padding: `${theme.spacing.sm} ${theme.spacing.lg}`,
             backgroundColor: theme.colors.background.tertiary,
-            color: theme.colors.accent.red.primary,
+            color: theme.colors.accent.error.primary,
             border: `1px solid ${theme.colors.border.primary}`,
             borderRadius: theme.borderRadius.sm,
             fontSize: theme.typography.fontSize.sm,
@@ -169,7 +169,7 @@ export default function ExportImportButtons() {
           onMouseEnter={e => {
             e.currentTarget.style.backgroundColor =
               theme.colors.background.secondary;
-            e.currentTarget.style.borderColor = theme.colors.accent.red.primary;
+            e.currentTarget.style.borderColor = theme.colors.accent.error.primary;
           }}
           onMouseLeave={e => {
             e.currentTarget.style.backgroundColor =
@@ -198,8 +198,8 @@ export default function ExportImportButtons() {
             padding: theme.spacing.md,
             backgroundColor:
               message.type === 'success'
-                ? theme.colors.accent.green.primary + '20'
-                : theme.colors.accent.red.primary + '20',
+                ? theme.colors.accent.success.primary + '20'
+                : theme.colors.accent.error.primary + '20',
             border: `1px solid ${message.type === 'success' ? theme.colors.state.success : theme.colors.state.error}`,
             borderRadius: theme.borderRadius.sm,
             fontSize: theme.typography.fontSize.sm,

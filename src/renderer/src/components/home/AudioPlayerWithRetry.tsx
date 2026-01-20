@@ -37,7 +37,7 @@ const AudioPlayerWithRetry = ({
       style={{
         width: '100%',
         backgroundColor: colors.background.secondary,
-        border: `1px solid ${colors.accent.red.primary}`,
+        border: `1px solid ${colors.accent.error.primary}`,
         borderRadius: borderRadius.lg,
         padding: spacing.lg,
         display: 'flex',
@@ -52,7 +52,7 @@ const AudioPlayerWithRetry = ({
           display: 'flex',
           alignItems: 'center',
           gap: spacing.sm,
-          color: colors.accent.red.primary,
+          color: colors.accent.error.primary,
           fontSize: typography.fontSize.sm,
           fontWeight: typography.fontWeight.medium
         }}
@@ -89,7 +89,7 @@ const AudioPlayerWithRetry = ({
           padding: `${spacing.sm} ${spacing.lg}`,
           backgroundColor: isLoading
             ? colors.background.tertiary
-            : colors.accent.blue.primary,
+            : colors.accent.primary.primary,
           color: colors.text.primary,
           border: 'none',
           borderRadius: borderRadius.md,
@@ -102,18 +102,18 @@ const AudioPlayerWithRetry = ({
             ? {}
             : {
                 ':hover': {
-                  backgroundColor: colors.accent.blue.light
+                  backgroundColor: colors.accent.primary.light
                 }
               })
         }}
         onMouseEnter={e => {
           if (!isLoading) {
-            e.currentTarget.style.backgroundColor = colors.accent.blue.light;
+            e.currentTarget.style.backgroundColor = colors.accent.primary.light;
           }
         }}
         onMouseLeave={e => {
           if (!isLoading) {
-            e.currentTarget.style.backgroundColor = colors.accent.blue.primary;
+            e.currentTarget.style.backgroundColor = colors.accent.primary.primary;
           }
         }}
       >

@@ -24,7 +24,7 @@ export const highContrastTheme: ThemeConfig = {
       accent: '#00d4ff'
     },
     accent: {
-      blue: {
+      primary: {
         primary: '#00d4ff',
         light: '#66e4ff',
         dark: '#0088cc',
@@ -32,7 +32,7 @@ export const highContrastTheme: ThemeConfig = {
         backgroundHover: 'rgba(0, 212, 255, 0.25)',
         backgroundActive: 'rgba(0, 212, 255, 0.35)'
       },
-      purple: {
+      secondary: {
         primary: '#cc99ff',
         light: '#e6ccff',
         dark: '#9966ff',
@@ -40,20 +40,20 @@ export const highContrastTheme: ThemeConfig = {
         backgroundHover: 'rgba(204, 153, 255, 0.25)',
         border: 'rgba(204, 153, 255, 0.4)'
       },
-      green: {
+      success: {
         primary: '#00ff00',
         button: '#00cc00'
       },
-      red: {
+      error: {
         primary: '#ff0000',
         button: '#cc0000'
       },
-      yellow: {
+      warning: {
         primary: '#ffff00',
         light: '#ffff99',
         background: 'rgba(255, 255, 0, 0.15)'
       },
-      gray: {
+      muted: {
         primary: '#cccccc',
         light: '#e0e0e0'
       }

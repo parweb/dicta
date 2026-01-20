@@ -93,9 +93,9 @@ export default function ToolExecutionStatus({ tools }: ToolExecutionStatusProps)
           let borderColor = colors.border.primary
 
           if (tool.status === 'running') {
-            iconColor = colors.accent.blue.primary
-            bgColor = colors.accent.blue.background
-            borderColor = colors.accent.blue.primary + '40'
+            iconColor = colors.accent.primary.primary
+            bgColor = colors.accent.primary.background
+            borderColor = colors.accent.primary.primary + '40'
           } else if (tool.status === 'success') {
             iconColor = colors.state.success
             bgColor = colors.state.success + '10'
@@ -205,7 +205,7 @@ export default function ToolExecutionStatus({ tools }: ToolExecutionStatusProps)
                   <div
                     style={{
                       fontSize: typography.fontSize.xs,
-                      color: colors.accent.blue.primary
+                      color: colors.accent.primary.primary
                     }}
                   >
                     Exécution en cours...

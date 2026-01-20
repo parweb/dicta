@@ -25,7 +25,7 @@ export default function Section({ icon, title, description, children }: SectionP
           marginBottom: spacing.md
         }}
       >
-        <div style={{ color: colors.accent.blue.primary }}>{icon}</div>
+        <div style={{ color: colors.accent.primary.primary }}>{icon}</div>
         <h2
           style={{
             fontSize: typography.fontSize.xl,

@@ -98,7 +98,7 @@ const AudioWaveform = ({
               style={{
                 flex: 1,
                 height: `${Math.max(2, normalizedHeight)}%`,
-                backgroundColor: colors.accent.blue.primary,
+                backgroundColor: colors.accent.primary.primary,
                 opacity,
                 borderRadius: borderRadius.xs,
                 minWidth: '1px'
