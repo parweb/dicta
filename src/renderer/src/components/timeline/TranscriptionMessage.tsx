@@ -8,6 +8,7 @@ import { Copy, Sparkles } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
 import BedrockAgentInline from '../bedrock/BedrockAgentInline';
+import BedrockHistoryDisplay from '../bedrock/BedrockHistoryDisplay';
 import type { BedrockConversationHistory } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TranscriptionMessage.css';
@@ -26,6 +27,7 @@ interface TranscriptionMessageProps {
   onFollowUpConsumed?: () => void;
   bedrockHistory?: BedrockConversationHistory;
   onBedrockHistoryChange?: (history: ConversationHistory) => void;
+  historyDisplayVariant?: string;
 }
 
 const TranscriptionMessage = memo(function TranscriptionMessage({
@@ -41,7 +43,8 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   newFollowUpTranscript,
   onFollowUpConsumed,
   bedrockHistory,
-  onBedrockHistoryChange
+  onBedrockHistoryChange,
+  historyDisplayVariant = 'accordion'
 }: TranscriptionMessageProps) {
   const { theme } = useThemeStore();
 
@@ -109,6 +112,13 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
       <div className="message-content">
         <p className="message-text">{text}</p>
       </div>
+
+      {/* Bedrock History Display (when not showing active actions) */}
+      {!showActions && bedrockHistory && bedrockHistory.toolsExecuted.length > 0 && (
+        <div style={{ padding: '0 16px' }}>
+          <BedrockHistoryDisplay history={bedrockHistory} variant={historyDisplayVariant} />
+        </div>
+      )}
 
       {/* Terminal-style border accent */}
       <div className="message-accent" />

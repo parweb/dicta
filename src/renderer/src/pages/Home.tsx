@@ -34,6 +34,7 @@ const HomePage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [activeActionsTranscriptionId, setActiveActionsTranscriptionId] = useState<string | null>(null);
   const [actionsFollowUpTranscript, setActionsFollowUpTranscript] = useState<string | undefined>(undefined);
+  const [historyDisplayVariant, setHistoryDisplayVariant] = useState('accordion');
 
   const hasRedirectedRef = useRef(false);
 
@@ -251,6 +252,52 @@ const HomePage = () => {
               paddingTop: theme.spacing['4xl']
             }}
           >
+            {/* History Display Variant Selector (DEV ONLY) */}
+            <div
+              style={{
+                padding: `${theme.spacing.md} ${theme.spacing.lg}`,
+                backgroundColor: theme.colors.background.secondary,
+                borderBottom: `1px solid ${theme.colors.border.primary}`,
+                WebkitAppRegion: 'no-drag'
+              }}
+            >
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: theme.spacing.sm,
+                  fontSize: theme.typography.fontSize.xs,
+                  color: theme.colors.text.secondary
+                }}
+              >
+                <span>Style d'affichage historique:</span>
+                <select
+                  value={historyDisplayVariant}
+                  onChange={(e) => setHistoryDisplayVariant(e.target.value)}
+                  style={{
+                    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+                    backgroundColor: theme.colors.background.tertiary,
+                    color: theme.colors.text.primary,
+                    border: `1px solid ${theme.colors.border.primary}`,
+                    borderRadius: theme.borderRadius.md,
+                    fontSize: theme.typography.fontSize.xs,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="accordion">1. Simple Accordion</option>
+                  <option value="badge">2. Badge with Tooltip</option>
+                  <option value="timeline">3. Mini Timeline</option>
+                  <option value="card">4. Collapsible Card</option>
+                  <option value="stacked">5. Stacked Icons</option>
+                  <option value="progress">6. Progress Bar</option>
+                  <option value="compact">7. Compact List</option>
+                  <option value="sidebar">8. Sidebar Style</option>
+                  <option value="modal">9. Modal Preview</option>
+                  <option value="chips">10. Chips/Tags</option>
+                </select>
+              </label>
+            </div>
+
             {/* Timeline List */}
             <TimelineTranscriptList
               transcriptions={allTranscriptions}
@@ -262,6 +309,7 @@ const HomePage = () => {
               onCloseActions={handleCloseActions}
               onFollowUpConsumed={() => setActionsFollowUpTranscript(undefined)}
               onBedrockHistoryChange={handleBedrockHistoryChange}
+              historyDisplayVariant={historyDisplayVariant}
             />
 
             {/* Fixed Record Button at Bottom */}

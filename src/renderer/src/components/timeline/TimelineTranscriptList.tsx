@@ -22,6 +22,7 @@ interface TimelineTranscriptListProps {
   onCloseActions?: () => void;
   onFollowUpConsumed?: () => void;
   onBedrockHistoryChange?: (transcriptionId: string, history: ConversationHistory) => void;
+  historyDisplayVariant?: string;
 }
 
 export default function TimelineTranscriptList({
@@ -33,7 +34,8 @@ export default function TimelineTranscriptList({
   onOpenActions,
   onCloseActions,
   onFollowUpConsumed,
-  onBedrockHistoryChange
+  onBedrockHistoryChange,
+  historyDisplayVariant = 'accordion'
 }: TimelineTranscriptListProps) {
   const { theme } = useThemeStore();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -187,6 +189,7 @@ export default function TimelineTranscriptList({
                     onFollowUpConsumed={onFollowUpConsumed}
                     bedrockHistory={transcription.bedrockHistory}
                     onBedrockHistoryChange={(history) => onBedrockHistoryChange?.(transcription.id, history)}
+                    historyDisplayVariant={historyDisplayVariant}
                   />
                 </div>
               );
