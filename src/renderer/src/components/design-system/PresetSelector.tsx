@@ -4,6 +4,7 @@ import {
   type PresetName
 } from '../../lib/theme-presets';
 import { useThemeStore } from '@/hooks/useThemeStore';
+import ThemePreviewCard from './ThemePreviewCard';
 
 export default function PresetSelector() {
   const { theme, activePreset, replaceTheme, setActivePreset } = useThemeStore();
@@ -18,7 +19,7 @@ export default function PresetSelector() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.md
+        gap: theme.spacing.lg
       }}
     >
       <h3
@@ -35,88 +36,24 @@ export default function PresetSelector() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: theme.spacing.md
+          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+          gap: theme.spacing.lg
         }}
       >
         {(Object.keys(PRESET_THEMES) as PresetName[]).map(presetName => {
           const metadata = PRESET_METADATA[presetName];
+          const presetTheme = PRESET_THEMES[presetName];
           const isActive = activePreset === presetName;
 
           return (
-            <button
+            <ThemePreviewCard
               key={presetName}
+              preset={presetName}
+              metadata={metadata}
+              theme={presetTheme}
+              isActive={isActive}
               onClick={() => handlePresetClick(presetName)}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: theme.spacing.sm,
-                padding: theme.spacing.lg,
-                backgroundColor: isActive
-                  ? theme.colors.accent.primary.background
-                  : theme.colors.background.secondary,
-                border: `2px solid ${isActive ? theme.colors.border.accent : theme.colors.border.primary}`,
-                borderRadius: theme.borderRadius.md,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                outline: 'none'
-              }}
-              onMouseEnter={e => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor =
-                    theme.colors.background.tertiary;
-                  e.currentTarget.style.borderColor =
-                    theme.colors.border.secondary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor =
-                    theme.colors.background.secondary;
-                  e.currentTarget.style.borderColor =
-                    theme.colors.border.primary;
-                }
-              }}
-            >
-              <span
-                style={{
-                  fontSize: theme.typography.fontSize.xl,
-                  lineHeight: '1'
-                }}
-              >
-                {metadata.icon}
-              </span>
-
-              <div
-                style={{
-                  textAlign: 'center'
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: theme.typography.fontSize.sm,
-                    fontWeight: theme.typography.fontWeight.semibold,
-                    color: isActive
-                      ? theme.colors.accent.primary.primary
-                      : theme.colors.text.primary,
-                    marginBottom: theme.spacing.xs
-                  }}
-                >
-                  {metadata.name}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: theme.typography.fontSize.xs,
-                    color: theme.colors.text.tertiary,
-                    lineHeight: theme.typography.lineHeight.tight
-                  }}
-                >
-                  {metadata.description}
-                </div>
-              </div>
-            </button>
+            />
           );
         })}
       </div>
