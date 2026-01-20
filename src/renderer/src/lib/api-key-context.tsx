@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState
 } from 'react';
 
@@ -126,15 +127,25 @@ export function ApiKeyProvider({ children }: { children: React.ReactNode }) {
     init();
   }, [loadApiKey]);
 
-  const value: ApiKeyContextValue = {
-    apiKey,
-    isLoading,
-    hasApiKey: !!apiKey,
-    isEncryptionAvailable,
-    saveApiKey,
-    deleteApiKey,
-    loadApiKey
-  };
+  const value: ApiKeyContextValue = useMemo(
+    () => ({
+      apiKey,
+      isLoading,
+      hasApiKey: !!apiKey,
+      isEncryptionAvailable,
+      saveApiKey,
+      deleteApiKey,
+      loadApiKey
+    }),
+    [
+      apiKey,
+      isLoading,
+      isEncryptionAvailable,
+      saveApiKey,
+      deleteApiKey,
+      loadApiKey
+    ]
+  );
 
   return (
     <ApiKeyContext.Provider value={value}>{children}</ApiKeyContext.Provider>

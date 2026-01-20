@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -186,22 +187,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   /**
    * Update theme with partial changes (deep merge)
    */
-  const setTheme = (updates: PartialThemeConfig) => {
+  const setTheme = useCallback((updates: PartialThemeConfig) => {
     setBaseConfig(prev => mergeTheme(prev, updates));
     setActivePresetState('custom');
-  };
+  }, []);
 
   /**
    * Replace entire theme (used for presets)
    */
-  const replaceTheme = (newTheme: ThemeConfig) => {
+  const replaceTheme = useCallback((newTheme: ThemeConfig) => {
     setBaseConfig(newTheme);
-  };
+  }, []);
 
   /**
    * Reset to default dark theme
    */
-  const resetTheme = async () => {
+  const resetTheme = useCallback(async () => {
     try {
       await window.api?.theme.reset();
       setBaseConfig(darkTheme);
@@ -210,14 +211,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error resetting theme:', error);
     }
-  };
+  }, []);
 
   /**
    * Set active preset (convenience wrapper)
    */
-  const setActivePreset = (preset: PresetName | 'custom') => {
+  const setActivePreset = useCallback((preset: PresetName | 'custom') => {
     setActivePresetState(preset);
-  };
+  }, []);
 
   const themeValue: ThemeContextValue = useMemo(
     () => ({
@@ -237,7 +238,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       activePreset,
       setActivePreset
     }),
-    [activePreset]
+    [setTheme, replaceTheme, resetTheme, saveTheme, loadTheme, activePreset, setActivePreset]
   );
 
   return (
