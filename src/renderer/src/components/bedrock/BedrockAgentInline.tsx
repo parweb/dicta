@@ -48,6 +48,7 @@ export default function BedrockAgentInline({
   const [isCollapsed, setIsCollapsed] = useState(false)
   const followUpInputRef = useRef<HTMLTextAreaElement>(null)
   const hasCalledHistoryChange = useRef(false)
+  const hasInitialExecuted = useRef(false)
 
   // Load initial history if provided (restoring previous conversation)
   useEffect(() => {
@@ -65,8 +66,10 @@ export default function BedrockAgentInline({
       hasCredentials &&
       !state.isStreaming &&
       !state.response &&
-      !state.error
+      !state.error &&
+      !hasInitialExecuted.current
     ) {
+      hasInitialExecuted.current = true
       executeAgent(transcriptContext)
     }
   }, []) // Only on mount
