@@ -3,8 +3,6 @@ import { ReactNode } from 'react';
 
 import type { Transcription } from '../lib/history';
 import { useThemeStore } from '@/hooks/useThemeStore';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/lib/variants';
 import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
@@ -63,7 +61,16 @@ const Layout = ({
           {/* History toggle button */}
           <button
             onClick={onHistoryToggle}
-            className={cn(buttonVariants({ variant: 'icon', size: 'icon' }))}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: spacing.sm,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '8px'
+            }}
             title="Historique"
           >
             <History size={18} color={colors.text.primary} />
@@ -72,16 +79,16 @@ const Layout = ({
           {/* Statistics button */}
           <button
             onClick={() => onViewChange('statistics')}
-            className={cn(
-              buttonVariants({ variant: 'icon', size: 'icon' }),
-              currentView === 'statistics' && 'rounded-full',
-              currentView === 'statistics' && `p-[${spacing.sm}px]`
-            )}
-            style={
-              currentView === 'statistics'
-                ? { backgroundColor: colors.text.primary }
-                : undefined
-            }
+            style={{
+              background: currentView === 'statistics' ? colors.text.primary : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: spacing.sm,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: currentView === 'statistics' ? '50%' : '8px'
+            }}
             title="Statistiques"
           >
             <BarChart3
@@ -97,16 +104,16 @@ const Layout = ({
           {/* Settings button */}
           <button
             onClick={() => onViewChange('settings')}
-            className={cn(
-              buttonVariants({ variant: 'icon', size: 'icon' }),
-              currentView === 'settings' && 'rounded-full',
-              currentView === 'settings' && `p-[${spacing.sm}px]`
-            )}
-            style={
-              currentView === 'settings'
-                ? { backgroundColor: colors.text.primary }
-                : undefined
-            }
+            style={{
+              background: currentView === 'settings' ? colors.text.primary : 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: spacing.sm,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: currentView === 'settings' ? '50%' : '8px'
+            }}
             title="Paramètres"
           >
             <Settings
