@@ -16,7 +16,7 @@ import type { Theme } from './theme-context'
 // ============================================================================
 
 export const apiKeyAtom = atom<string | null>(null)
-export const isApiKeyLoadingAtom = atom(false)
+export const isApiKeyLoadingAtom = atom(true) // Start as true to prevent premature redirect
 export const isEncryptionAvailableAtom = atom(false)
 
 // Derived atom: hasApiKey
