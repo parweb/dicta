@@ -297,6 +297,7 @@ const HomePage = () => {
               activeActionsTranscriptionId={activeActionsTranscriptionId}
               actionsFollowUpTranscript={actionsFollowUpTranscript}
               isRecording={isRecording}
+              isLoading={isLoading}
               realtimeAmplitudes={realtimeAmplitudes}
               onCopyTranscript={handleCopyTranscript}
               onOpenActions={handleOpenActions}

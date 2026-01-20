@@ -19,6 +19,7 @@ interface TimelineTranscriptListProps {
   activeActionsTranscriptionId?: string | null;
   actionsFollowUpTranscript?: string;
   isRecording?: boolean;
+  isLoading?: boolean;
   realtimeAmplitudes?: number[];
   onCopyTranscript?: (transcription: Transcription) => void;
   onOpenActions?: (transcription: Transcription) => void;
@@ -34,6 +35,7 @@ export default function TimelineTranscriptList({
   activeActionsTranscriptionId,
   actionsFollowUpTranscript,
   isRecording = false,
+  isLoading = false,
   realtimeAmplitudes = [],
   onCopyTranscript,
   onOpenActions,
@@ -69,7 +71,7 @@ export default function TimelineTranscriptList({
 
   // Auto-scroll to bottom when recording starts (to show placeholder)
   useEffect(() => {
-    if (isRecording && parentRef.current) {
+    if ((isRecording || isLoading) && parentRef.current) {
       // Small delay to ensure placeholder is rendered
       setTimeout(() => {
         if (parentRef.current) {
@@ -77,7 +79,7 @@ export default function TimelineTranscriptList({
         }
       }, 100);
     }
-  }, [isRecording]);
+  }, [isRecording, isLoading]);
 
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
@@ -148,7 +150,7 @@ export default function TimelineTranscriptList({
           paddingRight: transcriptions.length > 0 ? '72px' : '20px'
         }}
       >
-        {transcriptions.length === 0 && !isRecording ? (
+        {transcriptions.length === 0 && !isRecording && !isLoading ? (
           <div className="timeline-empty-state">
             <div className="empty-icon">
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -169,7 +171,7 @@ export default function TimelineTranscriptList({
         ) : (
           <div
             style={{
-              height: `${Math.max(virtualizer.getTotalSize(), isRecording ? 200 : 0)}px`,
+              height: `${Math.max(virtualizer.getTotalSize(), (isRecording || isLoading) ? 200 : 0)}px`,
               width: '100%',
               position: 'relative'
             }}
@@ -213,7 +215,7 @@ export default function TimelineTranscriptList({
             })}
 
             {/* Recording placeholder at the end */}
-            {isRecording && (
+            {(isRecording || isLoading) && (
               <div
                 style={{
                   position: 'absolute',
@@ -224,7 +226,11 @@ export default function TimelineTranscriptList({
                   padding: '16px 0'
                 }}
               >
-                <RecordingPlaceholder amplitudes={realtimeAmplitudes} />
+                <RecordingPlaceholder
+                  amplitudes={realtimeAmplitudes}
+                  isRecording={isRecording}
+                  isLoading={isLoading}
+                />
               </div>
             )}
           </div>

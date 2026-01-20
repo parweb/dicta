@@ -98,6 +98,32 @@
   letter-spacing: 0.3px;
 }
 
+.message-time {
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.recording-loader {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #94a3b8;
+}
+
+.loader-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .waveform-wrapper {
   margin-bottom: 16px;
 }
