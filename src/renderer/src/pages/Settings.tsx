@@ -1,21 +1,87 @@
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Palette, Key, Download, Cloud } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import ThemeConfigurator from '@/components/design-system/ThemeConfigurator';
 import BedrockSettings from '@/components/settings/BedrockSettings';
 import ModelSettings from '@/components/settings/ModelSettings';
 import UpdateSettings from '@/components/settings/UpdateSettings';
-import { useTheme } from '@/lib/theme-context';
+import { useTheme, type Theme } from '@/lib/theme-context';
 import DesignSystem from './DesignSystem';
 
+type TabValue = 'theme' | 'model' | 'bedrock' | 'updates';
+
+interface TabButtonProps {
+  label: string;
+  icon: LucideIcon;
+  value: TabValue;
+  isActive: boolean;
+  onClick: () => void;
+  theme: Theme;
+}
+
+const TabButton = memo(({ label, icon: Icon, value, isActive, onClick, theme }: TabButtonProps) => {
+  const { colors, spacing, typography } = theme;
+
+  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isActive) {
+      e.currentTarget.style.color = colors.text.secondary;
+    }
+  }, [isActive, colors.text.secondary]);
+
+  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!isActive) {
+      e.currentTarget.style.color = colors.text.tertiary;
+    }
+  }, [isActive, colors.text.tertiary]);
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: spacing.sm,
+        padding: `${spacing.md}px ${spacing.lg}px`,
+        backgroundColor: 'transparent',
+        color: isActive ? colors.text.primary : colors.text.tertiary,
+        border: 'none',
+        borderBottom: isActive
+          ? `2px solid ${colors.text.primary}`
+          : '2px solid transparent',
+        cursor: 'pointer',
+        fontSize: typography.fontSize.sm,
+        fontWeight: isActive
+          ? typography.fontWeight.medium
+          : typography.fontWeight.normal,
+        marginBottom: '-1px',
+        transition: 'color 0.15s'
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Icon size={16} />
+      <span>{label}</span>
+    </button>
+  );
+});
+
+TabButton.displayName = 'TabButton';
+
 interface SettingsProps {
-  defaultTab?: 'theme' | 'model' | 'bedrock' | 'updates';
+  defaultTab?: TabValue;
 }
 
 const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
   const { theme } = useTheme();
   const { colors, spacing, typography } = theme;
-  const [activeTab, setActiveTab] = useState<'theme' | 'model' | 'bedrock' | 'updates'>(defaultTab);
+  const [activeTab, setActiveTab] = useState<TabValue>(defaultTab);
+
+  // Memoize tab click handlers
+  const handleModelClick = useCallback(() => setActiveTab('model'), []);
+  const handleBedrockClick = useCallback(() => setActiveTab('bedrock'), []);
+  const handleThemeClick = useCallback(() => setActiveTab('theme'), []);
+  const handleUpdatesClick = useCallback(() => setActiveTab('updates'), []);
 
   return (
     <div
@@ -76,169 +142,38 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
               borderBottom: `1px solid ${colors.border.primary}`
             }}
           >
-            <button
-              onClick={() => setActiveTab('model')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing.sm,
-                padding: `${spacing.md}px ${spacing.lg}px`,
-                backgroundColor: 'transparent',
-                color:
-                  activeTab === 'model'
-                    ? colors.text.primary
-                    : colors.text.tertiary,
-                border: 'none',
-                borderBottom:
-                  activeTab === 'model'
-                    ? `2px solid ${colors.text.primary}`
-                    : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: typography.fontSize.sm,
-                fontWeight:
-                  activeTab === 'model'
-                    ? typography.fontWeight.medium
-                    : typography.fontWeight.normal,
-                marginBottom: '-1px',
-                transition: 'color 0.15s'
-              }}
-              onMouseEnter={e => {
-                if (activeTab !== 'model') {
-                  e.currentTarget.style.color = colors.text.secondary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (activeTab !== 'model') {
-                  e.currentTarget.style.color = colors.text.tertiary;
-                }
-              }}
-            >
-              <Key size={16} />
-              <span>Modèle</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('bedrock')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing.sm,
-                padding: `${spacing.md}px ${spacing.lg}px`,
-                backgroundColor: 'transparent',
-                color:
-                  activeTab === 'bedrock'
-                    ? colors.text.primary
-                    : colors.text.tertiary,
-                border: 'none',
-                borderBottom:
-                  activeTab === 'bedrock'
-                    ? `2px solid ${colors.text.primary}`
-                    : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: typography.fontSize.sm,
-                fontWeight:
-                  activeTab === 'bedrock'
-                    ? typography.fontWeight.medium
-                    : typography.fontWeight.normal,
-                marginBottom: '-1px',
-                transition: 'color 0.15s'
-              }}
-              onMouseEnter={e => {
-                if (activeTab !== 'bedrock') {
-                  e.currentTarget.style.color = colors.text.secondary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (activeTab !== 'bedrock') {
-                  e.currentTarget.style.color = colors.text.tertiary;
-                }
-              }}
-            >
-              <Cloud size={16} />
-              <span>Bedrock</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('theme')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing.sm,
-                padding: `${spacing.md}px ${spacing.lg}px`,
-                backgroundColor: 'transparent',
-                color:
-                  activeTab === 'theme'
-                    ? colors.text.primary
-                    : colors.text.tertiary,
-                border: 'none',
-                borderBottom:
-                  activeTab === 'theme'
-                    ? `2px solid ${colors.text.primary}`
-                    : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: typography.fontSize.sm,
-                fontWeight:
-                  activeTab === 'theme'
-                    ? typography.fontWeight.medium
-                    : typography.fontWeight.normal,
-                marginBottom: '-1px',
-                transition: 'color 0.15s'
-              }}
-              onMouseEnter={e => {
-                if (activeTab !== 'theme') {
-                  e.currentTarget.style.color = colors.text.secondary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (activeTab !== 'theme') {
-                  e.currentTarget.style.color = colors.text.tertiary;
-                }
-              }}
-            >
-              <Palette size={16} />
-              <span>Thème</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('updates')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: spacing.sm,
-                padding: `${spacing.md}px ${spacing.lg}px`,
-                backgroundColor: 'transparent',
-                color:
-                  activeTab === 'updates'
-                    ? colors.text.primary
-                    : colors.text.tertiary,
-                border: 'none',
-                borderBottom:
-                  activeTab === 'updates'
-                    ? `2px solid ${colors.text.primary}`
-                    : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: typography.fontSize.sm,
-                fontWeight:
-                  activeTab === 'updates'
-                    ? typography.fontWeight.medium
-                    : typography.fontWeight.normal,
-                marginBottom: '-1px',
-                transition: 'color 0.15s'
-              }}
-              onMouseEnter={e => {
-                if (activeTab !== 'updates') {
-                  e.currentTarget.style.color = colors.text.secondary;
-                }
-              }}
-              onMouseLeave={e => {
-                if (activeTab !== 'updates') {
-                  e.currentTarget.style.color = colors.text.tertiary;
-                }
-              }}
-            >
-              <Download size={16} />
-              <span>Mises à jour</span>
-            </button>
+            <TabButton
+              label="Modèle"
+              icon={Key}
+              value="model"
+              isActive={activeTab === 'model'}
+              onClick={handleModelClick}
+              theme={theme}
+            />
+            <TabButton
+              label="Bedrock"
+              icon={Cloud}
+              value="bedrock"
+              isActive={activeTab === 'bedrock'}
+              onClick={handleBedrockClick}
+              theme={theme}
+            />
+            <TabButton
+              label="Thème"
+              icon={Palette}
+              value="theme"
+              isActive={activeTab === 'theme'}
+              onClick={handleThemeClick}
+              theme={theme}
+            />
+            <TabButton
+              label="Mises à jour"
+              icon={Download}
+              value="updates"
+              isActive={activeTab === 'updates'}
+              onClick={handleUpdatesClick}
+              theme={theme}
+            />
           </div>
         </div>
 
