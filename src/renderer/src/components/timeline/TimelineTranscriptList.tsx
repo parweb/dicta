@@ -52,11 +52,15 @@ export default function TimelineTranscriptList({
   const recordingStartTimeRef = useRef<number>(Date.now());
   const [recordingDuration, setRecordingDuration] = useState(0);
 
+  // Save amplitudes when recording stops to keep them during loading
+  const [savedAmplitudes, setSavedAmplitudes] = useState<number[]>([]);
+
   // Reset start time when recording starts
   useEffect(() => {
     if (isRecording) {
       recordingStartTimeRef.current = Date.now();
       setRecordingDuration(0);
+      setSavedAmplitudes([]); // Clear saved amplitudes when starting new recording
     }
   }, [isRecording]);
 
@@ -71,18 +75,28 @@ export default function TimelineTranscriptList({
     return () => clearInterval(interval);
   }, [isRecording]);
 
+  // Save amplitudes when recording stops
+  useEffect(() => {
+    if (!isRecording && realtimeAmplitudes.length > 0) {
+      setSavedAmplitudes(realtimeAmplitudes);
+    }
+  }, [isRecording, realtimeAmplitudes]);
+
   // Create temporary transcription object during recording/loading
   const temporaryTranscription = useMemo<Transcription | null>(() => {
     if (!isRecording && !isLoading) return null;
+
+    // Use savedAmplitudes during loading, realtimeAmplitudes during recording
+    const amplitudes = isLoading ? savedAmplitudes : realtimeAmplitudes;
 
     return {
       id: 'temp-recording',
       text: '', // Empty during recording, will show loader during loading
       timestamp: recordingStartTimeRef.current,
       durationMs: recordingDuration,
-      audioAmplitudes: realtimeAmplitudes
+      audioAmplitudes: amplitudes
     };
-  }, [isRecording, isLoading, recordingDuration, realtimeAmplitudes]);
+  }, [isRecording, isLoading, recordingDuration, realtimeAmplitudes, savedAmplitudes]);
 
   // Virtualize the list for performance
   const virtualizer = useVirtualizer({
