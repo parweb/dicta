@@ -10,7 +10,6 @@ import {
 
 import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
 import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
-import RecordButton from '@/components/home/RecordButton';
 import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -298,27 +297,6 @@ const HomePage = () => {
               onFollowUpFocusChange={handleFollowUpFocusChange}
               onBedrockHistoryChange={handleBedrockHistoryChange}
             />
-
-            {/* Fixed Record Button at Bottom */}
-            <div
-              style={{
-                padding: '40px',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.colors.background.primary,
-                borderTop: `1px solid ${theme.colors.border.primary}`,
-                position: 'relative',
-                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0) 0%, rgba(15, 23, 42, 0.8) 50%, rgba(15, 23, 42, 1) 100%)'
-              }}
-            >
-              <RecordButton
-                isRecording={isRecording}
-                isLoading={isLoading}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-              />
-            </div>
           </div>
         )}
       </AnimatedView>
