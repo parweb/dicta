@@ -117,7 +117,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
       {(showActions || bedrockHistory) && (
         <BedrockAgentInline
           transcriptContext={text}
-          onClose={() => onCloseActions?.()}
+          onClose={showActions ? () => onCloseActions?.() : undefined}
           newTranscript={newFollowUpTranscript}
           onTranscriptConsumed={onFollowUpConsumed}
           initialHistory={bedrockHistory}

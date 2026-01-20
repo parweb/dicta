@@ -17,7 +17,7 @@ import './BedrockAgentInline.css'
 
 interface BedrockAgentInlineProps {
   transcriptContext: string
-  onClose: () => void
+  onClose?: () => void
   newTranscript?: string
   onTranscriptConsumed?: () => void
   initialHistory?: BedrockConversationHistory
@@ -144,13 +144,15 @@ export default function BedrockAgentInline({
           >
             {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </button>
-          <button
-            onClick={handleClose}
-            className="control-button"
-            title="Fermer"
-          >
-            <X size={16} />
-          </button>
+          {onClose && (
+            <button
+              onClick={handleClose}
+              className="control-button"
+              title="Fermer"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
       </div>
 
