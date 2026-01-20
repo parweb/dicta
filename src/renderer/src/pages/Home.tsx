@@ -78,7 +78,7 @@ const HomePage = () => {
       console.log('[HOME] Audio analyzed, duration:', durationMs, 'ms');
 
       // Transcribe and get the result
-      console.log('[HOME] Starting transcription with API key length:', apiKey?.length);
+      console.log('[HOME] Starting transcription...');
       const result = await transcribeAudio(audioBlob, durationMs, amplitudes);
       console.log('[HOME] Transcription result:', result);
 
@@ -97,7 +97,6 @@ const HomePage = () => {
     startAudioRecording,
     analyzeAudio,
     transcribeAudio,
-    apiKey,
     isDrawerOpen,
     navigateTo
   ]);
