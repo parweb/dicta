@@ -8,7 +8,7 @@ import {
   useRef,
   memo
 } from 'react';
-import Fuse from 'fuse.js';
+import type Fuse from 'fuse.js';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import SearchInput from './history/SearchInput';
@@ -44,9 +44,19 @@ const HistorySidebar = memo(
     const [searchQuery, setSearchQuery] = useState('');
     const [isPending] = useTransition();
     const parentRef = useRef<HTMLDivElement>(null);
+    const [FuseClass, setFuseClass] = useState<typeof Fuse | null>(null);
 
     // Defer the search query to not block the UI while typing
     const deferredSearchQuery = useDeferredValue(searchQuery);
+
+    // Lazy load Fuse.js only when needed (sidebar opens)
+    useEffect(() => {
+      if (isOpen && !FuseClass) {
+        import('fuse.js').then((module) => {
+          setFuseClass(() => module.default);
+        });
+      }
+    }, [isOpen, FuseClass]);
 
     useEffect(() => {
       if (isOpen) {
@@ -54,9 +64,11 @@ const HistorySidebar = memo(
       }
     }, [isOpen, loadHistory]);
 
-    // Configure Fuse.js for intelligent fuzzy search
+    // Configure Fuse.js for intelligent fuzzy search (only if loaded)
     const fuse = useMemo(() => {
-      return new Fuse(transcriptions, {
+      if (!FuseClass) return null;
+
+      return new FuseClass(transcriptions, {
         keys: [
           {
             name: 'text',
@@ -74,11 +86,16 @@ const HistorySidebar = memo(
         useExtendedSearch: true, // Enable advanced search patterns
         includeScore: true // Include relevance score
       });
-    }, [transcriptions]);
+    }, [FuseClass, transcriptions]);
 
     // Filter transcriptions based on deferred search query
     const filteredTranscriptions = useMemo(() => {
       if (!deferredSearchQuery.trim()) {
+        return transcriptions;
+      }
+
+      // If Fuse.js not loaded yet, return all transcriptions
+      if (!fuse) {
         return transcriptions;
       }
 
