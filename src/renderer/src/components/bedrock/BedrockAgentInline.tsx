@@ -20,6 +20,7 @@ interface BedrockAgentInlineProps {
   onClose?: () => void
   newTranscript?: string
   onTranscriptConsumed?: () => void
+  onFollowUpFocusChange?: (isFocused: boolean) => void
   initialHistory?: BedrockConversationHistory
   onHistoryChange?: (history: ConversationHistory) => void
   initiallyCollapsed?: boolean
@@ -30,6 +31,7 @@ export default function BedrockAgentInline({
   onClose,
   newTranscript,
   onTranscriptConsumed,
+  onFollowUpFocusChange,
   initialHistory,
   onHistoryChange,
   initiallyCollapsed = false
@@ -144,7 +146,7 @@ export default function BedrockAgentInline({
           <span className="control-button">
             {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </span>
-          {onClose && (
+          {onClose && conversationMessages.length === 0 && (
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -197,6 +199,8 @@ export default function BedrockAgentInline({
                 value={followUpPrompt}
                 onChange={(e) => setFollowUpPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onFocus={() => onFollowUpFocusChange?.(true)}
+                onBlur={() => onFollowUpFocusChange?.(false)}
                 placeholder="Continuer la conversation..."
                 disabled={!hasCredentials}
                 className="followup-input"
@@ -213,13 +217,6 @@ export default function BedrockAgentInline({
                 >
                   <Sparkles size={14} />
                   Envoyer
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleClose}
-                  className="followup-close"
-                >
-                  Fermer
                 </Button>
               </div>
             </div>

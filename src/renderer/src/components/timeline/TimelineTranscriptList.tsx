@@ -21,6 +21,7 @@ interface TimelineTranscriptListProps {
   onOpenActions?: (transcription: Transcription) => void;
   onCloseActions?: () => void;
   onFollowUpConsumed?: () => void;
+  onFollowUpFocusChange?: (isFocused: boolean) => void;
   onBedrockHistoryChange?: (transcriptionId: string, history: ConversationHistory) => void;
 }
 
@@ -33,6 +34,7 @@ export default function TimelineTranscriptList({
   onOpenActions,
   onCloseActions,
   onFollowUpConsumed,
+  onFollowUpFocusChange,
   onBedrockHistoryChange
 }: TimelineTranscriptListProps) {
   const { theme } = useThemeStore();
@@ -185,6 +187,7 @@ export default function TimelineTranscriptList({
                     onOpenActions={() => onOpenActions?.(transcription)}
                     onCloseActions={onCloseActions}
                     onFollowUpConsumed={onFollowUpConsumed}
+                    onFollowUpFocusChange={showActions ? onFollowUpFocusChange : undefined}
                     bedrockHistory={transcription.bedrockHistory}
                     onBedrockHistoryChange={(history) => onBedrockHistoryChange?.(transcription.id, history)}
                   />

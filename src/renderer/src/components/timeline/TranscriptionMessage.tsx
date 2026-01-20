@@ -24,6 +24,7 @@ interface TranscriptionMessageProps {
   onCloseActions?: () => void;
   newFollowUpTranscript?: string;
   onFollowUpConsumed?: () => void;
+  onFollowUpFocusChange?: (isFocused: boolean) => void;
   bedrockHistory?: BedrockConversationHistory;
   onBedrockHistoryChange?: (history: ConversationHistory) => void;
 }
@@ -40,6 +41,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   onCloseActions,
   newFollowUpTranscript,
   onFollowUpConsumed,
+  onFollowUpFocusChange,
   bedrockHistory,
   onBedrockHistoryChange
 }: TranscriptionMessageProps) {
@@ -120,6 +122,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
           onClose={showActions ? () => onCloseActions?.() : undefined}
           newTranscript={newFollowUpTranscript}
           onTranscriptConsumed={onFollowUpConsumed}
+          onFollowUpFocusChange={onFollowUpFocusChange}
           initialHistory={bedrockHistory}
           onHistoryChange={onBedrockHistoryChange}
           initiallyCollapsed={!showActions && !!bedrockHistory}

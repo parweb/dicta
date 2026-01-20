@@ -34,6 +34,7 @@ const HomePage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [activeActionsTranscriptionId, setActiveActionsTranscriptionId] = useState<string | null>(null);
   const [actionsFollowUpTranscript, setActionsFollowUpTranscript] = useState<string | undefined>(undefined);
+  const [isFollowUpFocused, setIsFollowUpFocused] = useState(false);
 
   const hasRedirectedRef = useRef(false);
 
@@ -85,9 +86,9 @@ const HomePage = () => {
       console.log('[HOME] Transcription result:', result);
 
       if (result.text) {
-        // If actions are open, send transcription as follow-up
-        if (activeActionsTranscriptionId) {
-          console.log('[HOME] Actions are open, sending transcription as follow-up');
+        // If actions are open AND follow-up field has focus, send transcription as follow-up
+        if (activeActionsTranscriptionId && isFollowUpFocused) {
+          console.log('[HOME] Follow-up field has focus, sending transcription to follow-up');
           setActionsFollowUpTranscript(result.text);
         } else {
           // Normal flow: transcription saved and list will auto-update
@@ -104,6 +105,7 @@ const HomePage = () => {
     analyzeAudio,
     transcribeAudio,
     activeActionsTranscriptionId,
+    isFollowUpFocused,
     navigateTo,
     setCurrentTranscriptionId
   ]);
@@ -145,6 +147,7 @@ const HomePage = () => {
   const handleCloseActions = useCallback(() => {
     setActiveActionsTranscriptionId(null);
     setActionsFollowUpTranscript(undefined);
+    setIsFollowUpFocused(false);
   }, []);
 
   const handleBedrockHistoryChange = useCallback(
@@ -261,6 +264,7 @@ const HomePage = () => {
               onOpenActions={handleOpenActions}
               onCloseActions={handleCloseActions}
               onFollowUpConsumed={() => setActionsFollowUpTranscript(undefined)}
+              onFollowUpFocusChange={setIsFollowUpFocused}
               onBedrockHistoryChange={handleBedrockHistoryChange}
             />
 
