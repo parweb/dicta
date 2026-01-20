@@ -1,8 +1,10 @@
 import { BarChart3, History, Settings } from 'lucide-react';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode } from 'react';
 
 import type { Transcription } from '../lib/history';
 import { useThemeStore } from '@/hooks/useThemeStore';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/lib/variants';
 import HistorySidebar from './HistorySidebar';
 
 interface LayoutProps {
@@ -27,135 +29,33 @@ const Layout = ({
   onSelectTranscription
 }: LayoutProps) => {
   const { theme } = useThemeStore();
-  const { colors, spacing, components } = theme;
-
-  // Memoize button styles that depend on currentView
-  const statisticsButtonStyle = useMemo(
-    () =>
-      ({
-        ...components.button.base,
-        ...components.button.icon,
-        ...(currentView === 'statistics' && {
-          backgroundColor: colors.text.primary,
-          borderRadius: '50%',
-          padding: spacing.sm
-        })
-      }) as React.CSSProperties,
-    [
-      components.button.base,
-      components.button.icon,
-      currentView,
-      colors.text.primary,
-      spacing.sm
-    ]
-  );
-
-  const settingsButtonStyle = useMemo(
-    () =>
-      ({
-        ...components.button.base,
-        ...components.button.icon,
-        ...(currentView === 'settings' && {
-          backgroundColor: colors.text.primary,
-          borderRadius: '50%',
-          padding: spacing.sm
-        })
-      }) as React.CSSProperties,
-    [
-      components.button.base,
-      components.button.icon,
-      currentView,
-      colors.text.primary,
-      spacing.sm
-    ]
-  );
-
-  const historyButtonStyle = useMemo(
-    () =>
-      ({
-        ...components.button.base,
-        ...components.button.icon
-      }) as React.CSSProperties,
-    [components.button.base, components.button.icon]
-  );
-
-  // Memoize sidebar container style that depends on isHistoryOpen
-  const sidebarContainerStyle = useMemo(
-    () => ({
-      position: 'fixed' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      isolation: 'isolate' as const,
-      zIndex: 1,
-      pointerEvents: (isHistoryOpen ? 'auto' : 'none') as 'auto' | 'none'
-    }),
-    [isHistoryOpen]
-  );
+  const { colors, spacing } = theme;
 
   return (
     <>
       {/* Main layout context */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          isolation: 'isolate',
-          zIndex: 0
-        }}
-      >
+      <div className="fixed inset-0 isolate z-0">
         {/* Draggable area - entire window */}
         <div
-          style={
-            {
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 0,
-              WebkitAppRegion: 'drag'
-            } as React.CSSProperties
-          }
+          className="fixed inset-0 z-0"
+          style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         />
 
         {/* Background */}
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: colors.background.primary,
-            zIndex: 1
-          }}
+          className="fixed inset-0 z-[1]"
+          style={{ backgroundColor: colors.background.primary }}
         />
 
         {/* Content */}
-        <div
-          style={{
-            position: 'relative',
-            width: '100%',
-            height: '100vh',
-            zIndex: 2
-          }}
-        >
-          {children}
-        </div>
+        <div className="relative w-full h-screen z-[2]">{children}</div>
 
         {/* Top left buttons */}
         <div
+          className="fixed z-[3] flex"
           style={{
-            position: 'fixed',
             top: spacing.md,
             left: spacing.md,
-            zIndex: 3,
-            display: 'flex',
             gap: spacing.sm,
             WebkitAppRegion: 'no-drag'
           }}
@@ -163,7 +63,7 @@ const Layout = ({
           {/* History toggle button */}
           <button
             onClick={onHistoryToggle}
-            style={historyButtonStyle}
+            className={cn(buttonVariants({ variant: 'icon', size: 'icon' }))}
             title="Historique"
           >
             <History size={18} color={colors.text.primary} />
@@ -172,7 +72,16 @@ const Layout = ({
           {/* Statistics button */}
           <button
             onClick={() => onViewChange('statistics')}
-            style={statisticsButtonStyle}
+            className={cn(
+              buttonVariants({ variant: 'icon', size: 'icon' }),
+              currentView === 'statistics' && 'rounded-full',
+              currentView === 'statistics' && `p-[${spacing.sm}px]`
+            )}
+            style={
+              currentView === 'statistics'
+                ? { backgroundColor: colors.text.primary }
+                : undefined
+            }
             title="Statistiques"
           >
             <BarChart3
@@ -188,7 +97,16 @@ const Layout = ({
           {/* Settings button */}
           <button
             onClick={() => onViewChange('settings')}
-            style={settingsButtonStyle}
+            className={cn(
+              buttonVariants({ variant: 'icon', size: 'icon' }),
+              currentView === 'settings' && 'rounded-full',
+              currentView === 'settings' && `p-[${spacing.sm}px]`
+            )}
+            style={
+              currentView === 'settings'
+                ? { backgroundColor: colors.text.primary }
+                : undefined
+            }
             title="Paramètres"
           >
             <Settings
@@ -204,7 +122,10 @@ const Layout = ({
       </div>
 
       {/* Sidebar context - isolated and above main layout */}
-      <div style={sidebarContainerStyle}>
+      <div
+        className="fixed inset-0 isolate z-[1]"
+        style={{ pointerEvents: isHistoryOpen ? 'auto' : 'none' }}
+      >
         <HistorySidebar
           isOpen={isHistoryOpen}
           onClose={onHistoryClose}
