@@ -43,7 +43,7 @@ export default function TimelineTranscriptList({
       setCurrentIndex(transcriptions.length - 1)
       virtualizer.scrollToIndex(transcriptions.length - 1, {
         align: 'end',
-        behavior: 'smooth'
+        behavior: 'auto'
       })
     }
   }, [transcriptions.length, virtualizer])
