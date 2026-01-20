@@ -22,6 +22,7 @@ interface BedrockAgentInlineProps {
   onTranscriptConsumed?: () => void
   initialHistory?: BedrockConversationHistory
   onHistoryChange?: (history: ConversationHistory) => void
+  initiallyCollapsed?: boolean
 }
 
 export default function BedrockAgentInline({
@@ -30,7 +31,8 @@ export default function BedrockAgentInline({
   newTranscript,
   onTranscriptConsumed,
   initialHistory,
-  onHistoryChange
+  onHistoryChange,
+  initiallyCollapsed = false
 }: BedrockAgentInlineProps) {
   const { theme } = useThemeStore()
   const { hasCredentials } = useBedrock()
@@ -45,7 +47,7 @@ export default function BedrockAgentInline({
   } = useBedrockAgent()
 
   const [followUpPrompt, setFollowUpPrompt] = useState('')
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed)
   const followUpInputRef = useRef<HTMLTextAreaElement>(null)
   const hasCalledHistoryChange = useRef(false)
   const hasInitialExecuted = useRef(false)

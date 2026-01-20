@@ -110,44 +110,11 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
         <p className="message-text">{text}</p>
       </div>
 
-      {/* Bedrock History Indicator (when not showing active actions) */}
-      {!showActions && bedrockHistory && bedrockHistory.toolsExecuted.length > 0 && onOpenActions && (
-        <div style={{ padding: '0 16px', marginTop: '8px' }}>
-          <button
-            onClick={onOpenActions}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              borderRadius: '6px',
-              color: 'rgb(96, 165, 250)',
-              fontSize: '14px',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s',
-              width: '100%'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'
-            }}
-          >
-            <Sparkles size={14} />
-            <span>{bedrockHistory.toolsExecuted.length} action(s) exécutée(s)</span>
-            <span style={{ fontSize: '12px', color: 'rgb(148, 163, 184)' }}>• Cliquer pour voir</span>
-          </button>
-        </div>
-      )}
-
       {/* Terminal-style border accent */}
       <div className="message-accent" />
 
-      {/* Bedrock Agent Inline */}
-      {showActions && (
+      {/* Bedrock Agent Inline - shown when actions active OR when history exists */}
+      {(showActions || bedrockHistory) && (
         <BedrockAgentInline
           transcriptContext={text}
           onClose={() => onCloseActions?.()}
@@ -155,6 +122,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
           onTranscriptConsumed={onFollowUpConsumed}
           initialHistory={bedrockHistory}
           onHistoryChange={onBedrockHistoryChange}
+          initiallyCollapsed={!showActions && !!bedrockHistory}
         />
       )}
     </div>
