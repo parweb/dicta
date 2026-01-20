@@ -1,5 +1,5 @@
 import { BarChart3, History, Settings } from 'lucide-react';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 
 import type { Transcription } from '../lib/history';
 import { useTheme } from '../lib/theme-context';
@@ -28,6 +28,71 @@ const Layout = ({
 }: LayoutProps) => {
   const { theme } = useTheme();
   const { colors, spacing, components } = theme;
+
+  // Memoize button styles that depend on currentView
+  const statisticsButtonStyle = useMemo(
+    () =>
+      ({
+        ...components.button.base,
+        ...components.button.icon,
+        ...(currentView === 'statistics' && {
+          backgroundColor: colors.text.primary,
+          borderRadius: '50%',
+          padding: spacing.sm
+        })
+      }) as React.CSSProperties,
+    [
+      components.button.base,
+      components.button.icon,
+      currentView,
+      colors.text.primary,
+      spacing.sm
+    ]
+  );
+
+  const settingsButtonStyle = useMemo(
+    () =>
+      ({
+        ...components.button.base,
+        ...components.button.icon,
+        ...(currentView === 'settings' && {
+          backgroundColor: colors.text.primary,
+          borderRadius: '50%',
+          padding: spacing.sm
+        })
+      }) as React.CSSProperties,
+    [
+      components.button.base,
+      components.button.icon,
+      currentView,
+      colors.text.primary,
+      spacing.sm
+    ]
+  );
+
+  const historyButtonStyle = useMemo(
+    () =>
+      ({
+        ...components.button.base,
+        ...components.button.icon
+      }) as React.CSSProperties,
+    [components.button.base, components.button.icon]
+  );
+
+  // Memoize sidebar container style that depends on isHistoryOpen
+  const sidebarContainerStyle = useMemo(
+    () => ({
+      position: 'fixed' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      isolation: 'isolate' as const,
+      zIndex: 1,
+      pointerEvents: (isHistoryOpen ? 'auto' : 'none') as 'auto' | 'none'
+    }),
+    [isHistoryOpen]
+  );
 
   return (
     <>
@@ -98,12 +163,7 @@ const Layout = ({
           {/* History toggle button */}
           <button
             onClick={onHistoryToggle}
-            style={
-              {
-                ...components.button.base,
-                ...components.button.icon
-              } as React.CSSProperties
-            }
+            style={historyButtonStyle}
             title="Historique"
           >
             <History size={18} color={colors.text.primary} />
@@ -112,17 +172,7 @@ const Layout = ({
           {/* Statistics button */}
           <button
             onClick={() => onViewChange('statistics')}
-            style={
-              {
-                ...components.button.base,
-                ...components.button.icon,
-                ...(currentView === 'statistics' && {
-                  backgroundColor: colors.text.primary,
-                  borderRadius: '50%',
-                  padding: spacing.sm
-                })
-              } as React.CSSProperties
-            }
+            style={statisticsButtonStyle}
             title="Statistiques"
           >
             <BarChart3
@@ -138,17 +188,7 @@ const Layout = ({
           {/* Settings button */}
           <button
             onClick={() => onViewChange('settings')}
-            style={
-              {
-                ...components.button.base,
-                ...components.button.icon,
-                ...(currentView === 'settings' && {
-                  backgroundColor: colors.text.primary,
-                  borderRadius: '50%',
-                  padding: spacing.sm
-                })
-              } as React.CSSProperties
-            }
+            style={settingsButtonStyle}
             title="Paramètres"
           >
             <Settings
@@ -164,18 +204,7 @@ const Layout = ({
       </div>
 
       {/* Sidebar context - isolated and above main layout */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          isolation: 'isolate',
-          zIndex: 1,
-          pointerEvents: isHistoryOpen ? 'auto' : 'none'
-        }}
-      >
+      <div style={sidebarContainerStyle}>
         <HistorySidebar
           isOpen={isHistoryOpen}
           onClose={onHistoryClose}
