@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApiKey } from '../../lib/api-key-context'
+import { useApiKeyStore } from '../../hooks/useApiKeyStore'
 import { useTheme } from '../../lib/theme-context'
 import ApiKeyViewMode from './model/ApiKeyViewMode'
 import ApiKeyEditForm from './model/ApiKeyEditForm'
@@ -8,7 +8,7 @@ import DeleteConfirmModal from './shared/DeleteConfirmModal'
 export default function ModelSettings() {
   const { theme } = useTheme()
   const { colors, spacing, typography } = theme
-  const { hasApiKey, saveApiKey, deleteApiKey } = useApiKey()
+  const { hasApiKey, saveApiKey, deleteApiKey } = useApiKeyStore()
 
   const [isEditing, setIsEditing] = useState(!hasApiKey)
   const [inputValue, setInputValue] = useState('')

@@ -20,7 +20,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useNavigation } from '@/hooks/useNavigation';
 import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
-import { useApiKey } from '@/lib/api-key-context';
+import { useApiKeyStore } from '@/hooks/useApiKeyStore';
 import type { Transcription } from '@/lib/history';
 import { useTheme } from '@/lib/theme-context';
 
@@ -41,7 +41,7 @@ const HomePage = () => {
 
   // Use theme and API key hooks
   const { theme } = useTheme();
-  const { apiKey, hasApiKey, isLoading: isApiKeyLoading } = useApiKey();
+  const { apiKey, hasApiKey, isLoading: isApiKeyLoading } = useApiKeyStore();
 
   // Use custom hooks
   const {
