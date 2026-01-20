@@ -52,6 +52,7 @@ const HomePage = () => {
 
   const {
     allTranscriptions,
+    currentTranscriptionId,
     navigateTranscription,
     setCurrentTranscriptionId,
     reloadTranscriptions
