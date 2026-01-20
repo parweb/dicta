@@ -334,8 +334,8 @@ app.whenReady().then(() => {
         const tenYearsAgo = now - (years * 365 * 24 * 60 * 60 * 1000);
         const transcriptions = [];
 
-        // Target: generate ~8000 transcriptions over 10 years
-        const targetCount = 100*365*years;
+        // Target: generate ~36k transcriptions over 10 years (10 per day - reasonable for testing)
+        const targetCount = 10*365*years;
         const duplications = Math.ceil(targetCount / realTranscriptions.length);
 
         for (let duplicationIndex = 0; duplicationIndex < duplications; duplicationIndex++) {
@@ -367,10 +367,28 @@ app.whenReady().then(() => {
               timestamp -= Math.random() * (30 * 24 * 60 * 60 * 1000);
             }
 
+            // AGGRESSIVE MEMORY OPTIMIZATION:
+            // - Only include audioAmplitudes for recent items (last 2 weeks)
+            // - Truncate text for old items (>1 month) to 200 chars
+            const age = now - timestamp;
+            const twoWeeks = 14 * 24 * 60 * 60 * 1000;
+            const oneMonth = 30 * 24 * 60 * 60 * 1000;
+            const includeAmplitudes = age < twoWeeks || transcriptions.length < 100;
+
+            // Truncate old text to save memory (~60% reduction)
+            const text = age > oneMonth && originalTranscription.text.length > 200
+              ? originalTranscription.text.slice(0, 200) + '...'
+              : originalTranscription.text;
+
             transcriptions.push({
-              ...originalTranscription,
               id: `extrapolated-${duplicationIndex}-${index}-${timestamp}`,
-              timestamp: Math.floor(timestamp)
+              text,
+              timestamp: Math.floor(timestamp),
+              durationMs: originalTranscription.durationMs,
+              // Only include amplitudes for recent/visible items
+              ...(includeAmplitudes && originalTranscription.audioAmplitudes
+                ? { audioAmplitudes: originalTranscription.audioAmplitudes }
+                : {})
             });
           });
         }
