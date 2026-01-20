@@ -1,0 +1,126 @@
+/**
+ * Theme Store Hook
+ * Jotai-based replacement for ThemeContext
+ */
+
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useCallback, useEffect, useRef } from 'react'
+
+import type { PartialThemeConfig, ThemeConfig } from '@/lib/theme-schema'
+import { validateTheme } from '@/lib/theme-schema'
+import {
+  activePresetAtom,
+  baseThemeConfigAtom,
+  themeAtom,
+  type ViewType
+} from '@/lib/store'
+import { darkTheme, type PresetName } from '@/lib/theme-presets'
+import { mergeTheme } from '@/lib/theme-utils'
+
+export function useThemeStore() {
+  const theme = useAtomValue(themeAtom)
+  const [baseConfig, setBaseConfig] = useAtom(baseThemeConfigAtom)
+  const [activePreset, setActivePreset] = useAtom(activePresetAtom)
+  const saveTimerRef = useRef<NodeJS.Timeout>()
+
+  // Update theme with partial changes (deep merge)
+  const setTheme = useCallback(
+    (updates: PartialThemeConfig) => {
+      setBaseConfig((prev) => mergeTheme(prev, updates))
+      setActivePreset('custom')
+    },
+    [setBaseConfig, setActivePreset]
+  )
+
+  // Replace entire theme (used for presets)
+  const replaceTheme = useCallback(
+    (newTheme: ThemeConfig) => {
+      setBaseConfig(newTheme)
+    },
+    [setBaseConfig]
+  )
+
+  // Reset to default dark theme
+  const resetTheme = useCallback(async () => {
+    try {
+      await window.api?.theme.reset()
+      setBaseConfig(darkTheme)
+      setActivePreset('dark')
+      console.log('[THEME STORE] Theme reset to default')
+    } catch (error) {
+      console.error('[THEME STORE] Error resetting theme:', error)
+    }
+  }, [setBaseConfig, setActivePreset])
+
+  // Save theme to disk (with debounce)
+  const saveTheme = useCallback(
+    async (themeToSave?: ThemeConfig) => {
+      const config = themeToSave || baseConfig
+
+      // Validate before saving
+      const validation = validateTheme(config)
+      if (!validation.valid) {
+        console.error('[THEME STORE] Invalid theme:', validation.errors)
+        return { success: false, error: 'Invalid theme configuration' }
+      }
+
+      try {
+        const result = await window.api?.theme.save(config)
+        if (result?.success) {
+          console.log('[THEME STORE] Theme saved successfully')
+          return { success: true }
+        }
+        return { success: false, error: result?.error || 'Unknown error' }
+      } catch (error) {
+        console.error('[THEME STORE] Error saving theme:', error)
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        }
+      }
+    },
+    [baseConfig]
+  )
+
+  // Load theme from disk
+  const loadTheme = useCallback(async () => {
+    try {
+      const result = await window.api?.theme.load()
+      if (result?.success && result.theme) {
+        setBaseConfig(result.theme)
+        console.log('[THEME STORE] Theme loaded successfully')
+      }
+    } catch (error) {
+      console.error('[THEME STORE] Error loading theme:', error)
+    }
+  }, [setBaseConfig])
+
+  // Auto-save theme on changes (debounced)
+  useEffect(() => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current)
+    }
+
+    saveTimerRef.current = setTimeout(() => {
+      saveTheme()
+    }, 2000) // Save 2 seconds after last change
+
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+      }
+    }
+  }, [baseConfig, saveTheme])
+
+  return {
+    theme,
+    baseConfig,
+    activePreset,
+    setTheme,
+    replaceTheme,
+    resetTheme,
+    saveTheme,
+    loadTheme,
+    setActivePreset
+  }
+}
