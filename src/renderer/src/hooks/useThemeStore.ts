@@ -57,11 +57,17 @@ export function useThemeStore() {
     async (themeToSave?: ThemeConfig) => {
       const config = themeToSave || baseConfig
 
+      // Don't save if config is undefined
+      if (!config) {
+        console.warn('[THEME STORE] Cannot save undefined theme')
+        return { success: false, error: 'Theme configuration is undefined' }
+      }
+
       // Validate before saving
       const validation = validateTheme(config)
-      if (!validation.valid) {
-        console.error('[THEME STORE] Invalid theme:', validation.errors)
-        return { success: false, error: 'Invalid theme configuration' }
+      if (!validation.success) {
+        console.error('[THEME STORE] Invalid theme:', validation.error)
+        return { success: false, error: validation.error }
       }
 
       try {
