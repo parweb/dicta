@@ -160,20 +160,10 @@ const HomePage = () => {
     >
       <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
 
-      <Suspense
-        fallback={
-          <div className="text-muted-foreground flex h-full items-center justify-center">
-            Loading...
-          </div>
-        }
-      >
-        <AnimatedView viewKey={currentView}>
-          {currentView === 'statistics' ? (
-            <Statistics />
-          ) : currentView === 'settings' ? (
-            <Settings defaultTab={settingsTab} />
-          ) : showApiKeyBanner ? (
-            <div
+      {/* Home view - always rendered */}
+      <AnimatedView viewKey="home">
+        {showApiKeyBanner ? (
+          <div
             style={{
               width: '100%',
               height: '100vh',
@@ -231,45 +221,58 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-          ) : (
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: '100vh',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              paddingTop: theme.spacing['4xl']
+            }}
+          >
+            {/* Timeline List */}
+            <TimelineTranscriptList
+              transcriptions={allTranscriptions}
+              onCopyTranscript={handleCopyTranscript}
+              onOpenActions={handleOpenActions}
+            />
+
+            {/* Fixed Record Button at Bottom */}
             <div
               style={{
-                width: '100%',
-                height: '100vh',
+                padding: theme.spacing.xl,
                 display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-                paddingTop: theme.spacing['4xl']
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: theme.colors.background.primary,
+                borderTop: `1px solid ${theme.colors.border.primary}`
               }}
             >
-              {/* Timeline List */}
-              <TimelineTranscriptList
-                transcriptions={allTranscriptions}
-                onCopyTranscript={handleCopyTranscript}
-                onOpenActions={handleOpenActions}
+              <RecordButton
+                isRecording={isRecording}
+                isLoading={isLoading}
+                onMouseDown={startRecording}
+                onMouseUp={stopRecording}
               />
-
-              {/* Fixed Record Button at Bottom */}
-              <div
-                style={{
-                  padding: theme.spacing.xl,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: theme.colors.background.primary,
-                  borderTop: `1px solid ${theme.colors.border.primary}`
-                }}
-              >
-                <RecordButton
-                  isRecording={isRecording}
-                  isLoading={isLoading}
-                  onMouseDown={startRecording}
-                  onMouseUp={stopRecording}
-                />
-              </div>
             </div>
-          )}
-        </AnimatedView>
+          </div>
+        )}
+      </AnimatedView>
+
+      {/* Overlay panels - Statistics and Settings */}
+      <Suspense fallback={null}>
+        {currentView === 'statistics' && (
+          <AnimatedView viewKey="statistics">
+            <Statistics />
+          </AnimatedView>
+        )}
+        {currentView === 'settings' && (
+          <AnimatedView viewKey="settings">
+            <Settings defaultTab={settingsTab} />
+          </AnimatedView>
+        )}
       </Suspense>
 
       {/* Bedrock Agent Drawer */}

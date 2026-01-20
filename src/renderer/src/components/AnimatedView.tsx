@@ -1,6 +1,8 @@
 /**
  * Animated View Component
  * Handles smooth transitions between different views
+ * - Home: stays static, no animation
+ * - Statistics/Settings: slide up/down as overlay panels
  */
 
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,38 +13,55 @@ interface AnimatedViewProps {
   viewKey: string
 }
 
-const pageVariants = {
+// Panel variants for Statistics and Settings (slide up from bottom)
+const panelVariants = {
   initial: {
-    opacity: 0,
-    scale: 0.98,
-    y: 10
+    y: '100%'
   },
   enter: {
-    opacity: 1,
-    scale: 1,
     y: 0,
     transition: {
-      duration: 0.25,
+      duration: 0.3,
       ease: [0.22, 1, 0.36, 1] // Custom easing for smooth feel
     }
   },
   exit: {
-    opacity: 0,
-    scale: 0.98,
-    y: -10,
+    y: '100%',
     transition: {
-      duration: 0.2,
+      duration: 0.25,
       ease: [0.22, 1, 0.36, 1]
     }
   }
 }
 
 export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
+  const isOverlayView = viewKey === 'statistics' || viewKey === 'settings'
+
+  // Home view: no animation, just stays in place
+  if (viewKey === 'home') {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
+        }}
+      >
+        {children}
+      </div>
+    )
+  }
+
+  // Statistics/Settings: slide up/down panel
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={viewKey}
-        variants={pageVariants}
+        variants={panelVariants}
         initial="initial"
         animate="enter"
         exit="exit"
@@ -53,7 +72,8 @@ export default function AnimatedView({ children, viewKey }: AnimatedViewProps) {
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0
+          bottom: 0,
+          zIndex: 10 // Overlay above home
         }}
       >
         {children}
