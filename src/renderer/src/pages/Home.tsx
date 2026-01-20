@@ -8,6 +8,7 @@ import {
   useState
 } from 'react';
 
+import AnimatedView from '@/components/AnimatedView';
 import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
 import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
 import RecordButton from '@/components/home/RecordButton';
@@ -16,6 +17,7 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useNavigation } from '@/hooks/useNavigation';
 import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
 import { useApiKey } from '@/lib/api-key-context';
@@ -31,12 +33,11 @@ const HomePage = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerFollowUpTranscript, setDrawerFollowUpTranscript] = useState<string | undefined>(undefined);
-  const [currentView, setCurrentView] = useState<
-    'home' | 'statistics' | 'settings'
-  >('home');
-  const [settingsTab, setSettingsTab] = useState<'theme' | 'model'>('theme');
 
   const hasRedirectedRef = useRef(false);
+
+  // Use navigation hook
+  const { currentView, settingsTab, navigateTo } = useNavigation();
 
   // Use theme and API key hooks
   const { theme } = useTheme();
@@ -65,7 +66,7 @@ const HomePage = () => {
 
     // Switch to home view and close sidebar when starting recording (unless drawer is open)
     if (!isDrawerOpen) {
-      setCurrentView('home');
+      navigateTo('home');
       setIsHistoryOpen(false);
     }
 
@@ -97,7 +98,8 @@ const HomePage = () => {
     analyzeAudio,
     transcribeAudio,
     apiKey,
-    isDrawerOpen
+    isDrawerOpen,
+    navigateTo
   ]);
 
   const stopRecording = useCallback(() => {
@@ -118,10 +120,9 @@ const HomePage = () => {
   useEffect(() => {
     if (!isApiKeyLoading && !hasApiKey && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
-      setCurrentView('settings');
-      setSettingsTab('model');
+      navigateTo('settings', 'model');
     }
-  }, [isApiKeyLoading, hasApiKey]);
+  }, [isApiKeyLoading, hasApiKey, navigateTo]);
 
   // Calculate whether to show API key banner
   const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home' && hasRedirectedRef.current;
@@ -140,16 +141,16 @@ const HomePage = () => {
       setTranscript(transcription.text);
       setCurrentTranscriptionId(transcription.id);
       setIsHistoryOpen(false);
-      setCurrentView('home');
+      navigateTo('home');
     },
-    [setCurrentTranscriptionId]
+    [setCurrentTranscriptionId, navigateTo]
   );
 
   return (
     <Layout
       currentView={currentView}
       onViewChange={value =>
-        setCurrentView(value === currentView ? 'home' : value)
+        navigateTo(value === currentView ? 'home' : value)
       }
       onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
       onHistoryClose={() => setIsHistoryOpen(false)}
@@ -166,12 +167,13 @@ const HomePage = () => {
           </div>
         }
       >
-        {currentView === 'statistics' ? (
-          <Statistics />
-        ) : currentView === 'settings' ? (
-          <Settings defaultTab={settingsTab} />
-        ) : showApiKeyBanner ? (
-          <div
+        <AnimatedView viewKey={currentView}>
+          {currentView === 'statistics' ? (
+            <Statistics />
+          ) : currentView === 'settings' ? (
+            <Settings defaultTab={settingsTab} />
+          ) : showApiKeyBanner ? (
+            <div
             style={{
               width: '100%',
               height: '100vh',
@@ -220,10 +222,7 @@ const HomePage = () => {
                     vocale
                   </p>
                   <Button
-                    onClick={() => {
-                      setCurrentView('settings');
-                      setSettingsTab('model');
-                    }}
+                    onClick={() => navigateTo('settings', 'model')}
                     size="sm"
                   >
                     Configurer maintenant
@@ -232,44 +231,45 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              paddingTop: theme.spacing['4xl']
-            }}
-          >
-            {/* Timeline List */}
-            <TimelineTranscriptList
-              transcriptions={allTranscriptions}
-              onCopyTranscript={handleCopyTranscript}
-              onOpenActions={handleOpenActions}
-            />
-
-            {/* Fixed Record Button at Bottom */}
+          ) : (
             <div
               style={{
-                padding: theme.spacing.xl,
+                width: '100%',
+                height: '100vh',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.colors.background.primary,
-                borderTop: `1px solid ${theme.colors.border.primary}`
+                flexDirection: 'column',
+                position: 'relative',
+                paddingTop: theme.spacing['4xl']
               }}
             >
-              <RecordButton
-                isRecording={isRecording}
-                isLoading={isLoading}
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
+              {/* Timeline List */}
+              <TimelineTranscriptList
+                transcriptions={allTranscriptions}
+                onCopyTranscript={handleCopyTranscript}
+                onOpenActions={handleOpenActions}
               />
+
+              {/* Fixed Record Button at Bottom */}
+              <div
+                style={{
+                  padding: theme.spacing.xl,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: theme.colors.background.primary,
+                  borderTop: `1px solid ${theme.colors.border.primary}`
+                }}
+              >
+                <RecordButton
+                  isRecording={isRecording}
+                  isLoading={isLoading}
+                  onMouseDown={startRecording}
+                  onMouseUp={stopRecording}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatedView>
       </Suspense>
 
       {/* Bedrock Agent Drawer */}
