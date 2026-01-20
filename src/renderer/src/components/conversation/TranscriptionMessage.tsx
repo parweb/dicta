@@ -1,11 +1,15 @@
 /**
  * Transcription Message Component
  * Displays a transcription in conversation format with waveform
+ * OPTIMIZED with React.memo to prevent unnecessary re-renders
  */
 
+import { memo, useMemo } from 'react'
 import { Copy, Sparkles } from 'lucide-react'
 import { useTheme } from '@/lib/theme-context'
 import AudioWaveform from '../AudioWaveform'
+import { formatDistanceToNow, format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface TranscriptionMessageProps {
   text: string
@@ -16,7 +20,7 @@ interface TranscriptionMessageProps {
   onOpenActions?: () => void
 }
 
-export default function TranscriptionMessage({
+const TranscriptionMessage = memo(function TranscriptionMessage({
   text,
   audioAmplitudes = [],
   audioDuration,
@@ -27,10 +31,21 @@ export default function TranscriptionMessage({
   const { theme } = useTheme()
   const { colors, spacing, typography } = theme
 
-  const formattedTime = new Date(timestamp).toLocaleTimeString('fr-FR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  // Memoize date/time formatting with relative time for recent items
+  const formattedTime = useMemo(() => {
+    const date = new Date(timestamp)
+    const now = Date.now()
+    const age = now - timestamp
+    const oneDay = 24 * 60 * 60 * 1000
+
+    // If less than 24 hours ago, show relative time
+    if (age < oneDay) {
+      return formatDistanceToNow(date, { addSuffix: true, locale: fr })
+    }
+
+    // Otherwise show full date + time
+    return format(date, 'dd MMM yyyy à HH:mm', { locale: fr })
+  }, [timestamp])
 
   return (
     <div
@@ -164,4 +179,6 @@ export default function TranscriptionMessage({
       </div>
     </div>
   )
-}
+})
+
+export default TranscriptionMessage
