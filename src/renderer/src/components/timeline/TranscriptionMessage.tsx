@@ -8,7 +8,6 @@ import { Copy, Sparkles } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
 import BedrockAgentInline from '../bedrock/BedrockAgentInline';
-import BedrockHistoryDisplay from '../bedrock/BedrockHistoryDisplay';
 import type { BedrockConversationHistory } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TranscriptionMessage.css';
@@ -27,7 +26,6 @@ interface TranscriptionMessageProps {
   onFollowUpConsumed?: () => void;
   bedrockHistory?: BedrockConversationHistory;
   onBedrockHistoryChange?: (history: ConversationHistory) => void;
-  historyDisplayVariant?: string;
 }
 
 const TranscriptionMessage = memo(function TranscriptionMessage({
@@ -43,8 +41,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   newFollowUpTranscript,
   onFollowUpConsumed,
   bedrockHistory,
-  onBedrockHistoryChange,
-  historyDisplayVariant = 'accordion'
+  onBedrockHistoryChange
 }: TranscriptionMessageProps) {
   const { theme } = useThemeStore();
 
@@ -114,13 +111,35 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
       </div>
 
       {/* Bedrock History Indicator (when not showing active actions) */}
-      {!showActions && bedrockHistory && bedrockHistory.toolsExecuted.length > 0 && (
-        <div style={{ padding: '0 16px' }}>
-          <BedrockHistoryDisplay
-            history={bedrockHistory}
-            variant={historyDisplayVariant}
+      {!showActions && bedrockHistory && bedrockHistory.toolsExecuted.length > 0 && onOpenActions && (
+        <div style={{ padding: '0 16px', marginTop: '8px' }}>
+          <button
             onClick={onOpenActions}
-          />
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              borderRadius: '6px',
+              color: 'rgb(96, 165, 250)',
+              fontSize: '14px',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+              width: '100%'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.2)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'
+            }}
+          >
+            <Sparkles size={14} />
+            <span>{bedrockHistory.toolsExecuted.length} action(s) exécutée(s)</span>
+            <span style={{ fontSize: '12px', color: 'rgb(148, 163, 184)' }}>• Cliquer pour voir</span>
+          </button>
         </div>
       )}
 
