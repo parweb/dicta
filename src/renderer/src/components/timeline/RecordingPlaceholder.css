@@ -102,6 +102,10 @@
   margin-bottom: 16px;
 }
 
+.waveform-container::-webkit-scrollbar {
+  display: none;
+}
+
 .waveform-bar {
   animation: bar-grow 0.2s ease-out;
 }

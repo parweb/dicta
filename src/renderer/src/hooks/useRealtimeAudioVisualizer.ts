@@ -52,34 +52,36 @@ export function useRealtimeAudioVisualizer(
 
     console.log('[VISUALIZER] Analyser setup complete, bufferLength:', bufferLength);
 
+    // Throttle updates to ~20 times per second for better visual accumulation
+    let lastUpdateTime = 0;
+    const updateInterval = 50; // 50ms = 20 updates per second
+
     // Update amplitudes in real-time
-    const updateAmplitudes = () => {
+    const updateAmplitudes = (timestamp: number) => {
       if (!analyserRef.current) return;
 
-      analyser.getByteTimeDomainData(dataArray);
+      // Throttle updates
+      if (timestamp - lastUpdateTime >= updateInterval) {
+        lastUpdateTime = timestamp;
 
-      // Calculate RMS amplitude from time domain data
-      let sum = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
-        sum += normalized * normalized;
-      }
-      const rms = Math.sqrt(sum / bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
 
-      // Only update if amplitude is significant (avoid showing noise)
-      if (rms > 0.01) {
-        // Add new amplitude to array (keep last 50 values for smooth animation)
-        setAmplitudes(prev => {
-          const newAmplitudes = [...prev, rms];
-          // Keep only last 50 values to avoid memory issues
-          return newAmplitudes.slice(-50);
-        });
+        // Calculate RMS amplitude from time domain data
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const normalized = (dataArray[i] - 128) / 128; // Normalize to -1 to 1
+          sum += normalized * normalized;
+        }
+        const rms = Math.sqrt(sum / bufferLength);
+
+        // Add new amplitude to array (accumulate all values)
+        setAmplitudes(prev => [...prev, rms]);
       }
 
       animationFrameRef.current = requestAnimationFrame(updateAmplitudes);
     };
 
-    updateAmplitudes();
+    animationFrameRef.current = requestAnimationFrame(updateAmplitudes);
 
     // Cleanup on unmount or when recording stops
     return () => {
