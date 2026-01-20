@@ -97,6 +97,11 @@ export function useThemeStore() {
 
   // Auto-save theme on changes (debounced)
   useEffect(() => {
+    // Don't auto-save if baseConfig is undefined
+    if (!baseConfig) {
+      return
+    }
+
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current)
     }
@@ -110,7 +115,8 @@ export function useThemeStore() {
         clearTimeout(saveTimerRef.current)
       }
     }
-  }, [baseConfig, saveTheme])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseConfig]) // saveTheme deliberately omitted to avoid infinite loop
 
   return {
     theme,
