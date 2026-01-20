@@ -47,6 +47,7 @@ export default function BedrockAgentInline({
   const [followUpPrompt, setFollowUpPrompt] = useState('')
   const [isCollapsed, setIsCollapsed] = useState(false)
   const followUpInputRef = useRef<HTMLTextAreaElement>(null)
+  const hasCalledHistoryChange = useRef(false)
 
   // Load initial history if provided (restoring previous conversation)
   useEffect(() => {
@@ -81,24 +82,29 @@ export default function BedrockAgentInline({
 
   // Notify history changes when state updates
   useEffect(() => {
-    if (state.isComplete && onHistoryChange && conversationMessages.length > 0) {
+    if (state.isComplete && onHistoryChange && conversationMessages.length > 0 && !hasCalledHistoryChange.current) {
       console.log('[BEDROCK-INLINE] State complete, saving history')
       const history = getHistory()
       onHistoryChange(history)
+      hasCalledHistoryChange.current = true
+    } else if (!state.isComplete) {
+      // Reset flag when starting a new operation
+      hasCalledHistoryChange.current = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.isComplete, conversationMessages.length, onHistoryChange])
 
   // Handle close
   const handleClose = () => {
-    // Save history before closing
-    if (onHistoryChange && conversationMessages.length > 0) {
+    // Save history before closing (only if not already saved)
+    if (onHistoryChange && conversationMessages.length > 0 && !hasCalledHistoryChange.current) {
       console.log('[BEDROCK-INLINE] Closing, saving history')
       const history = getHistory()
       onHistoryChange(history)
     }
     reset()
     setFollowUpPrompt('')
+    hasCalledHistoryChange.current = false
     onClose()
   }
 

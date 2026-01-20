@@ -37,10 +37,8 @@ export async function updateTranscriptionWithBedrockHistory(
       await window.api?.history.save(updatedTranscription)
       console.log('[BEDROCK-HISTORY-UPDATER] Transcription saved successfully')
 
-      // Trigger history reload if callback provided
-      if (onHistoryUpdate) {
-        await onHistoryUpdate()
-      }
+      // Note: We don't need to reload all transcriptions here
+      // The file is updated on disk and will be loaded when needed
     } else {
       console.warn('[BEDROCK-HISTORY-UPDATER] Transcription not found:', transcriptionId)
     }
