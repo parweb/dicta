@@ -55,14 +55,34 @@ export default function TimelineTranscriptList({
   // Save amplitudes when recording stops to keep them during loading
   const [savedAmplitudes, setSavedAmplitudes] = useState<number[]>([]);
 
+  // Track the last transcription count to detect when new one is added
+  const lastTranscriptionCountRef = useRef(transcriptions.length);
+  const [shouldShowPlaceholder, setShouldShowPlaceholder] = useState(false);
+
+  // Show placeholder when recording or loading starts
+  useEffect(() => {
+    if (isRecording || isLoading) {
+      setShouldShowPlaceholder(true);
+    }
+  }, [isRecording, isLoading]);
+
+  // Hide placeholder when new transcription is added
+  useEffect(() => {
+    if (transcriptions.length > lastTranscriptionCountRef.current) {
+      setShouldShowPlaceholder(false);
+      lastTranscriptionCountRef.current = transcriptions.length;
+    }
+  }, [transcriptions.length]);
+
   // Reset start time when recording starts
   useEffect(() => {
     if (isRecording) {
       recordingStartTimeRef.current = Date.now();
       setRecordingDuration(0);
       setSavedAmplitudes([]); // Clear saved amplitudes when starting new recording
+      lastTranscriptionCountRef.current = transcriptions.length; // Update count reference
     }
-  }, [isRecording]);
+  }, [isRecording, transcriptions.length]);
 
   // Update recording duration while recording
   useEffect(() => {
@@ -84,7 +104,7 @@ export default function TimelineTranscriptList({
 
   // Create temporary transcription object during recording/loading
   const temporaryTranscription = useMemo<Transcription | null>(() => {
-    if (!isRecording && !isLoading) return null;
+    if (!shouldShowPlaceholder) return null;
 
     // Use savedAmplitudes during loading, realtimeAmplitudes during recording
     const amplitudes = isLoading ? savedAmplitudes : realtimeAmplitudes;
@@ -96,7 +116,7 @@ export default function TimelineTranscriptList({
       durationMs: recordingDuration,
       audioAmplitudes: amplitudes
     };
-  }, [isRecording, isLoading, recordingDuration, realtimeAmplitudes, savedAmplitudes]);
+  }, [shouldShowPlaceholder, isRecording, isLoading, recordingDuration, realtimeAmplitudes, savedAmplitudes]);
 
   // Virtualize the list for performance
   const virtualizer = useVirtualizer({
@@ -120,7 +140,7 @@ export default function TimelineTranscriptList({
 
   // Auto-scroll to bottom when recording starts (to show placeholder)
   useEffect(() => {
-    if ((isRecording || isLoading) && parentRef.current) {
+    if (shouldShowPlaceholder && parentRef.current) {
       // Use requestAnimationFrame to ensure DOM is updated
       requestAnimationFrame(() => {
         if (parentRef.current) {
@@ -131,7 +151,7 @@ export default function TimelineTranscriptList({
         }
       });
     }
-  }, [isRecording, isLoading]);
+  }, [shouldShowPlaceholder]);
 
   // Continuous scroll during recording as content grows
   useEffect(() => {
@@ -216,7 +236,7 @@ export default function TimelineTranscriptList({
           paddingRight: transcriptions.length > 0 ? '72px' : '20px'
         }}
       >
-        {transcriptions.length === 0 && !isRecording && !isLoading ? (
+        {transcriptions.length === 0 && !shouldShowPlaceholder ? (
           <div className="timeline-empty-state">
             <div className="empty-icon">
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -237,7 +257,7 @@ export default function TimelineTranscriptList({
         ) : (
           <div
             style={{
-              height: `${Math.max(virtualizer.getTotalSize(), (isRecording || isLoading) ? 200 : 0)}px`,
+              height: `${Math.max(virtualizer.getTotalSize(), shouldShowPlaceholder ? 200 : 0)}px`,
               width: '100%',
               position: 'relative'
             }}
