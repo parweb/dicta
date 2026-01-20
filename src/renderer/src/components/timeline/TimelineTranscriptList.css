@@ -1,4 +1,5 @@
 /* Voice Terminal - Timeline Transcript List Styles */
+/* Uses design system CSS variables for consistent theming */
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -53,8 +54,8 @@
 }
 
 .empty-icon {
-  margin-bottom: 24px;
-  color: #475569;
+  margin-bottom: var(--spacing-xl);
+  color: var(--color-border-secondary);
   animation: float 3s ease-in-out infinite;
 }
 
@@ -69,34 +70,34 @@
 
 .empty-title {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   font-weight: 700;
-  color: #94a3b8;
-  margin: 0 0 12px 0;
+  color: var(--color-text-tertiary);
+  margin: 0 0 var(--spacing-md) 0;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
 .empty-description {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   font-weight: 400;
-  color: #64748b;
-  margin: 0 0 24px 0;
+  color: var(--color-text-disabled);
+  margin: 0 0 var(--spacing-xl) 0;
   line-height: 1.6;
   max-width: 400px;
 }
 
 .kbd-key {
   display: inline-block;
-  padding: 4px 8px;
+  padding: var(--spacing-xs) var(--spacing-sm);
   background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(71, 85, 105, 0.4);
-  border-radius: 6px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--color-text-secondary);
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -106,14 +107,14 @@
 .empty-hint {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
   background: rgba(30, 41, 59, 0.3);
-  border: 1px solid rgba(71, 85, 105, 0.3);
-  border-radius: 8px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-md);
   font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  color: #94a3b8;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
   backdrop-filter: blur(8px);
 }
 
@@ -121,8 +122,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #06b6d4;
-  box-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+  background: var(--color-accent-primary);
+  box-shadow: 0 0 8px var(--color-accent-bg-hover);
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
