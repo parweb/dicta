@@ -9,7 +9,6 @@ import {
 } from 'react';
 
 import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
-import BedrockAgentDrawer from '@/components/bedrock/BedrockAgentDrawer';
 import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
 import RecordButton from '@/components/home/RecordButton';
 import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
@@ -31,8 +30,8 @@ const Settings = lazy(() => import('./Settings'));
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerFollowUpTranscript, setDrawerFollowUpTranscript] = useState<string | undefined>(undefined);
+  const [activeActionsTranscriptionId, setActiveActionsTranscriptionId] = useState<string | null>(null);
+  const [actionsFollowUpTranscript, setActionsFollowUpTranscript] = useState<string | undefined>(undefined);
 
   const hasRedirectedRef = useRef(false);
 
@@ -65,8 +64,8 @@ const HomePage = () => {
   const startRecording = useCallback(async () => {
     console.log('[HOME] ========== STARTING RECORDING ==========');
 
-    // Switch to home view and close sidebar when starting recording (unless drawer is open)
-    if (!isDrawerOpen) {
+    // Switch to home view and close sidebar when starting recording (unless actions are open)
+    if (!activeActionsTranscriptionId) {
       navigateTo('home');
       setIsHistoryOpen(false);
     }
@@ -84,10 +83,10 @@ const HomePage = () => {
       console.log('[HOME] Transcription result:', result);
 
       if (result.text) {
-        // If drawer is open, send transcription to drawer as follow-up
-        if (isDrawerOpen) {
-          console.log('[HOME] Drawer is open, sending transcription as follow-up');
-          setDrawerFollowUpTranscript(result.text);
+        // If actions are open, send transcription as follow-up
+        if (activeActionsTranscriptionId) {
+          console.log('[HOME] Actions are open, sending transcription as follow-up');
+          setActionsFollowUpTranscript(result.text);
         } else {
           // Normal flow: transcription saved and list will auto-update
           setTranscript(result.text);
@@ -102,7 +101,7 @@ const HomePage = () => {
     startAudioRecording,
     analyzeAudio,
     transcribeAudio,
-    isDrawerOpen,
+    activeActionsTranscriptionId,
     navigateTo,
     setCurrentTranscriptionId
   ]);
@@ -138,7 +137,12 @@ const HomePage = () => {
 
   const handleOpenActions = useCallback((transcription: Transcription) => {
     setTranscript(transcription.text);
-    setIsDrawerOpen(true);
+    setActiveActionsTranscriptionId(transcription.id);
+  }, []);
+
+  const handleCloseActions = useCallback(() => {
+    setActiveActionsTranscriptionId(null);
+    setActionsFollowUpTranscript(undefined);
   }, []);
 
   const handleSelectTranscription = useCallback(
@@ -241,8 +245,12 @@ const HomePage = () => {
             <TimelineTranscriptList
               transcriptions={allTranscriptions}
               currentTranscriptionId={currentTranscriptionId}
+              activeActionsTranscriptionId={activeActionsTranscriptionId}
+              actionsFollowUpTranscript={actionsFollowUpTranscript}
               onCopyTranscript={handleCopyTranscript}
               onOpenActions={handleOpenActions}
+              onCloseActions={handleCloseActions}
+              onFollowUpConsumed={() => setActionsFollowUpTranscript(undefined)}
             />
 
             {/* Fixed Record Button at Bottom */}
@@ -276,15 +284,6 @@ const HomePage = () => {
           {currentView === 'settings' && <Settings defaultTab={settingsTab} />}
         </Suspense>
       </OverlayPanels>
-
-      {/* Bedrock Agent Drawer */}
-      <BedrockAgentDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        transcriptContext={transcript}
-        newTranscript={drawerFollowUpTranscript}
-        onTranscriptConsumed={() => setDrawerFollowUpTranscript(undefined)}
-      />
     </Layout>
   );
 };

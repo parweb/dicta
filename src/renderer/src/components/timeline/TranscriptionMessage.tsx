@@ -7,6 +7,7 @@ import { memo } from 'react';
 import { Copy, Sparkles } from 'lucide-react';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import AudioWaveform from '../AudioWaveform';
+import BedrockAgentInline from '../bedrock/BedrockAgentInline';
 import './TranscriptionMessage.css';
 
 interface TranscriptionMessageProps {
@@ -15,8 +16,12 @@ interface TranscriptionMessageProps {
   audioDuration?: number;
   timestamp: number;
   isSelected?: boolean;
+  showActions?: boolean;
   onCopy?: () => void;
   onOpenActions?: () => void;
+  onCloseActions?: () => void;
+  newFollowUpTranscript?: string;
+  onFollowUpConsumed?: () => void;
 }
 
 const TranscriptionMessage = memo(function TranscriptionMessage({
@@ -25,8 +30,12 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   audioDuration,
   timestamp,
   isSelected = false,
+  showActions = false,
   onCopy,
-  onOpenActions
+  onOpenActions,
+  onCloseActions,
+  newFollowUpTranscript,
+  onFollowUpConsumed
 }: TranscriptionMessageProps) {
   const { theme } = useThemeStore();
 
@@ -97,6 +106,16 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
 
       {/* Terminal-style border accent */}
       <div className="message-accent" />
+
+      {/* Bedrock Agent Inline */}
+      {showActions && (
+        <BedrockAgentInline
+          transcriptContext={text}
+          onClose={() => onCloseActions?.()}
+          newTranscript={newFollowUpTranscript}
+          onTranscriptConsumed={onFollowUpConsumed}
+        />
+      )}
     </div>
   );
 });

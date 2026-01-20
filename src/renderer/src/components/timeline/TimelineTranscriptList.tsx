@@ -14,15 +14,23 @@ import './TimelineTranscriptList.css';
 interface TimelineTranscriptListProps {
   transcriptions: Transcription[];
   currentTranscriptionId?: string | null;
+  activeActionsTranscriptionId?: string | null;
+  actionsFollowUpTranscript?: string;
   onCopyTranscript?: (transcription: Transcription) => void;
   onOpenActions?: (transcription: Transcription) => void;
+  onCloseActions?: () => void;
+  onFollowUpConsumed?: () => void;
 }
 
 export default function TimelineTranscriptList({
   transcriptions,
   currentTranscriptionId,
+  activeActionsTranscriptionId,
+  actionsFollowUpTranscript,
   onCopyTranscript,
-  onOpenActions
+  onOpenActions,
+  onCloseActions,
+  onFollowUpConsumed
 }: TimelineTranscriptListProps) {
   const { theme } = useThemeStore();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -147,6 +155,7 @@ export default function TimelineTranscriptList({
             {virtualizer.getVirtualItems().map((virtualItem) => {
               const transcription = transcriptions[virtualItem.index];
               const isSelected = currentTranscriptionId === transcription.id;
+              const showActions = activeActionsTranscriptionId === transcription.id;
               return (
                 <div
                   key={virtualItem.key}
@@ -167,8 +176,12 @@ export default function TimelineTranscriptList({
                     audioDuration={transcription.durationMs}
                     timestamp={transcription.timestamp}
                     isSelected={isSelected}
+                    showActions={showActions}
+                    newFollowUpTranscript={showActions ? actionsFollowUpTranscript : undefined}
                     onCopy={() => onCopyTranscript?.(transcription)}
                     onOpenActions={() => onOpenActions?.(transcription)}
+                    onCloseActions={onCloseActions}
+                    onFollowUpConsumed={onFollowUpConsumed}
                   />
                 </div>
               );
