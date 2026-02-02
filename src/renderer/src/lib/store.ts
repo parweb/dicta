@@ -8,6 +8,12 @@ import { atomWithStorage } from 'jotai/utils'
 
 import type { ThemeConfig } from './theme-schema'
 import { darkTheme, type PresetName } from './theme-presets'
+import {
+  DEFAULT_OFFLINE_MODEL_ID,
+  DEFAULT_TRANSCRIPTION_MODE,
+  type OfflineModelId,
+  type TranscriptionMode
+} from './transcription-models'
 import { computeDerivedStyles } from './theme-utils'
 import type { Theme } from './theme-context'
 
@@ -21,6 +27,20 @@ export const isEncryptionAvailableAtom = atom(false)
 
 // Derived atom: hasApiKey
 export const hasApiKeyAtom = atom((get) => !!get(apiKeyAtom))
+
+// ============================================================================
+// TRANSCRIPTION SETTINGS ATOMS
+// ============================================================================
+
+export const transcriptionModeAtom = atomWithStorage<TranscriptionMode>(
+  'dicta-transcription-mode',
+  DEFAULT_TRANSCRIPTION_MODE
+)
+export const offlineModelIdAtom = atomWithStorage<OfflineModelId>(
+  'dicta-offline-model-id',
+  DEFAULT_OFFLINE_MODEL_ID
+)
+export const requiresApiKeyAtom = atom((get) => get(transcriptionModeAtom) === 'openai')
 
 // ============================================================================
 // THEME ATOMS

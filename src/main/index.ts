@@ -8,12 +8,16 @@ import {
   shell
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import { exec } from 'node:child_process';
+import { exec, execFile } from 'node:child_process';
+import { once } from 'node:events';
 import {
+  createWriteStream,
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
   readdirSync,
+  unlinkSync,
   writeFileSync
 } from 'node:fs';
 import { join } from 'node:path';
@@ -27,6 +31,224 @@ let mainWindow: BrowserWindow | null = null;
 let updateCheckInterval: NodeJS.Timeout | null = null;
 const UPDATE_CHECK_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
 const INITIAL_CHECK_DELAY = 5 * 60 * 1000; // 5 minutes after startup
+
+type OfflineModelId =
+  | 'whisper-small'
+  | 'whisper-medium'
+  | 'whisper-large-turbo'
+  | 'whisper-large'
+  | 'parakeet-v2'
+  | 'parakeet-v3';
+
+interface OfflineModelSource {
+  url: string;
+  filename: string;
+  extractArchive?: boolean;
+}
+
+interface OfflineModelDownloadProgress {
+  modelId: OfflineModelId;
+  status: 'starting' | 'downloading' | 'extracting' | 'completed' | 'error';
+  percent?: number;
+  downloadedBytes?: number;
+  totalBytes?: number;
+  message?: string;
+}
+
+const OFFLINE_MODEL_SOURCES: Record<OfflineModelId, OfflineModelSource> = {
+  'whisper-small': {
+    url: 'https://blob.handy.computer/ggml-small.bin',
+    filename: 'ggml-small.bin'
+  },
+  'whisper-medium': {
+    url: 'https://blob.handy.computer/whisper-medium-q4_1.bin',
+    filename: 'whisper-medium-q4_1.bin'
+  },
+  'whisper-large-turbo': {
+    url: 'https://blob.handy.computer/ggml-large-v3-turbo.bin',
+    filename: 'ggml-large-v3-turbo.bin'
+  },
+  'whisper-large': {
+    url: 'https://blob.handy.computer/ggml-large-v3-q5_0.bin',
+    filename: 'ggml-large-v3-q5_0.bin'
+  },
+  'parakeet-v2': {
+    url: 'https://blob.handy.computer/parakeet-v2-int8.tar.gz',
+    filename: 'parakeet-v2-int8.tar.gz',
+    extractArchive: true
+  },
+  'parakeet-v3': {
+    url: 'https://blob.handy.computer/parakeet-v3-int8.tar.gz',
+    filename: 'parakeet-v3-int8.tar.gz',
+    extractArchive: true
+  }
+};
+
+const OFFLINE_MODEL_SIGNATURES: Record<OfflineModelId, string[]> = {
+  'whisper-small': ['ggml-small.bin'],
+  'whisper-medium': ['whisper-medium-q4_1.bin', 'ggml-medium.bin'],
+  'whisper-large-turbo': ['ggml-large-v3-turbo.bin', 'large-v3-turbo'],
+  'whisper-large': ['ggml-large-v3-q5_0.bin', 'ggml-large-v3.bin'],
+  'parakeet-v2': ['parakeet-tdt-0.6b-v2-int8', 'parakeet-v2-int8'],
+  'parakeet-v3': ['parakeet-tdt-0.6b-v3-int8', 'parakeet-v3-int8']
+};
+
+const activeOfflineDownloads = new Map<OfflineModelId, Promise<void>>();
+
+function detectInstalledOfflineModels(modelsDir: string): OfflineModelId[] {
+  if (!existsSync(modelsDir)) {
+    return [];
+  }
+
+  const entries = readdirSync(modelsDir, { withFileTypes: true }).map((entry) =>
+    entry.name.toLowerCase()
+  );
+
+  return (Object.entries(OFFLINE_MODEL_SIGNATURES) as [OfflineModelId, string[]][])
+    .filter(([, signatures]) =>
+      signatures.some(signature =>
+        entries.some(entryName => entryName.includes(signature.toLowerCase()))
+      )
+    )
+    .map(([modelId]) => modelId);
+}
+
+function emitOfflineModelProgress(payload: OfflineModelDownloadProgress): void {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('offline-models:download-progress', payload);
+  }
+}
+
+async function downloadFileWithProgress(
+  url: string,
+  destinationPath: string,
+  onProgress: (downloadedBytes: number, totalBytes: number) => void
+): Promise<void> {
+  const tempPath = `${destinationPath}.part`;
+
+  if (existsSync(tempPath)) {
+    unlinkSync(tempPath);
+  }
+
+  const response = await fetch(url);
+  if (!response.ok || !response.body) {
+    throw new Error(`Download failed with status ${response.status}`);
+  }
+
+  const totalBytes = Number(response.headers.get('content-length') || 0);
+  const reader = response.body.getReader();
+  const fileStream = createWriteStream(tempPath);
+  let downloadedBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+
+      downloadedBytes += value.byteLength;
+      if (!fileStream.write(Buffer.from(value))) {
+        await once(fileStream, 'drain');
+      }
+
+      onProgress(downloadedBytes, totalBytes);
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      fileStream.once('finish', resolve);
+      fileStream.once('error', reject);
+      fileStream.end();
+    });
+
+    renameSync(tempPath, destinationPath);
+  } catch (error) {
+    fileStream.destroy();
+    if (existsSync(tempPath)) {
+      unlinkSync(tempPath);
+    }
+    throw error;
+  }
+}
+
+async function extractTarGz(archivePath: string, outputDir: string): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    execFile('tar', ['-xzf', archivePath, '-C', outputDir], (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+async function ensureOfflineModelDownloaded(
+  modelId: OfflineModelId,
+  modelsDir: string
+): Promise<void> {
+  if (!existsSync(modelsDir)) {
+    mkdirSync(modelsDir, { recursive: true });
+  }
+
+  const installedModels = detectInstalledOfflineModels(modelsDir);
+  if (installedModels.includes(modelId)) {
+    emitOfflineModelProgress({
+      modelId,
+      status: 'completed',
+      percent: 100
+    });
+    return;
+  }
+
+  const source = OFFLINE_MODEL_SOURCES[modelId];
+  const destinationPath = join(modelsDir, source.filename);
+
+  emitOfflineModelProgress({
+    modelId,
+    status: 'starting',
+    percent: 0
+  });
+
+  if (!existsSync(destinationPath)) {
+    await downloadFileWithProgress(
+      source.url,
+      destinationPath,
+      (downloadedBytes, totalBytes) => {
+        const percent = totalBytes > 0
+          ? Math.min(100, Math.round((downloadedBytes / totalBytes) * 100))
+          : undefined;
+
+        emitOfflineModelProgress({
+          modelId,
+          status: 'downloading',
+          percent,
+          downloadedBytes,
+          totalBytes
+        });
+      }
+    );
+  } else {
+    emitOfflineModelProgress({
+      modelId,
+      status: 'downloading',
+      percent: 100
+    });
+  }
+
+  if (source.extractArchive) {
+    emitOfflineModelProgress({
+      modelId,
+      status: 'extracting'
+    });
+    await extractTarGz(destinationPath, modelsDir);
+  }
+
+  emitOfflineModelProgress({
+    modelId,
+    status: 'completed',
+    percent: 100
+  });
+}
 
 // Configure autoUpdater
 autoUpdater.autoDownload = true; // Download automatically when update is available
@@ -339,6 +561,66 @@ app.whenReady().then(() => {
   const themeConfigPath = join(configDir, 'design-system.json');
   const credentialsPath = join(configDir, 'credentials.json');
   const credentialsBedrockPath = join(configDir, 'credentials-bedrock.json');
+  const offlineModelsDir = join(app.getPath('userData'), 'models');
+
+  // Offline models status
+  ipcMain.handle('offline-models:get-status', () => {
+    try {
+      if (!existsSync(offlineModelsDir)) {
+        mkdirSync(offlineModelsDir, { recursive: true });
+      }
+
+      const installedModels = detectInstalledOfflineModels(offlineModelsDir);
+      return {
+        success: true,
+        modelsDir: offlineModelsDir,
+        installedModels
+      };
+    } catch (error) {
+      console.error('[OFFLINE-MODELS] Error loading status:', error);
+      return {
+        success: false,
+        modelsDir: offlineModelsDir,
+        installedModels: [],
+        error: String(error)
+      };
+    }
+  });
+
+  ipcMain.handle('offline-models:download', async (_event, modelId: OfflineModelId) => {
+    try {
+      if (!OFFLINE_MODEL_SOURCES[modelId]) {
+        return { success: false, error: `Unsupported model: ${modelId}` };
+      }
+
+      const existingDownload = activeOfflineDownloads.get(modelId);
+      if (existingDownload) {
+        await existingDownload;
+      } else {
+        const downloadPromise = ensureOfflineModelDownloaded(modelId, offlineModelsDir);
+        activeOfflineDownloads.set(modelId, downloadPromise);
+
+        try {
+          await downloadPromise;
+        } finally {
+          activeOfflineDownloads.delete(modelId);
+        }
+      }
+
+      return {
+        success: true,
+        installedModels: detectInstalledOfflineModels(offlineModelsDir)
+      };
+    } catch (error) {
+      console.error('[OFFLINE-MODELS] Download failed:', error);
+      emitOfflineModelProgress({
+        modelId,
+        status: 'error',
+        message: String(error)
+      });
+      return { success: false, error: String(error) };
+    }
+  });
 
   // Load theme configuration
   ipcMain.handle('theme:load', () => {

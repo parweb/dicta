@@ -65,6 +65,25 @@ interface CustomAPI {
       error?: string;
     }>;
   };
+  offlineModels: {
+    getStatus: () => Promise<{
+      success: boolean;
+      modelsDir: string;
+      installedModels: string[];
+      error?: string;
+    }>;
+    download: (modelId: string) => Promise<{
+      success: boolean;
+      installedModels?: string[];
+      error?: string;
+    }>;
+    onDownloadProgress: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
+    removeDownloadProgressListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ) => void;
+  };
   bedrock: {
     addToCalendar: (params: {
       title: string;

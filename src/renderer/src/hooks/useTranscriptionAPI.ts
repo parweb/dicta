@@ -6,6 +6,12 @@
 import { useState, useCallback } from 'react'
 
 import type { Transcription } from '../lib/history'
+import {
+  DEFAULT_OFFLINE_MODEL_ID,
+  DEFAULT_TRANSCRIPTION_MODE,
+  type OfflineModelId,
+  type TranscriptionMode
+} from '../lib/transcription-models'
 import { analyzeAudio as analyzeAudioUtil } from './transcription-api/audio-analyzer'
 import { saveToHistory as saveToHistoryUtil } from './transcription-api/history-saver'
 import { transcribeAudio as transcribeAudioUtil } from './transcription-api/transcription-fetcher'
@@ -34,7 +40,9 @@ export interface UseTranscriptionAPIReturn {
 
 export function useTranscriptionAPI(
   apiKey: string | null,
-  onHistoryUpdate?: () => Promise<void>
+  onHistoryUpdate?: () => Promise<void>,
+  transcriptionMode: TranscriptionMode = DEFAULT_TRANSCRIPTION_MODE,
+  offlineModelId: OfflineModelId = DEFAULT_OFFLINE_MODEL_ID
 ): UseTranscriptionAPIReturn {
   const [proxyStatuses, setProxyStatuses] =
     useState<Record<string, ProxyStatus>>(INITIAL_PROXY_STATUSES)
@@ -69,12 +77,14 @@ export function useTranscriptionAPI(
         setIsLoading,
         setProxyStatuses,
         onHistoryUpdate,
+        transcriptionMode,
+        offlineModelId,
         durationMs,
         audioAmplitudes,
         skipHistorySave
       )
     },
-    [apiKey, onHistoryUpdate]
+    [apiKey, onHistoryUpdate, transcriptionMode, offlineModelId]
   )
 
   return {

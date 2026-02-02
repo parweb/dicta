@@ -9,8 +9,13 @@ import type {
   TranscriptionResponse,
   TranscriptionResult
 } from './types'
-import { PROXY_CONFIGS } from './types'
+import { INITIAL_PROXY_STATUSES, PROXY_CONFIGS } from './types'
 import { saveToHistory } from './history-saver'
+import {
+  OFFLINE_MODEL_LABELS,
+  type OfflineModelId,
+  type TranscriptionMode
+} from '@/lib/transcription-models'
 
 /**
  * Fetch transcription with a specific proxy
@@ -67,25 +72,53 @@ export async function transcribeAudio(
   setIsLoading: (loading: boolean) => void,
   setProxyStatuses: React.Dispatch<React.SetStateAction<Record<string, ProxyStatus>>>,
   onHistoryUpdate?: () => Promise<void>,
+  transcriptionMode: TranscriptionMode = 'openai',
+  offlineModelId: OfflineModelId = 'whisper-small',
   durationMs?: number,
   audioAmplitudes?: number[],
   skipHistorySave?: boolean
 ): Promise<TranscriptionResult> {
   console.log('[TRANSCRIPTION] Starting transcription...')
+  console.log('[TRANSCRIPTION] Mode:', transcriptionMode)
+  console.log('[TRANSCRIPTION] Offline model:', offlineModelId)
   console.log('[TRANSCRIPTION] API key present:', !!apiKey)
   console.log('[TRANSCRIPTION] API key length:', apiKey?.length)
   console.log('[TRANSCRIPTION] API key starts with:', apiKey?.substring(0, 7))
   console.log('[TRANSCRIPTION] Blob size:', blob.size, 'bytes')
   console.log('[TRANSCRIPTION] Blob type:', blob.type)
 
+  setIsLoading(true)
+
+  if (transcriptionMode === 'offline') {
+    try {
+      setProxyStatuses({ ...INITIAL_PROXY_STATUSES })
+
+      const modelLabel = OFFLINE_MODEL_LABELS[offlineModelId]
+      const offlineStatus = await window.api?.offlineModels.getStatus()
+      const installedModels = offlineStatus?.installedModels || []
+      const isInstalled = installedModels.includes(offlineModelId)
+
+      if (!isInstalled) {
+        return {
+          error: `Le modèle ${modelLabel} n'est pas détecté en local. Ajoutez-le puis réessayez.`
+        }
+      }
+
+      return {
+        error: `Mode hors-ligne activé (${modelLabel}), mais l'inférence locale n'est pas encore branchée dans Dicta.`
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   if (!apiKey) {
     console.error('[TRANSCRIPTION] API key is not configured')
+    setIsLoading(false)
     return {
       error: 'Clé API non configurée. Veuillez ajouter votre clé OpenAI dans les paramètres.'
     }
   }
-
-  setIsLoading(true)
 
   const formData = new FormData()
   formData.append('file', blob, 'recording.webm')

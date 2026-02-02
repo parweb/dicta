@@ -1,6 +1,7 @@
 import { useThemeStore } from '@/hooks/useThemeStore';
 import type { Transcription } from '@/lib/history';
 import { useApiKeyStore } from '@renderer/hooks/useApiKeyStore';
+import { useTranscriptionSettings } from '@renderer/hooks/useTranscriptionSettings';
 import { useTranscriptionAPI } from '@renderer/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@renderer/hooks/useTranscriptionNavigation';
 import { BarChart3, Search, Settings } from 'lucide-react';
@@ -32,8 +33,13 @@ const Layout = ({
   totalCount
 }: LayoutProps) => {
   const { apiKey } = useApiKeyStore();
+  const { transcriptionMode } = useTranscriptionSettings();
   const { reloadTranscriptions } = useTranscriptionNavigation();
-  const { proxyStatuses } = useTranscriptionAPI(apiKey, reloadTranscriptions);
+  const { proxyStatuses } = useTranscriptionAPI(
+    apiKey,
+    reloadTranscriptions,
+    transcriptionMode
+  );
 
   const {
     theme: { colors, spacing, typography }
@@ -194,7 +200,21 @@ const Layout = ({
         </div>
 
         <div>
-          <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
+          {transcriptionMode === 'openai' ? (
+            <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
+          ) : (
+            <div
+              style={{
+                fontSize: typography.fontSize.xs,
+                color: colors.text.secondary,
+                padding: `${spacing.xs} ${spacing.sm}`,
+                border: `1px solid ${colors.border.primary}`,
+                borderRadius: '999px'
+              }}
+            >
+              Mode offline
+            </div>
+          )}
         </div>
       </header>
 

@@ -85,6 +85,30 @@ const api = {
       error?: string;
     }> => ipcRenderer.invoke('credentials:delete-bedrock')
   },
+  // Offline models
+  offlineModels: {
+    getStatus: (): Promise<{
+      success: boolean;
+      modelsDir: string;
+      installedModels: string[];
+      error?: string;
+    }> => ipcRenderer.invoke('offline-models:get-status'),
+    download: (modelId: string): Promise<{
+      success: boolean;
+      installedModels?: string[];
+      error?: string;
+    }> => ipcRenderer.invoke('offline-models:download', modelId),
+    onDownloadProgress: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.on('offline-models:download-progress', callback);
+    },
+    removeDownloadProgressListener: (
+      callback: (event: IpcRendererEvent, data: unknown) => void
+    ): void => {
+      ipcRenderer.removeListener('offline-models:download-progress', callback);
+    }
+  },
   // Bedrock tools
   bedrock: {
     addToCalendar: (params: {

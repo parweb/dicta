@@ -13,6 +13,7 @@ import { useRealtimeAudioVisualizer } from '@/hooks/useRealtimeAudioVisualizer';
 import { useThemeStore } from '@/hooks/useThemeStore';
 import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
 import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
+import { useTranscriptionSettings } from '@/hooks/useTranscriptionSettings';
 import type { Transcription } from '@/lib/history';
 import type Fuse from 'fuse.js';
 import { AlertCircle } from 'lucide-react';
@@ -63,6 +64,7 @@ const HomePage = () => {
   // Use theme and API key hooks
   const { theme } = useThemeStore();
   const { apiKey, hasApiKey, isLoading: isApiKeyLoading } = useApiKeyStore();
+  const { transcriptionMode, offlineModelId, requiresApiKey } = useTranscriptionSettings();
 
   // Use custom hooks
   const {
@@ -86,8 +88,13 @@ const HomePage = () => {
     reloadTranscriptions
   } = useTranscriptionNavigation();
 
-  const { transcribeAudio, proxyStatuses, isLoading, analyzeAudio } =
-    useTranscriptionAPI(apiKey, reloadTranscriptions);
+  const { transcribeAudio, isLoading, analyzeAudio } =
+    useTranscriptionAPI(
+      apiKey,
+      reloadTranscriptions,
+      transcriptionMode,
+      offlineModelId
+    );
 
   // Lazy load Fuse.js for search
   useEffect(() => {
@@ -177,8 +184,9 @@ const HomePage = () => {
       // ✅ Read from refs to get current values (not stale closure values)
       const currentActiveActionsId = activeActionsTranscriptionIdRef.current;
       const currentIsFollowUpFocused = isFollowUpFocusedRef.current;
-      const shouldSkipHistorySave =
-        currentActiveActionsId && currentIsFollowUpFocused;
+      const shouldSkipHistorySave = Boolean(
+        currentActiveActionsId && currentIsFollowUpFocused
+      );
       console.log(
         '[HOME] Skip history save:',
         shouldSkipHistorySave,
@@ -259,14 +267,20 @@ const HomePage = () => {
 
   // Auto-redirect to settings if no API key on initial mount
   useEffect(() => {
+    if (!requiresApiKey) {
+      hasRedirectedRef.current = false;
+      return;
+    }
+
     if (!isApiKeyLoading && !hasApiKey && !hasRedirectedRef.current) {
       hasRedirectedRef.current = true;
       navigateTo('settings', 'model');
     }
-  }, [isApiKeyLoading, hasApiKey, navigateTo]);
+  }, [isApiKeyLoading, hasApiKey, navigateTo, requiresApiKey]);
 
   // Calculate whether to show API key banner
   const showApiKeyBanner =
+    requiresApiKey &&
     !isApiKeyLoading &&
     !hasApiKey &&
     currentView === 'home' &&
