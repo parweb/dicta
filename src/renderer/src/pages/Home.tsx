@@ -1,30 +1,31 @@
+import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
+import RecordButton from '@/components/home/RecordButton';
+import Layout from '@/components/Layout';
+import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
+import { Button } from '@/components/ui/button';
+import { updateTranscriptionWithBedrockHistory } from '@/hooks/transcription-api/bedrock-history-updater';
+import { useApiKeyStore } from '@/hooks/useApiKeyStore';
+import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import type { ConversationHistory } from '@/hooks/useBedrockAgent';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useNavigationStore } from '@/hooks/useNavigationStore';
+import { useRealtimeAudioVisualizer } from '@/hooks/useRealtimeAudioVisualizer';
+import { useThemeStore } from '@/hooks/useThemeStore';
+import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
+import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
+import type { Transcription } from '@/lib/history';
+import type Fuse from 'fuse.js';
 import { AlertCircle } from 'lucide-react';
 import {
   lazy,
   Suspense,
   useCallback,
+  useDeferredValue,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
-
-import AnimatedView, { OverlayPanels } from '@/components/AnimatedView';
-import TimelineTranscriptList from '@/components/timeline/TimelineTranscriptList';
-import RecordButton from '@/components/home/RecordButton';
-import ProxyStatusIndicators from '@/components/home/ProxyStatusIndicators';
-import Layout from '@/components/Layout';
-import { Button } from '@/components/ui/button';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useRealtimeAudioVisualizer } from '@/hooks/useRealtimeAudioVisualizer';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { useNavigationStore } from '@/hooks/useNavigationStore';
-import { useTranscriptionAPI } from '@/hooks/useTranscriptionAPI';
-import { useTranscriptionNavigation } from '@/hooks/useTranscriptionNavigation';
-import { useApiKeyStore } from '@/hooks/useApiKeyStore';
-import type { Transcription } from '@/lib/history';
-import { useThemeStore } from '@/hooks/useThemeStore';
-import { updateTranscriptionWithBedrockHistory } from '@/hooks/transcription-api/bedrock-history-updater';
-import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 
 // Lazy load Statistics and Settings pages to reduce initial bundle size
 const Statistics = lazy(() => import('./Statistics'));
@@ -33,9 +34,14 @@ const Settings = lazy(() => import('./Settings'));
 const HomePage = () => {
   const [transcript, setTranscript] = useState('');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [activeActionsTranscriptionId, setActiveActionsTranscriptionId] = useState<string | null>(null);
-  const [actionsFollowUpTranscript, setActionsFollowUpTranscript] = useState<string | undefined>(undefined);
+  const [activeActionsTranscriptionId, setActiveActionsTranscriptionId] =
+    useState<string | null>(null);
+  const [actionsFollowUpTranscript, setActionsFollowUpTranscript] = useState<
+    string | undefined
+  >(undefined);
   const [isFollowUpFocused, setIsFollowUpFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [FuseClass, setFuseClass] = useState<typeof Fuse | null>(null);
 
   const hasRedirectedRef = useRef(false);
   // Use ref to always read the current value (avoid stale closure)
@@ -67,7 +73,10 @@ const HomePage = () => {
   } = useAudioRecorder();
 
   // Real-time audio visualization
-  const realtimeAmplitudes = useRealtimeAudioVisualizer(mediaStream, isRecording);
+  const realtimeAmplitudes = useRealtimeAudioVisualizer(
+    mediaStream,
+    isRecording
+  );
 
   const {
     allTranscriptions,
@@ -79,6 +88,67 @@ const HomePage = () => {
 
   const { transcribeAudio, proxyStatuses, isLoading, analyzeAudio } =
     useTranscriptionAPI(apiKey, reloadTranscriptions);
+
+  // Lazy load Fuse.js for search
+  useEffect(() => {
+    if (!FuseClass) {
+      import('fuse.js').then(module => {
+        setFuseClass(() => module.default);
+      });
+    }
+  }, [FuseClass]);
+
+  // Defer search query for better performance
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  // Configure Fuse.js for fuzzy search
+  const fuse = useMemo(() => {
+    if (!FuseClass) return null;
+
+    return new FuseClass(allTranscriptions, {
+      keys: [
+        {
+          name: 'text',
+          weight: 0.7
+        },
+        {
+          name: 'id',
+          weight: 0.3
+        }
+      ],
+      threshold: 0.4,
+      distance: 100,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
+      useExtendedSearch: true,
+      includeScore: true
+    });
+  }, [FuseClass, allTranscriptions]);
+
+  // Filter transcriptions based on search query
+  const filteredTranscriptions = useMemo(() => {
+    if (!deferredSearchQuery.trim()) {
+      return allTranscriptions;
+    }
+
+    if (!fuse) {
+      return allTranscriptions;
+    }
+
+    const results = fuse.search(deferredSearchQuery);
+    return results.map(result => result.item);
+  }, [deferredSearchQuery, fuse, allTranscriptions]);
+
+  // Handle search change - navigate to home if not already there
+  const handleSearchChange = useCallback(
+    (query: string) => {
+      setSearchQuery(query);
+      if (query.trim() && currentView !== 'home') {
+        navigateTo('home');
+      }
+    },
+    [currentView, navigateTo]
+  );
 
   // Wrapper functions to handle view changes and transcription flow
   const startRecording = useCallback(async () => {
@@ -92,7 +162,12 @@ const HomePage = () => {
     }
 
     await startAudioRecording(async audioBlob => {
-      console.log('[HOME] Audio recorded, blob size:', audioBlob.size, 'type:', audioBlob.type);
+      console.log(
+        '[HOME] Audio recorded, blob size:',
+        audioBlob.size,
+        'type:',
+        audioBlob.type
+      );
 
       // Analyze audio
       const { durationMs, amplitudes } = await analyzeAudio(audioBlob);
@@ -102,12 +177,26 @@ const HomePage = () => {
       // ✅ Read from refs to get current values (not stale closure values)
       const currentActiveActionsId = activeActionsTranscriptionIdRef.current;
       const currentIsFollowUpFocused = isFollowUpFocusedRef.current;
-      const shouldSkipHistorySave = currentActiveActionsId && currentIsFollowUpFocused;
-      console.log('[HOME] Skip history save:', shouldSkipHistorySave, '(activeActions:', currentActiveActionsId, ', focused:', currentIsFollowUpFocused, ')');
+      const shouldSkipHistorySave =
+        currentActiveActionsId && currentIsFollowUpFocused;
+      console.log(
+        '[HOME] Skip history save:',
+        shouldSkipHistorySave,
+        '(activeActions:',
+        currentActiveActionsId,
+        ', focused:',
+        currentIsFollowUpFocused,
+        ')'
+      );
 
       // Transcribe and get the result
       console.log('[HOME] Starting transcription...');
-      const result = await transcribeAudio(audioBlob, durationMs, amplitudes, shouldSkipHistorySave);
+      const result = await transcribeAudio(
+        audioBlob,
+        durationMs,
+        amplitudes,
+        shouldSkipHistorySave
+      );
       console.log('[HOME] Transcription result:', result);
 
       if (result.text) {
@@ -115,12 +204,25 @@ const HomePage = () => {
         // ✅ Read from refs again in case they changed during transcription
         const finalActiveActionsId = activeActionsTranscriptionIdRef.current;
         const finalIsFollowUpFocused = isFollowUpFocusedRef.current;
-        console.log('[HOME] Checking routing - activeActionsTranscriptionId:', finalActiveActionsId, 'isFollowUpFocused:', finalIsFollowUpFocused);
+        console.log(
+          '[HOME] Checking routing - activeActionsTranscriptionId:',
+          finalActiveActionsId,
+          'isFollowUpFocused:',
+          finalIsFollowUpFocused
+        );
         if (finalActiveActionsId && finalIsFollowUpFocused) {
-          console.log('[HOME] Follow-up field has focus, sending transcription to follow-up');
+          console.log(
+            '[HOME] Follow-up field has focus, sending transcription to follow-up'
+          );
           setActionsFollowUpTranscript(result.text);
         } else {
-          console.log('[HOME] Creating new transcription (activeActionsId:', finalActiveActionsId, ', focused:', finalIsFollowUpFocused, ')');
+          console.log(
+            '[HOME] Creating new transcription (activeActionsId:',
+            finalActiveActionsId,
+            ', focused:',
+            finalIsFollowUpFocused,
+            ')'
+          );
           // Normal flow: transcription saved and list will auto-update
           setTranscript(result.text);
           // Select the newly created transcription
@@ -164,7 +266,11 @@ const HomePage = () => {
   }, [isApiKeyLoading, hasApiKey, navigateTo]);
 
   // Calculate whether to show API key banner
-  const showApiKeyBanner = !isApiKeyLoading && !hasApiKey && currentView === 'home' && hasRedirectedRef.current;
+  const showApiKeyBanner =
+    !isApiKeyLoading &&
+    !hasApiKey &&
+    currentView === 'home' &&
+    hasRedirectedRef.current;
 
   const handleCopyTranscript = useCallback((transcription: Transcription) => {
     navigator.clipboard.writeText(transcription.text);
@@ -183,8 +289,15 @@ const HomePage = () => {
 
   const handleBedrockHistoryChange = useCallback(
     async (transcriptionId: string, history: ConversationHistory) => {
-      console.log('[HOME] Saving Bedrock history for transcription:', transcriptionId);
-      await updateTranscriptionWithBedrockHistory(transcriptionId, history, reloadTranscriptions);
+      console.log(
+        '[HOME] Saving Bedrock history for transcription:',
+        transcriptionId
+      );
+      await updateTranscriptionWithBedrockHistory(
+        transcriptionId,
+        history,
+        reloadTranscriptions
+      );
     },
     [reloadTranscriptions]
   );
@@ -207,18 +320,17 @@ const HomePage = () => {
   return (
     <Layout
       currentView={currentView}
-      onViewChange={value =>
-        navigateTo(value === currentView ? 'home' : value)
-      }
+      onViewChange={value => navigateTo(value === currentView ? 'home' : value)}
       onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
       onHistoryClose={() => setIsHistoryOpen(false)}
       isHistoryOpen={isHistoryOpen}
       currentTranscript={transcript}
       onSelectTranscription={handleSelectTranscription}
+      searchQuery={searchQuery}
+      onSearchChange={handleSearchChange}
+      filteredCount={filteredTranscriptions.length}
+      totalCount={allTranscriptions.length}
     >
-      <ProxyStatusIndicators proxyStatuses={proxyStatuses} />
-
-      {/* Home view - always rendered */}
       <AnimatedView viewKey="home">
         {showApiKeyBanner ? (
           <div
@@ -232,14 +344,16 @@ const HomePage = () => {
             }}
           >
             <div
-              style={{
-                ...theme.components.card.base,
-                padding: theme.spacing.md,
-                backgroundColor: '#ffffff',
-                borderLeft: `4px solid ${theme.colors.accent.warning}`,
-                maxWidth: '500px',
-                WebkitAppRegion: 'no-drag'
-              } as React.CSSProperties}
+              style={
+                {
+                  ...theme.components.card.base,
+                  padding: theme.spacing.md,
+                  backgroundColor: '#ffffff',
+                  borderLeft: `4px solid ${theme.colors.accent.warning}`,
+                  maxWidth: '500px',
+                  WebkitAppRegion: 'no-drag'
+                } as React.CSSProperties
+              }
             >
               <div
                 style={{
@@ -280,19 +394,9 @@ const HomePage = () => {
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              paddingTop: theme.spacing['4xl']
-            }}
-          >
-            {/* Timeline List */}
+          <>
             <TimelineTranscriptList
-              transcriptions={allTranscriptions}
+              transcriptions={filteredTranscriptions}
               currentTranscriptionId={currentTranscriptionId}
               activeActionsTranscriptionId={activeActionsTranscriptionId}
               actionsFollowUpTranscript={actionsFollowUpTranscript}
@@ -307,20 +411,12 @@ const HomePage = () => {
               onBedrockHistoryChange={handleBedrockHistoryChange}
             />
 
-            {/* Hidden RecordButton for functionality - visuals handled by RecordingPlaceholder */}
             <div
               style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                padding: '40px',
-                display: 'flex',
+                display: 'none',
                 justifyContent: 'center',
                 alignItems: 'center',
-                opacity: 0,
-                pointerEvents: 'none',
-                zIndex: -1
+                pointerEvents: 'none'
               }}
             >
               <RecordButton
@@ -330,11 +426,10 @@ const HomePage = () => {
                 onMouseUp={stopRecording}
               />
             </div>
-          </div>
+          </>
         )}
       </AnimatedView>
 
-      {/* Overlay panels - Statistics and Settings */}
       <OverlayPanels currentView={currentView}>
         <Suspense fallback={null}>
           {currentView === 'statistics' && <Statistics />}
