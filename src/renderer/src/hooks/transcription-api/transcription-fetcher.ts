@@ -104,8 +104,44 @@ export async function transcribeAudio(
         }
       }
 
+      // Convert blob to base64
+      console.log('[TRANSCRIPTION] Converting audio to base64...')
+      const arrayBuffer = await blob.arrayBuffer()
+      const uint8Array = new Uint8Array(arrayBuffer)
+      let binaryString = ''
+      const chunkSize = 65536 // Process in chunks to avoid stack overflow
+      for (let i = 0; i < uint8Array.length; i += chunkSize) {
+        const chunk = uint8Array.slice(i, i + chunkSize)
+        binaryString += String.fromCharCode.apply(null, chunk as unknown as number[])
+      }
+      const audioBase64 = btoa(binaryString)
+      console.log('[TRANSCRIPTION] Audio converted, base64 length:', audioBase64.length)
+
+      // Call local transcription
+      console.log('[TRANSCRIPTION] Calling local transcription with model:', offlineModelId)
+      const result = await window.api?.offlineModels.transcribe(offlineModelId, audioBase64)
+      console.log('[TRANSCRIPTION] Local transcription result:', result)
+
+      if (!result?.success) {
+        return {
+          error: result?.error || 'Transcription locale échouée.'
+        }
+      }
+
+      const text = result.text || ''
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(text)
+
+      // Save to history (unless skip requested)
+      let savedTranscription
+      if (!skipHistorySave) {
+        savedTranscription = await saveToHistory(text, onHistoryUpdate, durationMs, audioAmplitudes)
+      }
+
       return {
-        error: `Mode hors-ligne activé (${modelLabel}), mais l'inférence locale n'est pas encore branchée dans Dicta.`
+        text,
+        id: savedTranscription?.id
       }
     } finally {
       setIsLoading(false)

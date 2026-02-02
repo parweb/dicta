@@ -1,5 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 
+async function closeAudioContextSafely(
+  audioContext: AudioContext | null
+): Promise<void> {
+  if (!audioContext || audioContext.state === 'closed') {
+    return;
+  }
+
+  try {
+    await audioContext.close();
+  } catch (error) {
+    // React StrictMode can trigger duplicate effect cleanup in development.
+    if (
+      error instanceof DOMException &&
+      error.name === 'InvalidStateError'
+    ) {
+      return;
+    }
+    console.warn('[VISUALIZER] Failed to close AudioContext:', error);
+  }
+}
+
 /**
  * Hook to capture real-time audio amplitudes during recording
  * Uses Web Audio API's AnalyserNode to extract frequency data
@@ -24,7 +45,7 @@ export function useRealtimeAudioVisualizer(
         animationFrameRef.current = null;
       }
       if (audioContextRef.current) {
-        audioContextRef.current.close();
+        void closeAudioContextSafely(audioContextRef.current);
         audioContextRef.current = null;
       }
       analyserRef.current = null;
@@ -35,6 +56,10 @@ export function useRealtimeAudioVisualizer(
     console.log('[VISUALIZER] Starting audio visualization, mediaStream:', mediaStream);
 
     // Setup Web Audio API
+    if (audioContextRef.current) {
+      void closeAudioContextSafely(audioContextRef.current);
+      audioContextRef.current = null;
+    }
     const audioContext = new AudioContext();
     audioContextRef.current = audioContext;
 
@@ -88,9 +113,14 @@ export function useRealtimeAudioVisualizer(
       console.log('[VISUALIZER] Cleanup');
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
       source.disconnect();
-      audioContext.close();
+      void closeAudioContextSafely(audioContext);
+      if (audioContextRef.current === audioContext) {
+        audioContextRef.current = null;
+      }
+      analyserRef.current = null;
     };
   }, [mediaStream, isRecording]);
 

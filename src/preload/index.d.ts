@@ -77,6 +77,11 @@ interface CustomAPI {
       installedModels?: string[];
       error?: string;
     }>;
+    transcribe: (modelId: string, audioBase64: string) => Promise<{
+      success: boolean;
+      text?: string;
+      error?: string;
+    }>;
     onDownloadProgress: (
       callback: (event: IpcRendererEvent, data: unknown) => void
     ) => void;

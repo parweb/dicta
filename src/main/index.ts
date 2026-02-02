@@ -113,6 +113,204 @@ function detectInstalledOfflineModels(modelsDir: string): OfflineModelId[] {
     .map(([modelId]) => modelId);
 }
 
+// Find the actual model file path for a given modelId
+function findModelFilePath(modelsDir: string, modelId: OfflineModelId): string | null {
+  if (!existsSync(modelsDir)) {
+    return null;
+  }
+
+  const signatures = OFFLINE_MODEL_SIGNATURES[modelId];
+  if (!signatures) return null;
+
+  const entries = readdirSync(modelsDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryName = entry.name.toLowerCase();
+    for (const signature of signatures) {
+      if (entryName.includes(signature.toLowerCase())) {
+        return join(modelsDir, entry.name);
+      }
+    }
+  }
+
+  return null;
+}
+
+// Transcribe audio using whisper.cpp CLI
+async function transcribeWithWhisper(
+  audioBuffer: Buffer,
+  modelPath: string,
+  modelsDir: string
+): Promise<{ text: string; error?: string }> {
+  const tempDir = join(modelsDir, 'temp');
+  if (!existsSync(tempDir)) {
+    mkdirSync(tempDir, { recursive: true });
+  }
+
+  const timestamp = Date.now();
+  const inputPath = join(tempDir, `input_${timestamp}.webm`);
+  const wavPath = join(tempDir, `input_${timestamp}.wav`);
+
+  try {
+    // Save the audio buffer to file
+    writeFileSync(inputPath, audioBuffer);
+
+    // Convert webm to wav using ffmpeg if available
+    let audioFileToUse = inputPath;
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        // Convert to 16kHz mono WAV for whisper.cpp
+        execFile('ffmpeg', [
+          '-i', inputPath,
+          '-ar', '16000',
+          '-ac', '1',
+          '-c:a', 'pcm_s16le',
+          '-y',
+          wavPath
+        ], (error) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+      audioFileToUse = wavPath;
+    } catch (ffmpegError) {
+      console.log('[WHISPER] ffmpeg not available, trying with original file:', ffmpegError);
+    }
+
+    let whisperPath: string | null = null;
+
+    // First try using 'which' command to find in PATH
+    try {
+      const { execSync } = require('node:child_process');
+      const whichResult = execSync('which whisper-cli', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'ignore'] });
+      const foundPath = whichResult.trim();
+      if (foundPath && existsSync(foundPath)) {
+        whisperPath = foundPath;
+        console.log('[WHISPER] Found via which command:', whisperPath);
+      }
+    } catch (e) {
+      // 'which' failed, continue with other methods
+    }
+
+    // Define possible paths
+    const possibleWhisperPaths = [
+      join(process.resourcesPath || '', 'whisper-cli'),
+      join(process.resourcesPath || '', 'whisper'),
+      join(modelsDir, 'whisper-cli'),
+      join(modelsDir, 'whisper'),
+      '/opt/homebrew/bin/whisper-cli',
+      '/opt/zerobrew/prefix/bin/whisper-cli',  // ZeroBrew path
+      '/usr/local/bin/whisper-cli',
+      '/usr/local/bin/whisper',
+      '/usr/bin/whisper-cli',
+      '/usr/bin/whisper',
+      `${process.env.HOME}/.brew/bin/whisper-cli`,
+      `${process.env.HOME}/homebrew/bin/whisper-cli`,
+    ];
+
+    // Look for whisper.cpp binary in different locations
+    if (!whisperPath) {
+      for (const path of possibleWhisperPaths) {
+        if (existsSync(path)) {
+          whisperPath = path;
+          break;
+        }
+      }
+    }
+
+    // Also check with .exe extension on Windows
+    if (!whisperPath && process.platform === 'win32') {
+      for (const path of possibleWhisperPaths) {
+        const exePath = path + '.exe';
+        if (existsSync(exePath)) {
+          whisperPath = exePath;
+          break;
+        }
+      }
+    }
+
+    if (!whisperPath) {
+      return {
+        text: '',
+        error: 'whisper-cli not found. Please install whisper.cpp: brew install whisper-cpp'
+      };
+    }
+
+    console.log('[WHISPER] Using binary:', whisperPath);
+    console.log('[WHISPER] Model path:', modelPath);
+    console.log('[WHISPER] Audio file:', audioFileToUse);
+
+    // Run whisper with parameters optimized for transcription
+    const output = await new Promise<string>((resolve) => {
+      const args = [
+        '-m', modelPath,
+        '-f', audioFileToUse,
+        '-l', 'fr',
+        '--output-txt',
+        '-of', join(tempDir, `output_${timestamp}`)
+      ];
+
+      console.log('[WHISPER] Executing:', whisperPath, args.join(' '));
+
+      execFile(whisperPath!, args, (error, stdout, stderr) => {
+        if (stderr) {
+          console.log('[WHISPER] stderr:', stderr);
+        }
+        if (stdout) {
+          console.log('[WHISPER] stdout:', stdout);
+        }
+        if (error) {
+          console.log('[WHISPER] Process exited with code:', error.code);
+        }
+        resolve(stdout || '');
+      });
+    });
+
+    // Read the output file
+    const outputFilePath = join(tempDir, `output_${timestamp}.txt`);
+    if (existsSync(outputFilePath)) {
+      const text = readFileSync(outputFilePath, 'utf-8').trim();
+      return { text };
+    }
+
+    // Fallback: try to extract from stdout
+    const lines = output.split('\n').filter(line => line.trim());
+    const textLines = lines.filter(line =>
+      !line.startsWith('[') &&
+      !line.includes('whisper_') &&
+      !line.includes('load:') &&
+      !line.includes('=')
+    );
+
+    if (textLines.length > 0) {
+      return { text: textLines.join(' ').trim() };
+    }
+
+    return { text: output.trim() };
+
+  } catch (error) {
+    console.error('[WHISPER] Transcription error:', error);
+    return {
+      text: '',
+      error: `Transcription failed: ${error instanceof Error ? error.message : String(error)}`
+    };
+  } finally {
+    // Cleanup temp files
+    try {
+      if (existsSync(inputPath)) unlinkSync(inputPath);
+      if (existsSync(wavPath)) unlinkSync(wavPath);
+      const outputFilePath = join(tempDir, `output_${timestamp}.txt`);
+      if (existsSync(outputFilePath)) unlinkSync(outputFilePath);
+    } catch (cleanupError) {
+      console.error('[WHISPER] Cleanup error:', cleanupError);
+    }
+  }
+}
+
 function emitOfflineModelProgress(payload: OfflineModelDownloadProgress): void {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send('offline-models:download-progress', payload);
@@ -535,10 +733,17 @@ app.whenReady().then(() => {
   });
 
   // Load all transcriptions from history
+  interface HistoryTranscription {
+    id: string;
+    timestamp: number;
+    text?: string;
+    [key: string]: unknown;
+  }
+
   ipcMain.handle('history:load-all', () => {
     try {
       // Load transcriptions from files
-      let transcriptions = [];
+      let transcriptions: HistoryTranscription[] = [];
       if (existsSync(historyDir)) {
         const files = readdirSync(historyDir).filter(f => f.endsWith('.json'));
         transcriptions = files.map(file => {
@@ -619,6 +824,60 @@ app.whenReady().then(() => {
         message: String(error)
       });
       return { success: false, error: String(error) };
+    }
+  });
+
+  // Transcribe audio using offline model (external whisper-cli)
+  ipcMain.handle('offline-models:transcribe', async (_event, { modelId, audioBase64 }: { modelId: OfflineModelId; audioBase64: string }) => {
+    try {
+      console.log('[OFFLINE-MODELS] Transcription request for model:', modelId);
+
+      // Check if model is installed
+      const installedModels = detectInstalledOfflineModels(offlineModelsDir);
+      if (!installedModels.includes(modelId)) {
+        return {
+          success: false,
+          error: `Model ${modelId} is not installed. Please download it first.`
+        };
+      }
+
+      // Get model file path
+      const modelPath = findModelFilePath(offlineModelsDir, modelId);
+      if (!modelPath) {
+        return {
+          success: false,
+          error: `Model file for ${modelId} not found in ${offlineModelsDir}`
+        };
+      }
+
+      // Decode base64 audio
+      const audioBuffer = Buffer.from(audioBase64, 'base64');
+      console.log('[OFFLINE-MODELS] Audio buffer size:', audioBuffer.length, 'bytes');
+
+      // Check if it's a whisper model (ggml format)
+      if (modelId.startsWith('whisper-')) {
+        const result = await transcribeWithWhisper(audioBuffer, modelPath, offlineModelsDir);
+        if (result.error) {
+          return { success: false, error: result.error };
+        }
+        return { success: true, text: result.text };
+      }
+
+      // For parakeet models, we'd need ONNX Runtime - not implemented yet
+      if (modelId.startsWith('parakeet-')) {
+        return {
+          success: false,
+          error: 'Parakeet models are not yet supported for transcription. Please use a Whisper model.'
+        };
+      }
+
+      return { success: false, error: `Unsupported model type: ${modelId}` };
+    } catch (error) {
+      console.error('[OFFLINE-MODELS] Transcription error:', error);
+      return {
+        success: false,
+        error: `Transcription failed: ${error instanceof Error ? error.message : String(error)}`
+      };
     }
   });
 

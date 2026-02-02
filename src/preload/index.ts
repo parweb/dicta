@@ -98,6 +98,11 @@ const api = {
       installedModels?: string[];
       error?: string;
     }> => ipcRenderer.invoke('offline-models:download', modelId),
+    transcribe: (modelId: string, audioBase64: string): Promise<{
+      success: boolean;
+      text?: string;
+      error?: string;
+    }> => ipcRenderer.invoke('offline-models:transcribe', { modelId, audioBase64 }),
     onDownloadProgress: (
       callback: (event: IpcRendererEvent, data: unknown) => void
     ): void => {
