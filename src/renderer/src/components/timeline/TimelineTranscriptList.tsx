@@ -1,16 +1,10 @@
-/**
- * Timeline Transcript List Component - Voice Terminal Style
- * Displays transcriptions in a terminal-inspired layout with virtualization
- */
-
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useThemeStore } from '@/hooks/useThemeStore';
-import TranscriptionMessage from './TranscriptionMessage';
-import SimpleScrollbar from './SimpleScrollbar';
-import type { Transcription } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
+import type { Transcription } from '@/lib/history';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import SimpleScrollbar from './SimpleScrollbar';
 import './TimelineTranscriptList.css';
+import TranscriptionMessage from './TranscriptionMessage';
 
 interface TimelineTranscriptListProps {
   transcriptions: Transcription[];
@@ -25,7 +19,10 @@ interface TimelineTranscriptListProps {
   onCloseActions?: () => void;
   onFollowUpConsumed?: () => void;
   onFollowUpFocusChange?: (isFocused: boolean) => void;
-  onBedrockHistoryChange?: (transcriptionId: string, history: ConversationHistory) => void;
+  onBedrockHistoryChange?: (
+    transcriptionId: string,
+    history: ConversationHistory
+  ) => void;
 }
 
 export default function TimelineTranscriptList({
@@ -43,7 +40,6 @@ export default function TimelineTranscriptList({
   onFollowUpFocusChange,
   onBedrockHistoryChange
 }: TimelineTranscriptListProps) {
-  const { theme } = useThemeStore();
   const parentRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(transcriptions.length - 1);
   const [scrollProgress, setScrollProgress] = useState(1);
@@ -65,7 +61,7 @@ export default function TimelineTranscriptList({
     getScrollElement: () => parentRef.current,
     estimateSize: () => 180,
     overscan: 5,
-    measureElement: (el) => el?.getBoundingClientRect().height ?? 180
+    measureElement: el => el?.getBoundingClientRect().height ?? 180
   });
 
   // Show placeholder when recording or loading starts
@@ -134,7 +130,14 @@ export default function TimelineTranscriptList({
       durationMs: recordingDuration,
       audioAmplitudes: amplitudes
     };
-  }, [shouldShowPlaceholder, isRecording, isLoading, recordingDuration, realtimeAmplitudes, savedAmplitudes]);
+  }, [
+    shouldShowPlaceholder,
+    isRecording,
+    isLoading,
+    recordingDuration,
+    realtimeAmplitudes,
+    savedAmplitudes
+  ]);
 
   // Auto-scroll to bottom when new transcriptions added
   useEffect(() => {
@@ -174,7 +177,13 @@ export default function TimelineTranscriptList({
 
     // Scroll every time amplitudes change (content grows) or when transitioning to loading
     scrollToBottom();
-  }, [shouldShowPlaceholder, isRecording, isLoading, realtimeAmplitudes.length, savedAmplitudes.length]);
+  }, [
+    shouldShowPlaceholder,
+    isRecording,
+    isLoading,
+    realtimeAmplitudes.length,
+    savedAmplitudes.length
+  ]);
 
   // Update current index and scroll progress based on scroll position
   useEffect(() => {
@@ -190,11 +199,12 @@ export default function TimelineTranscriptList({
       // Find the item closest to the middle of the viewport
       const items = virtualizer.getVirtualItems();
       if (items.length > 0) {
-        const viewportMiddle = scrollElement.scrollTop + scrollElement.clientHeight / 2;
+        const viewportMiddle =
+          scrollElement.scrollTop + scrollElement.clientHeight / 2;
         let closestIndex = 0;
         let closestDistance = Infinity;
 
-        items.forEach((item) => {
+        items.forEach(item => {
           const itemMiddle = item.start + item.size / 2;
           const distance = Math.abs(itemMiddle - viewportMiddle);
           if (distance < closestDistance) {
@@ -226,41 +236,52 @@ export default function TimelineTranscriptList({
   };
 
   return (
-    <div className="timeline-transcript-list">
-      {/* Simple Custom Scrollbar */}
-      {transcriptions.length > 0 && (
-        <SimpleScrollbar
-          scrollProgress={scrollProgress}
-          onScroll={handleTimelineScroll}
-          itemCount={transcriptions.length}
-          currentIndex={currentIndex}
-        />
-      )}
-
-      {/* Scrollable content */}
-      <div
-        ref={parentRef}
-        className="timeline-scroll-container"
-        style={{
-          paddingRight: transcriptions.length > 0 ? '72px' : '20px'
-        }}
-      >
+    <div className="timeline-transcript-list align-center flex flex-1 gap-5 self-stretch">
+      <div ref={parentRef} className="timeline-scroll-container flex-1">
         {transcriptions.length === 0 && !shouldShowPlaceholder ? (
           <div className="timeline-empty-state">
             <div className="empty-icon">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="12" y1="19" x2="12" y2="22" strokeWidth="2" strokeLinecap="round"/>
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path
+                  d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M19 10v2a7 7 0 0 1-14 0v-2"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <line
+                  x1="12"
+                  y1="19"
+                  x2="12"
+                  y2="22"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
             </div>
             <h3 className="empty-title">Prêt à transcrire</h3>
             <p className="empty-description">
-              Maintenez la touche <kbd className="kbd-key">X</kbd> enfoncée pour commencer l'enregistrement
+              Maintenez la touche <kbd className="kbd-key">X</kbd> enfoncée pour
+              commencer l'enregistrement
             </p>
             <div className="empty-hint">
               <span className="hint-dot" />
-              <span>Ou utilisez le raccourci global <kbd className="kbd-key">⌘</kbd> + <kbd className="kbd-key">⇧</kbd> + <kbd className="kbd-key">X</kbd></span>
+              <span>
+                Ou utilisez le raccourci global <kbd className="kbd-key">⌘</kbd>{' '}
+                + <kbd className="kbd-key">⇧</kbd> +{' '}
+                <kbd className="kbd-key">X</kbd>
+              </span>
             </div>
           </div>
         ) : (
@@ -271,10 +292,11 @@ export default function TimelineTranscriptList({
               position: 'relative'
             }}
           >
-            {virtualizer.getVirtualItems().map((virtualItem) => {
+            {virtualizer.getVirtualItems().map(virtualItem => {
               const transcription = transcriptions[virtualItem.index];
               const isSelected = currentTranscriptionId === transcription.id;
-              const showActions = activeActionsTranscriptionId === transcription.id;
+              const showActions =
+                activeActionsTranscriptionId === transcription.id;
               return (
                 <div
                   key={virtualItem.key}
@@ -290,21 +312,29 @@ export default function TimelineTranscriptList({
                   }}
                 >
                   <TranscriptionMessage
-                    textContent={<p className="message-text">{transcription.text}</p>}
+                    textContent={
+                      <p className="message-text">{transcription.text}</p>
+                    }
                     transcriptText={transcription.text}
                     audioAmplitudes={transcription.audioAmplitudes}
                     audioDuration={transcription.durationMs}
                     timestamp={transcription.timestamp}
                     isSelected={isSelected}
                     showActions={showActions}
-                    newFollowUpTranscript={showActions ? actionsFollowUpTranscript : undefined}
+                    newFollowUpTranscript={
+                      showActions ? actionsFollowUpTranscript : undefined
+                    }
                     onCopy={() => onCopyTranscript?.(transcription)}
                     onOpenActions={() => onOpenActions?.(transcription)}
                     onCloseActions={onCloseActions}
                     onFollowUpConsumed={onFollowUpConsumed}
-                    onFollowUpFocusChange={showActions ? onFollowUpFocusChange : undefined}
+                    onFollowUpFocusChange={
+                      showActions ? onFollowUpFocusChange : undefined
+                    }
                     bedrockHistory={transcription.bedrockHistory}
-                    onBedrockHistoryChange={(history) => onBedrockHistoryChange?.(transcription.id, history)}
+                    onBedrockHistoryChange={history =>
+                      onBedrockHistoryChange?.(transcription.id, history)
+                    }
                   />
                 </div>
               );
@@ -337,7 +367,9 @@ export default function TimelineTranscriptList({
                         >
                           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                         </svg>
-                        <span className="loader-text">Transcription en cours...</span>
+                        <span className="loader-text">
+                          Transcription en cours...
+                        </span>
                       </div>
                     ) : null
                   }
@@ -345,8 +377,10 @@ export default function TimelineTranscriptList({
                   audioAmplitudes={temporaryTranscription.audioAmplitudes}
                   audioDuration={temporaryTranscription.durationMs}
                   timestamp={temporaryTranscription.timestamp}
-                  waveformColor={(isRecording || isLoading) ? '#ef4444' : undefined}
-                  waveformMaxBars={(isRecording || isLoading) ? 200 : 60}
+                  waveformColor={
+                    isRecording || isLoading ? '#ef4444' : undefined
+                  }
+                  waveformMaxBars={isRecording || isLoading ? 200 : 60}
                   isSelected={false}
                   showActions={false}
                 />
@@ -355,6 +389,15 @@ export default function TimelineTranscriptList({
           </div>
         )}
       </div>
+
+      {transcriptions.length > 0 && (
+        <SimpleScrollbar
+          scrollProgress={scrollProgress}
+          onScroll={handleTimelineScroll}
+          itemCount={transcriptions.length}
+          currentIndex={currentIndex}
+        />
+      )}
     </div>
   );
 }

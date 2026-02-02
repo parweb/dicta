@@ -3,18 +3,18 @@
  * Clean, minimal, always works - composed of small components
  */
 
-import { useState } from 'react'
-import { useThemeStore } from '@/hooks/useThemeStore'
-import { useScrollbarDrag } from '@/hooks/useScrollbarDrag'
-import ScrollbarTrack from './ScrollbarTrack'
-import ScrollbarThumb from './ScrollbarThumb'
-import ScrollbarIndicator from './ScrollbarIndicator'
+import { useState } from 'react';
+import { useThemeStore } from '@/hooks/useThemeStore';
+import { useScrollbarDrag } from '@/hooks/useScrollbarDrag';
+import ScrollbarTrack from './ScrollbarTrack';
+import ScrollbarThumb from './ScrollbarThumb';
+import ScrollbarIndicator from './ScrollbarIndicator';
 
 interface SimpleScrollbarProps {
-  scrollProgress: number
-  onScroll: (progress: number) => void
-  itemCount: number
-  currentIndex: number
+  scrollProgress: number;
+  onScroll: (progress: number) => void;
+  itemCount: number;
+  currentIndex: number;
 }
 
 export default function SimpleScrollbar({
@@ -23,31 +23,33 @@ export default function SimpleScrollbar({
   itemCount,
   currentIndex
 }: SimpleScrollbarProps) {
-  const { theme } = useThemeStore()
-  const { spacing } = theme
-  const [isHovering, setIsHovering] = useState(false)
+  const [isHovering, setIsHovering] = useState(false);
 
-  const thumbHeight = 80
+  const thumbHeight = 80;
   const { isDragging, trackRef, handleMouseDown } = useScrollbarDrag({
     scrollProgress,
     thumbHeight,
     onScroll
-  })
+  });
 
-  const trackHeight = trackRef.current?.clientHeight || 500
-  const thumbPosition = scrollProgress * (trackHeight - thumbHeight)
-  const indicatorPosition = (currentIndex / Math.max(1, itemCount - 1)) * trackHeight
+  const trackHeight = trackRef.current?.clientHeight || 500;
+  const thumbPosition = scrollProgress * (trackHeight - thumbHeight);
+  const indicatorPosition =
+    (currentIndex / Math.max(1, itemCount - 1)) * trackHeight;
 
   const handleTrackClick = (e: React.MouseEvent) => {
-    if (!trackRef.current) return
-    if (e.target !== trackRef.current) return
+    if (!trackRef.current) return;
+    if (e.target !== trackRef.current) return;
 
-    const rect = trackRef.current.getBoundingClientRect()
-    const clickY = e.clientY - rect.top
-    const newProgress = Math.max(0, Math.min(1, (clickY - thumbHeight / 2) / (rect.height - thumbHeight)))
+    const rect = trackRef.current.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const newProgress = Math.max(
+      0,
+      Math.min(1, (clickY - thumbHeight / 2) / (rect.height - thumbHeight))
+    );
 
-    onScroll(newProgress)
-  }
+    onScroll(newProgress);
+  };
 
   return (
     <div
@@ -55,15 +57,7 @@ export default function SimpleScrollbar({
       onClick={handleTrackClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      style={{
-        position: 'absolute',
-        right: spacing.sm,
-        top: spacing.lg,
-        bottom: spacing.lg,
-        width: '48px',
-        zIndex: 50,
-        cursor: 'pointer'
-      }}
+      className="relative w-3 cursor-pointer"
     >
       <ScrollbarTrack />
       <ScrollbarThumb
@@ -75,5 +69,5 @@ export default function SimpleScrollbar({
       />
       <ScrollbarIndicator position={indicatorPosition} />
     </div>
-  )
+  );
 }

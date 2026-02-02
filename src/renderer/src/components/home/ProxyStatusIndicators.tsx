@@ -1,8 +1,7 @@
-import { memo, useMemo } from 'react';
-
-import type { ProxyStatus } from '../../hooks/useTranscriptionAPI';
 import { useThemeStore } from '@/hooks/useThemeStore';
-import { getStatusColor } from '../../lib/theme-utils';
+import { memo, useMemo } from 'react';
+import type { ProxyStatus } from '@/hooks/useTranscriptionAPI';
+import { getStatusColor } from '@/lib/theme-utils';
 
 interface ProxyStatusIndicatorsProps {
   proxyStatuses: Record<string, ProxyStatus>;
@@ -65,14 +64,10 @@ const ProxyStatusIndicators = memo(
     return (
       <div
         style={{
-          position: 'fixed',
-          top: spacing.md,
-          right: spacing.md,
           display: 'flex',
           gap: spacing.sm,
           fontSize: typography.fontSize.xs,
-          color: colors.text.tertiary,
-          zIndex: 3
+          color: colors.text.tertiary
         }}
       >
         {proxyStatusEntries.map(([name, status]) => (

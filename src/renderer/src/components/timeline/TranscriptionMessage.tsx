@@ -11,6 +11,7 @@ import BedrockAgentInline from '../bedrock/BedrockAgentInline';
 import type { BedrockConversationHistory } from '@/lib/history';
 import type { ConversationHistory } from '@/hooks/useBedrockAgent';
 import './TranscriptionMessage.css';
+import { cn } from '@renderer/lib/utils';
 
 interface TranscriptionMessageProps {
   textContent: ReactNode; // Can be text, loader, or null
@@ -65,7 +66,10 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
   const durationSeconds = audioDuration ? Math.round(audioDuration / 1000) : 0;
 
   return (
-    <div className={`transcription-message ${isSelected ? 'selected' : ''}`}>
+    <div
+      style={{ backgroundColor: theme.colors.background.secondary + '80' }}
+      className={cn('transcription-message', isSelected && 'selected')}
+    >
       {/* Header with timestamp and actions */}
       <div className="message-header">
         <div className="message-meta">
@@ -115,11 +119,7 @@ const TranscriptionMessage = memo(function TranscriptionMessage({
       )}
 
       {/* Transcription text content (can be text, loader, or null) */}
-      {textContent && (
-        <div className="message-content">
-          {textContent}
-        </div>
-      )}
+      {textContent && <div className="message-content">{textContent}</div>}
 
       {/* Terminal-style border accent */}
       <div className="message-accent" />

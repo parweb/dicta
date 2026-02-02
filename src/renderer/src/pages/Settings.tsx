@@ -1,12 +1,13 @@
-import { useState, memo, useCallback } from 'react';
-import { Palette, Key, Download, Cloud } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { Cloud, Download, Key, Palette } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
 
 import ThemeConfigurator from '@/components/design-system/ThemeConfigurator';
 import BedrockSettings from '@/components/settings/BedrockSettings';
 import ModelSettings from '@/components/settings/ModelSettings';
 import UpdateSettings from '@/components/settings/UpdateSettings';
-import { useThemeStore, type Theme } from '@/hooks/useThemeStore';
+import { useThemeStore } from '@/hooks/useThemeStore';
+import type { Theme } from '@/lib/theme-context';
 import DesignSystem from './DesignSystem';
 
 type TabValue = 'theme' | 'model' | 'bedrock' | 'updates';
@@ -20,51 +21,59 @@ interface TabButtonProps {
   theme: Theme;
 }
 
-const TabButton = memo(({ label, icon: Icon, value, isActive, onClick, theme }: TabButtonProps) => {
-  const { colors, spacing, typography } = theme;
+const TabButton = memo(
+  ({ label, icon: Icon, isActive, onClick, theme }: TabButtonProps) => {
+    const { colors, spacing, typography } = theme;
 
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isActive) {
-      e.currentTarget.style.color = colors.text.secondary;
-    }
-  }, [isActive, colors.text.secondary]);
+    const handleMouseEnter = useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!isActive) {
+          e.currentTarget.style.color = colors.text.secondary;
+        }
+      },
+      [isActive, colors.text.secondary]
+    );
 
-  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!isActive) {
-      e.currentTarget.style.color = colors.text.tertiary;
-    }
-  }, [isActive, colors.text.tertiary]);
+    const handleMouseLeave = useCallback(
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        if (!isActive) {
+          e.currentTarget.style.color = colors.text.tertiary;
+        }
+      },
+      [isActive, colors.text.tertiary]
+    );
 
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: spacing.sm,
-        padding: `${spacing.md}px ${spacing.lg}px`,
-        backgroundColor: 'transparent',
-        color: isActive ? colors.text.primary : colors.text.tertiary,
-        border: 'none',
-        borderBottom: isActive
-          ? `2px solid ${colors.text.primary}`
-          : '2px solid transparent',
-        cursor: 'pointer',
-        fontSize: typography.fontSize.sm,
-        fontWeight: isActive
-          ? typography.fontWeight.medium
-          : typography.fontWeight.normal,
-        marginBottom: '-1px',
-        transition: 'color 0.15s'
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <Icon size={16} />
-      <span>{label}</span>
-    </button>
-  );
-});
+    return (
+      <button
+        onClick={onClick}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: spacing.sm,
+          padding: `${spacing.md}px ${spacing.lg}px`,
+          backgroundColor: 'transparent',
+          color: isActive ? colors.text.primary : colors.text.tertiary,
+          border: 'none',
+          borderBottom: isActive
+            ? `2px solid ${colors.text.primary}`
+            : '2px solid transparent',
+          cursor: 'pointer',
+          fontSize: typography.fontSize.sm,
+          fontWeight: isActive
+            ? typography.fontWeight.medium
+            : typography.fontWeight.normal,
+          marginBottom: '-1px',
+          transition: 'color 0.15s'
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <Icon size={16} />
+        <span>{label}</span>
+      </button>
+    );
+  }
+);
 
 TabButton.displayName = 'TabButton';
 
@@ -87,11 +96,6 @@ const Settings = ({ defaultTab = 'theme' }: SettingsProps) => {
     <div
       style={
         {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
           WebkitAppRegion: 'no-drag'

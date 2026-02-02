@@ -3,27 +3,37 @@
  * Inline UI for interacting with Bedrock agent within the timeline
  */
 
-import { useEffect, useState, useRef } from 'react'
-import { Mic, Sparkles, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react';
+import {
+  Mic,
+  Sparkles,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Terminal
+} from 'lucide-react';
 
-import { useBedrock } from '../../contexts/BedrockContext'
-import { useBedrockAgent, type ConversationHistory } from '../../hooks/useBedrockAgent'
-import { useThemeStore } from '@/hooks/useThemeStore'
-import { Button } from '../ui/button'
-import AgentStreamingDisplay from './AgentStreamingDisplay'
-import ConversationView from './ConversationView'
-import type { BedrockConversationHistory } from '@/lib/history'
-import './BedrockAgentInline.css'
+import { useBedrock } from '../../contexts/BedrockContext';
+import {
+  useBedrockAgent,
+  type ConversationHistory
+} from '../../hooks/useBedrockAgent';
+import { useThemeStore } from '@/hooks/useThemeStore';
+import { Button } from '../ui/button';
+import AgentStreamingDisplay from './AgentStreamingDisplay';
+import ConversationView from './ConversationView';
+import type { BedrockConversationHistory } from '@/lib/history';
+import './BedrockAgentInline.css';
 
 interface BedrockAgentInlineProps {
-  transcriptContext: string
-  onClose?: () => void
-  newTranscript?: string
-  onTranscriptConsumed?: () => void
-  onFollowUpFocusChange?: (isFocused: boolean) => void
-  initialHistory?: BedrockConversationHistory
-  onHistoryChange?: (history: ConversationHistory) => void
-  initiallyCollapsed?: boolean
+  transcriptContext: string;
+  onClose?: () => void;
+  newTranscript?: string;
+  onTranscriptConsumed?: () => void;
+  onFollowUpFocusChange?: (isFocused: boolean) => void;
+  initialHistory?: BedrockConversationHistory;
+  onHistoryChange?: (history: ConversationHistory) => void;
+  initiallyCollapsed?: boolean;
 }
 
 export default function BedrockAgentInline({
@@ -36,8 +46,8 @@ export default function BedrockAgentInline({
   onHistoryChange,
   initiallyCollapsed = false
 }: BedrockAgentInlineProps) {
-  const { theme } = useThemeStore()
-  const { hasCredentials } = useBedrock()
+  const { theme } = useThemeStore();
+  const { hasCredentials } = useBedrock();
   const {
     state,
     conversationMessages,
@@ -46,21 +56,22 @@ export default function BedrockAgentInline({
     loadHistory,
     getHistory,
     reset
-  } = useBedrockAgent()
+  } = useBedrockAgent();
 
-  const [followUpPrompt, setFollowUpPrompt] = useState('')
-  const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed)
-  const followUpInputRef = useRef<HTMLTextAreaElement>(null)
-  const hasCalledHistoryChange = useRef(false)
-  const hasInitialExecuted = useRef(false)
+  const [followUpPrompt, setFollowUpPrompt] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(initiallyCollapsed);
+  const [showLogs, setShowLogs] = useState(false);
+  const followUpInputRef = useRef<HTMLTextAreaElement>(null);
+  const hasCalledHistoryChange = useRef(false);
+  const hasInitialExecuted = useRef(false);
 
   // Load initial history if provided (restoring previous conversation)
   useEffect(() => {
     if (initialHistory) {
-      console.log('[BEDROCK-INLINE] Loading history:', initialHistory)
-      loadHistory(initialHistory)
+      console.log('[BEDROCK-INLINE] Loading history:', initialHistory);
+      loadHistory(initialHistory);
     }
-  }, [initialHistory, loadHistory])
+  }, [initialHistory, loadHistory]);
 
   // Auto-execute when component mounts with transcript (only if no initial history)
   useEffect(() => {
@@ -73,62 +84,76 @@ export default function BedrockAgentInline({
       !state.error &&
       !hasInitialExecuted.current
     ) {
-      hasInitialExecuted.current = true
-      executeAgent(transcriptContext)
+      hasInitialExecuted.current = true;
+      executeAgent(transcriptContext);
     }
-  }, []) // Only on mount
+  }, []); // Only on mount
 
   // Handle new transcript from recording (follow-up)
   useEffect(() => {
     if (newTranscript && state.isComplete && !state.isStreaming) {
-      setFollowUpPrompt(newTranscript)
-      followUpInputRef.current?.focus()
-      onTranscriptConsumed?.()
+      setFollowUpPrompt(newTranscript);
+      followUpInputRef.current?.focus();
+      onTranscriptConsumed?.();
     }
-  }, [newTranscript, state.isComplete, state.isStreaming, onTranscriptConsumed])
+  }, [
+    newTranscript,
+    state.isComplete,
+    state.isStreaming,
+    onTranscriptConsumed
+  ]);
 
   // Notify history changes when state updates
   useEffect(() => {
-    if (state.isComplete && onHistoryChange && conversationMessages.length > 0 && !hasCalledHistoryChange.current) {
-      console.log('[BEDROCK-INLINE] State complete, saving history')
-      const history = getHistory()
-      onHistoryChange(history)
-      hasCalledHistoryChange.current = true
+    if (
+      state.isComplete &&
+      onHistoryChange &&
+      conversationMessages.length > 0 &&
+      !hasCalledHistoryChange.current
+    ) {
+      console.log('[BEDROCK-INLINE] State complete, saving history');
+      const history = getHistory();
+      onHistoryChange(history);
+      hasCalledHistoryChange.current = true;
     } else if (!state.isComplete) {
       // Reset flag when starting a new operation
-      hasCalledHistoryChange.current = false
+      hasCalledHistoryChange.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isComplete, conversationMessages.length, onHistoryChange])
+  }, [state.isComplete, conversationMessages.length, onHistoryChange]);
 
   // Handle close
   const handleClose = () => {
     // Save history before closing (only if not already saved)
-    if (onHistoryChange && conversationMessages.length > 0 && !hasCalledHistoryChange.current) {
-      console.log('[BEDROCK-INLINE] Closing, saving history')
-      const history = getHistory()
-      onHistoryChange(history)
+    if (
+      onHistoryChange &&
+      conversationMessages.length > 0 &&
+      !hasCalledHistoryChange.current
+    ) {
+      console.log('[BEDROCK-INLINE] Closing, saving history');
+      const history = getHistory();
+      onHistoryChange(history);
     }
-    reset()
-    setFollowUpPrompt('')
-    hasCalledHistoryChange.current = false
-    onClose()
-  }
+    reset();
+    setFollowUpPrompt('');
+    hasCalledHistoryChange.current = false;
+    onClose();
+  };
 
   // Handle follow-up submit
   const handleFollowUp = async () => {
-    if (!followUpPrompt.trim()) return
-    await continueConversation(followUpPrompt)
-    setFollowUpPrompt('')
-  }
+    if (!followUpPrompt.trim()) return;
+    await continueConversation(followUpPrompt);
+    setFollowUpPrompt('');
+  };
 
   // Handle key press in follow-up input
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault()
-      handleFollowUp()
+      e.preventDefault();
+      handleFollowUp();
     }
-  }
+  };
 
   return (
     <div className="bedrock-agent-inline">
@@ -143,14 +168,25 @@ export default function BedrockAgentInline({
           <span>Actions IA</span>
         </div>
         <div className="agent-controls">
+          <button
+            onClick={e => {
+              e.stopPropagation();
+              setShowLogs(!showLogs);
+            }}
+            className="control-button"
+            title="Afficher les logs"
+            style={{ opacity: showLogs ? 1 : 0.5 }}
+          >
+            <Terminal size={14} />
+          </button>
           <span className="control-button">
             {isCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
           </span>
           {onClose && conversationMessages.length === 0 && (
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleClose()
+              onClick={e => {
+                e.stopPropagation();
+                handleClose();
               }}
               className="control-button"
               title="Fermer"
@@ -167,7 +203,78 @@ export default function BedrockAgentInline({
           {/* Credentials warning */}
           {!hasCredentials && (
             <div className="agent-warning">
-              Configurez vos credentials Bedrock dans Paramètres → Bedrock pour utiliser l'agent.
+              Configurez vos credentials Bedrock dans Paramètres → Bedrock pour
+              utiliser l'agent.
+            </div>
+          )}
+
+          {/* Raw Logs Display */}
+          {showLogs && (
+            <div
+              style={{
+                padding: theme.spacing.md,
+                backgroundColor: theme.colors.background.secondary,
+                border: `1px solid ${theme.colors.border.primary}`,
+                borderRadius: '4px',
+                maxHeight: '300px',
+                overflowY: 'auto',
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: '11px',
+                color: theme.colors.text.tertiary
+              }}
+            >
+              <div
+                style={{
+                  marginBottom: theme.spacing.sm,
+                  fontWeight: 600,
+                  color: theme.colors.text.secondary
+                }}
+              >
+                {initialHistory ? 'État' : 'Logs Bedrock (Live)'}
+              </div>
+              {!initialHistory && state.logs.length > 0 ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px'
+                  }}
+                >
+                  {state.logs.map((log, idx) => (
+                    <div
+                      key={idx}
+                      style={{ fontSize: '10px', lineHeight: 1.4 }}
+                    >
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <pre
+                  style={{
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-all',
+                    fontSize: '10px'
+                  }}
+                >
+                  {JSON.stringify(
+                    {
+                      state: {
+                        isStreaming: state.isStreaming,
+                        isComplete: state.isComplete,
+                        isConversationMode: state.isConversationMode,
+                        error: state.error,
+                        toolsExecuted: state.toolsExecuted
+                      },
+                      conversationMessages: conversationMessages.length,
+                      hasHistory: !!initialHistory
+                    },
+                    null,
+                    2
+                  )}
+                </pre>
+              )}
             </div>
           )}
 
@@ -197,7 +304,7 @@ export default function BedrockAgentInline({
                 id="follow-up"
                 ref={followUpInputRef}
                 value={followUpPrompt}
-                onChange={(e) => setFollowUpPrompt(e.target.value)}
+                onChange={e => setFollowUpPrompt(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onFocus={() => {
                   console.log('[BEDROCK-INLINE] Follow-up field focused');
@@ -211,9 +318,7 @@ export default function BedrockAgentInline({
                 disabled={!hasCredentials}
                 className="followup-input"
               />
-              <div className="followup-hint">
-                Cmd/Ctrl + Enter pour envoyer
-              </div>
+              <div className="followup-hint">Cmd/Ctrl + Enter pour envoyer</div>
 
               <div className="followup-actions">
                 <Button
@@ -230,5 +335,5 @@ export default function BedrockAgentInline({
         </div>
       )}
     </div>
-  )
+  );
 }

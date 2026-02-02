@@ -2,9 +2,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import LoadingState from '@/components/shared/LoadingState';
 import DailyTimelineGridChart from '@/components/statistics/DailyTimelineGridChart';
 import StatsSummaryCards from '@/components/statistics/StatsSummaryCards';
-import {
-  spacing
-} from '@/lib/design-system';
+import { spacing } from '@/lib/design-system';
 import type { Transcription } from '@/lib/history';
 import { calculateStatistics } from '@/lib/statistics';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -62,14 +60,9 @@ const Statistics = () => {
     };
   }, [isDropdownOpen]);
 
-
-
-
   return (
     <div
       style={{
-        width: '100%',
-        height: '100vh',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

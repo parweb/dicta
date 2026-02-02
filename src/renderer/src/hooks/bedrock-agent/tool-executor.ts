@@ -3,19 +3,26 @@
  * Handles tool execution and result formatting
  */
 
-import { executeTool } from '../../lib/bedrock/tools'
-import type { BedrockContentBlock, BedrockToolUse, ToolExecution } from '../../lib/bedrock/types'
-import type { AgentState } from './types'
+import { executeTool } from '../../lib/bedrock/tools';
+import type {
+  BedrockContentBlock,
+  BedrockToolUse,
+  ToolExecution
+} from '../../lib/bedrock/types';
+import type { AgentState } from './types';
 
 /**
  * Execute a single tool and return formatted result
  */
 export async function executeToolUse(
   toolUse: BedrockToolUse,
-  setState: React.Dispatch<React.SetStateAction<AgentState>>
+  setState: React.Dispatch<React.SetStateAction<AgentState>>,
+  addLog: (message: string) => void
 ): Promise<BedrockContentBlock> {
+  addLog(`[TOOL-EXECUTOR] Executing tool: ${toolUse.name}`);
+
   // Mark tool as running
-  setState((prev) => ({
+  setState(prev => ({
     ...prev,
     toolsExecuted: [
       ...prev.toolsExecuted,
@@ -26,15 +33,18 @@ export async function executeToolUse(
         status: 'running'
       }
     ]
-  }))
+  }));
 
   // Execute tool
-  const result = await executeTool(toolUse.name, toolUse.input)
+  const result = await executeTool(toolUse.name, toolUse.input);
+  addLog(
+    `[TOOL-EXECUTOR] Tool ${toolUse.name}: ${result.success ? '✓ success' : '✗ error'}`
+  );
 
   // Mark tool as complete
-  setState((prev) => ({
+  setState(prev => ({
     ...prev,
-    toolsExecuted: prev.toolsExecuted.map((t) =>
+    toolsExecuted: prev.toolsExecuted.map(t =>
       t.id === toolUse.toolUseId
         ? {
             ...t,
@@ -44,7 +54,7 @@ export async function executeToolUse(
           }
         : t
     )
-  }))
+  }));
 
   // Return formatted tool result
   return {
@@ -52,12 +62,14 @@ export async function executeToolUse(
       toolUseId: toolUse.toolUseId,
       content: [
         {
-          text: result.success ? result.message : `Error: ${result.error || 'Unknown error'}`
+          text: result.success
+            ? result.message
+            : `Error: ${result.error || 'Unknown error'}`
         }
       ],
       status: result.success ? 'success' : 'error'
     }
-  }
+  };
 }
 
 /**
@@ -65,16 +77,17 @@ export async function executeToolUse(
  */
 export async function executeToolUses(
   toolUses: BedrockToolUse[],
-  setState: React.Dispatch<React.SetStateAction<AgentState>>
+  setState: React.Dispatch<React.SetStateAction<AgentState>>,
+  addLog: (message: string) => void
 ): Promise<BedrockContentBlock[]> {
-  console.log(`[TOOL-EXECUTOR] Executing ${toolUses.length} tools`)
+  addLog(`[TOOL-EXECUTOR] Executing ${toolUses.length} tools`);
 
-  const toolResults: BedrockContentBlock[] = []
+  const toolResults: BedrockContentBlock[] = [];
 
   for (const toolUse of toolUses) {
-    const result = await executeToolUse(toolUse, setState)
-    toolResults.push(result)
+    const result = await executeToolUse(toolUse, setState, addLog);
+    toolResults.push(result);
   }
 
-  return toolResults
+  return toolResults;
 }
