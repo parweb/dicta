@@ -28,7 +28,7 @@ const panelVariants = {
     y: '100%',
     transition: {
       duration: 0.25,
-      ease: [0.22, 1, 0.36, 1]
+      ease: [0.22, 1, 0.36, 1] as const
     }
   }
 };

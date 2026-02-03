@@ -8,6 +8,8 @@ import React, {
 
 import type { BedrockContextValue, BedrockCredentials } from '../lib/bedrock/types'
 
+export type { BedrockCredentials } from '../lib/bedrock/types'
+
 const BedrockContext = createContext<BedrockContextValue | undefined>(undefined)
 
 /**

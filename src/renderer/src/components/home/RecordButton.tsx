@@ -1,5 +1,4 @@
 import { Loader2, Mic, MicOff } from 'lucide-react';
-import { useThemeStore } from '@/hooks/useThemeStore';
 import './RecordButton.css';
 
 interface RecordButtonProps {
@@ -15,8 +14,6 @@ const RecordButton = ({
   onMouseDown,
   onMouseUp
 }: RecordButtonProps) => {
-  const { theme } = useThemeStore();
-
   return (
     <div className="record-button-container">
       {/* Animated rings during recording */}

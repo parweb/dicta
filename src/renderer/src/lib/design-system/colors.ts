@@ -50,9 +50,9 @@ export const colors = {
     accent: accentColor.primary // Environment-aware accent border
   },
 
-  // Accent colors
+  // Accent colors (semantic names matching ThemeConfig)
   accent: {
-    blue: {
+    primary: {
       primary: accentColor.primary, // Environment-aware primary
       light: accentColor.light, // Environment-aware light
       dark: accentColor.dark, // Environment-aware dark
@@ -60,7 +60,7 @@ export const colors = {
       backgroundHover: `rgba(${accentColor.rgb}, 0.15)`,
       backgroundActive: `rgba(${accentColor.rgb}, 0.2)`
     },
-    purple: {
+    secondary: {
       primary: '#a78bfa', // Purple for AI/Bedrock actions (violet-400)
       light: '#c4b5fd', // Light purple (violet-300)
       dark: '#7c3aed', // Dark purple (violet-600)
@@ -68,20 +68,20 @@ export const colors = {
       backgroundHover: 'rgba(139, 92, 246, 0.15)',
       border: 'rgba(139, 92, 246, 0.3)' // Purple border
     },
-    green: {
+    success: {
       primary: '#4ade80', // Success green (green-400)
       button: '#4CAF50' // Record button green
     },
-    red: {
+    error: {
       primary: '#ef4444', // Error red (red-500)
       button: '#ff4444' // Recording button red
     },
-    yellow: {
+    warning: {
       primary: '#eab308', // Warning yellow (yellow-500)
       light: '#fef08a', // Light yellow text (yellow-200)
       background: 'rgba(234, 179, 8, 0.1)' // Yellow tint background
     },
-    gray: {
+    muted: {
       primary: '#9ca3af', // Neutral gray (gray-400)
       light: '#d1d5db' // Light gray (gray-300)
     }

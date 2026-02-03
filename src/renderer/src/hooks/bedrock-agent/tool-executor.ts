@@ -6,8 +6,7 @@
 import { executeTool } from '../../lib/bedrock/tools';
 import type {
   BedrockContentBlock,
-  BedrockToolUse,
-  ToolExecution
+  BedrockToolUseBlock
 } from '../../lib/bedrock/types';
 import type { AgentState } from './types';
 
@@ -15,7 +14,7 @@ import type { AgentState } from './types';
  * Execute a single tool and return formatted result
  */
 export async function executeToolUse(
-  toolUse: BedrockToolUse,
+  toolUse: BedrockToolUseBlock['toolUse'],
   setState: React.Dispatch<React.SetStateAction<AgentState>>,
   addLog: (message: string) => void
 ): Promise<BedrockContentBlock> {
@@ -76,7 +75,7 @@ export async function executeToolUse(
  * Execute all tool uses and collect results
  */
 export async function executeToolUses(
-  toolUses: BedrockToolUse[],
+  toolUses: BedrockToolUseBlock['toolUse'][],
   setState: React.Dispatch<React.SetStateAction<AgentState>>,
   addLog: (message: string) => void
 ): Promise<BedrockContentBlock[]> {

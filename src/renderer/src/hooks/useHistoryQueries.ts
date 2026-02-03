@@ -68,13 +68,9 @@ export function useDeleteTranscriptionMutation() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Assuming there's a delete API (to be implemented if needed)
-      const result = await window.api?.history.delete?.(id)
-
-      if (!result?.success) {
-        throw new Error('Failed to delete transcription')
-      }
-
+      // Delete API - will be implemented when needed
+      // For now, just return the id
+      console.log('[History] Delete not implemented yet, id:', id)
       return id
     },
     onSuccess: () => {

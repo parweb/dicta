@@ -4,7 +4,7 @@
  */
 
 import { useAtom, useAtomValue } from 'jotai';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { activePresetAtom, baseThemeConfigAtom, themeAtom } from '@/lib/store';
 import { darkTheme } from '@/lib/theme-presets';
@@ -23,7 +23,6 @@ export function useThemeStore() {
   const theme = useAtomValue(themeAtom);
   const [baseConfig, setBaseConfig] = useAtom(baseThemeConfigAtom);
   const [activePreset, setActivePreset] = useAtom(activePresetAtom);
-  const saveTimerRef = useRef<NodeJS.Timeout>();
 
   // Update theme with partial changes (deep merge)
   const setTheme = useCallback(
@@ -112,7 +111,7 @@ export function useThemeStore() {
     try {
       const result = await window.api?.theme.load();
       if (result?.success && result.theme) {
-        setBaseConfig(result.theme);
+        setBaseConfig(result.theme as ThemeConfig);
         console.log('[THEME STORE] Theme loaded successfully');
       }
     } catch (error) {

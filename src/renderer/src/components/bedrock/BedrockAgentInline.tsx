@@ -137,7 +137,7 @@ export default function BedrockAgentInline({
     reset();
     setFollowUpPrompt('');
     hasCalledHistoryChange.current = false;
-    onClose();
+    onClose?.();
   };
 
   // Handle follow-up submit

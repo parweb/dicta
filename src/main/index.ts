@@ -8,6 +8,7 @@ import {
   shell
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
 import { exec, execFile } from 'node:child_process';
 import { once } from 'node:events';
 import {
@@ -23,6 +24,21 @@ import {
 import { join } from 'node:path';
 
 import icon from '../../resources/icon.png?asset';
+
+// Configure electron-log
+log.initialize();
+log.transports.file.level = 'info';
+log.transports.console.level = 'info';
+
+// Redirect console to electron-log
+console.log = log.log.bind(log);
+console.info = log.info.bind(log);
+console.warn = log.warn.bind(log);
+console.error = log.error.bind(log);
+console.debug = log.debug.bind(log);
+
+console.log('[DICTA] Logging initialized');
+console.log('[DICTA] Log file location:', log.transports.file.getFile().path);
 
 // Déclaration de mainWindow dans un scope accessible
 let mainWindow: BrowserWindow | null = null;
@@ -136,6 +152,26 @@ function findModelFilePath(modelsDir: string, modelId: OfflineModelId): string |
   return null;
 }
 
+// Find ffmpeg binary in common locations
+function findFfmpeg(): string | null {
+  const possiblePaths = [
+    '/opt/homebrew/bin/ffmpeg',      // Apple Silicon Homebrew
+    '/usr/local/bin/ffmpeg',         // Intel Homebrew
+    '/opt/zerobrew/prefix/bin/ffmpeg', // ZeroBrew
+    `${process.env.HOME}/.brew/bin/ffmpeg`,
+    `${process.env.HOME}/homebrew/bin/ffmpeg`,
+    '/usr/bin/ffmpeg',
+    'ffmpeg'                         // Fallback to PATH
+  ];
+
+  for (const path of possiblePaths) {
+    if (path === 'ffmpeg' || existsSync(path)) {
+      return path;
+    }
+  }
+  return null;
+}
+
 // Transcribe audio using whisper.cpp CLI
 async function transcribeWithWhisper(
   audioBuffer: Buffer,
@@ -155,13 +191,31 @@ async function transcribeWithWhisper(
     // Save the audio buffer to file
     writeFileSync(inputPath, audioBuffer);
 
-    // Convert webm to wav using ffmpeg if available
+    // Convert webm to wav using ffmpeg (required for whisper.cpp)
     let audioFileToUse = inputPath;
+
+    const ffmpegPath = findFfmpeg();
+    if (!ffmpegPath) {
+      console.error('[WHISPER] ffmpeg not found in common locations');
+      try {
+        if (existsSync(inputPath)) {
+          unlinkSync(inputPath);
+        }
+      } catch (e) {
+        // ignore cleanup errors
+      }
+      return {
+        text: '',
+        error: 'ffmpeg not found. Please install it: brew install ffmpeg'
+      };
+    }
+
+    console.log('[WHISPER] Using ffmpeg:', ffmpegPath);
 
     try {
       await new Promise<void>((resolve, reject) => {
         // Convert to 16kHz mono WAV for whisper.cpp
-        execFile('ffmpeg', [
+        execFile(ffmpegPath, [
           '-i', inputPath,
           '-ar', '16000',
           '-ac', '1',
@@ -177,8 +231,21 @@ async function transcribeWithWhisper(
         });
       });
       audioFileToUse = wavPath;
+      console.log('[WHISPER] Audio converted to WAV:', wavPath);
     } catch (ffmpegError) {
-      console.log('[WHISPER] ffmpeg not available, trying with original file:', ffmpegError);
+      console.error('[WHISPER] ffmpeg conversion failed:', ffmpegError);
+      // Clean up temp file
+      try {
+        if (existsSync(inputPath)) {
+          unlinkSync(inputPath);
+        }
+      } catch (e) {
+        // ignore cleanup errors
+      }
+      return {
+        text: '',
+        error: 'ffmpeg is required to convert audio. Please install it: brew install ffmpeg'
+      };
     }
 
     let whisperPath: string | null = null;
@@ -679,6 +746,31 @@ app.whenReady().then(() => {
   });
 
   ipcMain.on('ping', () => console.log('pong'));
+
+  // Logging handlers
+  ipcMain.on('log:write', (_event, level: string, ...params: unknown[]) => {
+    const message = params.map(p => typeof p === 'object' ? JSON.stringify(p) : String(p)).join(' ');
+    switch (level) {
+      case 'debug':
+        log.debug('[RENDERER]', message);
+        break;
+      case 'info':
+        log.info('[RENDERER]', message);
+        break;
+      case 'warn':
+        log.warn('[RENDERER]', message);
+        break;
+      case 'error':
+        log.error('[RENDERER]', message);
+        break;
+      default:
+        log.info('[RENDERER]', message);
+    }
+  });
+
+  ipcMain.handle('log:get-path', () => {
+    return log.transports.file.getFile().path;
+  });
 
   // Écoute de l'événement "stop-recording" envoyé par le renderer.
   ipcMain.on('stop-recording', () => {

@@ -4,7 +4,6 @@
  */
 
 import { useState } from 'react';
-import { useThemeStore } from '@/hooks/useThemeStore';
 import { useScrollbarDrag } from '@/hooks/useScrollbarDrag';
 import ScrollbarTrack from './ScrollbarTrack';
 import ScrollbarThumb from './ScrollbarThumb';

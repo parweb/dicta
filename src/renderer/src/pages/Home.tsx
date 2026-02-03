@@ -307,11 +307,8 @@ const HomePage = () => {
         '[HOME] Saving Bedrock history for transcription:',
         transcriptionId
       );
-      await updateTranscriptionWithBedrockHistory(
-        transcriptionId,
-        history,
-        reloadTranscriptions
-      );
+      await updateTranscriptionWithBedrockHistory(transcriptionId, history);
+      await reloadTranscriptions();
     },
     [reloadTranscriptions]
   );

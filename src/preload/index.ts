@@ -3,6 +3,18 @@ import { electronAPI } from '@electron-toolkit/preload';
 
 // Custom APIs for renderer
 const api = {
+  // Logging
+  log: {
+    debug: (...params: unknown[]): void =>
+      ipcRenderer.send('log:write', 'debug', ...params),
+    info: (...params: unknown[]): void =>
+      ipcRenderer.send('log:write', 'info', ...params),
+    warn: (...params: unknown[]): void =>
+      ipcRenderer.send('log:write', 'warn', ...params),
+    error: (...params: unknown[]): void =>
+      ipcRenderer.send('log:write', 'error', ...params),
+    getLogPath: (): Promise<string> => ipcRenderer.invoke('log:get-path')
+  },
   send: (channel: string, data?: unknown): void => {
     ipcRenderer.send(channel, data);
   },

@@ -8,6 +8,13 @@ interface CustomAPI {
     channel: string,
     callback: (...args: unknown[]) => void
   ) => void;
+  log: {
+    debug: (...params: unknown[]) => void;
+    info: (...params: unknown[]) => void;
+    warn: (...params: unknown[]) => void;
+    error: (...params: unknown[]) => void;
+    getLogPath: () => Promise<string>;
+  };
   history: {
     ensureDir: () => Promise<{ success: boolean; error?: string }>;
     save: (

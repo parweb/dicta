@@ -10,8 +10,7 @@ import type { BedrockConversationHistory, Transcription } from '../../lib/histor
  */
 export async function updateTranscriptionWithBedrockHistory(
   transcriptionId: string,
-  bedrockHistory: BedrockConversationHistory,
-  onHistoryUpdate?: () => Promise<void>
+  bedrockHistory: BedrockConversationHistory
 ): Promise<void> {
   try {
     console.log('[BEDROCK-HISTORY-UPDATER] Updating transcription:', transcriptionId)
@@ -23,7 +22,7 @@ export async function updateTranscriptionWithBedrockHistory(
     console.log('[BEDROCK-HISTORY-UPDATER] Loaded transcriptions:', allTranscriptions.length)
 
     // Find the transcription to update
-    const transcription = allTranscriptions.find((t: Transcription) => t.id === transcriptionId)
+    const transcription = (allTranscriptions as Transcription[]).find((t) => t.id === transcriptionId)
 
     if (transcription) {
       console.log('[BEDROCK-HISTORY-UPDATER] Found transcription, updating with bedrockHistory')

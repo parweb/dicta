@@ -3,7 +3,7 @@
  * Jotai-based replacement for ApiKeyContext
  */
 
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useCallback, useEffect } from 'react'
 
 import {
@@ -91,7 +91,7 @@ export function useApiKeyStore() {
       try {
         const available =
           await window.api?.credentials.checkEncryptionAvailable()
-        setIsEncryptionAvailable(available ?? false)
+        setIsEncryptionAvailable(available?.available ?? false)
       } catch (error) {
         console.error(
           '[API KEY STORE] Error checking encryption availability:',
