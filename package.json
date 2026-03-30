@@ -25,7 +25,7 @@
     "version:minor": "npm version minor --no-git-tag-version",
     "version:major": "npm version major --no-git-tag-version",
     "version:beta": "npm version prerelease --preid=beta --no-git-tag-version",
-    "release": "git add package.json && git commit -m \"chore: bump version to $(node -p \\\"require('./package.json').version\\\")\" && git tag \"v$(node -p \\\"require('./package.json').version\\\")\" && git push && git push --tags",
+    "release": "git add package.json && git commit -m \"chore: bump version to $npm_package_version\" && git tag \"v$npm_package_version\" && git push && git push --tags",
     "release:beta": "npm run version:beta && npm run release",
     "release:patch": "npm run version:patch && npm run release",
     "release:minor": "npm run version:minor && npm run release",
