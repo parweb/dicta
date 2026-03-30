@@ -287,7 +287,7 @@ const HomePage = () => {
     hasRedirectedRef.current;
 
   const handleCopyTranscript = useCallback((transcription: Transcription) => {
-    navigator.clipboard.writeText(transcription.text);
+    navigator.clipboard.writeText(transcription.text).catch(() => {});
   }, []);
 
   const handleOpenActions = useCallback((transcription: Transcription) => {

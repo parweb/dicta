@@ -131,7 +131,7 @@ export async function transcribeAudio(
       const text = result.text || ''
 
       // Copy to clipboard
-      await navigator.clipboard.writeText(text)
+      await navigator.clipboard.writeText(text).catch(() => {})
 
       // Save to history (unless skip requested)
       let savedTranscription
@@ -189,7 +189,7 @@ export async function transcribeAudio(
     })
 
     // Copy to clipboard
-    await navigator.clipboard.writeText(data.text)
+    await navigator.clipboard.writeText(data.text).catch(() => {})
 
     // Save to history (unless skip requested)
     let savedTranscription

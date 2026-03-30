@@ -144,7 +144,7 @@ const HistorySidebar = memo(
     const handleTranscriptionClick = useCallback(
       (transcription: Transcription) => {
         onSelectTranscription(transcription);
-        navigator.clipboard.writeText(transcription.text);
+        navigator.clipboard.writeText(transcription.text).catch(() => {});
       },
       [onSelectTranscription]
     );
